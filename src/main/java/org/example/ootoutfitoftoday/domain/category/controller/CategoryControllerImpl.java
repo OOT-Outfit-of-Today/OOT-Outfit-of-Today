@@ -1,0 +1,71 @@
+package org.example.ootoutfitoftoday.domain.category.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.example.ootoutfitoftoday.common.response.PageResponse;
+import org.example.ootoutfitoftoday.common.response.Response;
+import org.example.ootoutfitoftoday.domain.category.dto.request.CategoryRequest;
+import org.example.ootoutfitoftoday.domain.category.dto.response.CategoryResponse;
+import org.example.ootoutfitoftoday.domain.category.exception.CategorySuccessCode;
+import org.example.ootoutfitoftoday.domain.category.service.command.CategoryCommandService;
+import org.example.ootoutfitoftoday.domain.category.service.query.CategoryQueryService;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+public class CategoryControllerImpl implements CategoryController {
+
+    private final CategoryCommandService categoryCommandService;
+    private final CategoryQueryService categoryQueryService;
+
+
+    @Override
+    @PostMapping("/admin/v1/categories")
+    public ResponseEntity<Response<CategoryResponse>> create(
+            CategoryRequest categoryRequest
+    ) {
+        CategoryResponse response = categoryCommandService.createCategory(categoryRequest);
+
+        return Response.success(response, CategorySuccessCode.CATEGORY_CREATED);
+    }
+
+    @Override
+    @GetMapping("/v1/categories")
+    public ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(
+            int page,
+            int size,
+            String sort,
+            String direction
+    ) {
+        Page<CategoryResponse> categories = categoryQueryService.getCategories(
+                page,
+                size,
+                sort,
+                direction
+        );
+
+        return PageResponse.success(categories, CategorySuccessCode.CATEGORY_OK);
+    }
+
+    @Override
+    @PutMapping("/admin/v1/categories/{categoryId}")
+    public ResponseEntity<Response<CategoryResponse>> updateCategory(
+            Long categoryId,
+            CategoryRequest categoryRequest
+    ) {
+        CategoryResponse categoryResponse = categoryCommandService.updateCategory(categoryId, categoryRequest);
+
+        return Response.success(categoryResponse, CategorySuccessCode.CATEGORY_UPDATE);
+    }
+
+    @Override
+    @DeleteMapping("/admin/v1/categories/{categoryId}")
+    public ResponseEntity<Response<Void>> deleteCategory(
+            Long categoryId
+    ) {
+        categoryCommandService.deleteCategory(categoryId);
+
+        return Response.success(null, CategorySuccessCode.CATEGORY_DELETE);
+    }
+}

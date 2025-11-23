@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -13,23 +12,15 @@ import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.request.ClosetC
 import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.response.ClosetClothesLinkDeleteResponse;
 import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.response.ClosetClothesLinkGetResponse;
 import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.response.ClosetClothesLinkResponse;
-import org.example.ootoutfitoftoday.domain.closetclotheslink.exception.ClosetClothesLinkSuccessCode;
-import org.example.ootoutfitoftoday.domain.closetclotheslink.service.command.ClosetClothesLinkCommandService;
-import org.example.ootoutfitoftoday.domain.closetclotheslink.service.query.ClosetClothesLinkQueryService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "옷장-옷 관리", description = "옷장에 옷을 등록, 조회, 삭제하는 API")
 @SecurityRequirement(name = "bearerAuth")
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/v1/closets/{closetId}/clothes")
-public class ClosetClothesLinkController {
-
-    private final ClosetClothesLinkCommandService closetClothesLinkCommandService;
-    private final ClosetClothesLinkQueryService closetClothesLinkQueryService;
+public interface ClosetClothesLinkController {
 
     @Operation(
             summary = "옷장에 옷 등록",
@@ -42,20 +33,11 @@ public class ClosetClothesLinkController {
                     @ApiResponse(responseCode = "404", description = "옷장 또는 옷을 찾을 수 없음")
             }
     )
-    @PostMapping
-    public ResponseEntity<Response<ClosetClothesLinkResponse>> createClosetClothesLink(
+    ResponseEntity<Response<ClosetClothesLinkResponse>> createClosetClothesLink(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long closetId,
             @Valid @RequestBody ClosetClothesLinkRequest closetClothesLinkRequest
-    ) {
-        ClosetClothesLinkResponse closetClothesLinkResponse = closetClothesLinkCommandService.createClosetClothesLink(
-                authUser.getUserId(),
-                closetId,
-                closetClothesLinkRequest
-        );
-
-        return Response.success(closetClothesLinkResponse, ClosetClothesLinkSuccessCode.CLOSET_CLOTHES_LINKED);
-    }
+    );
 
     @Operation(
             summary = "옷장에 등록된 옷 리스트 조회",
@@ -67,26 +49,14 @@ public class ClosetClothesLinkController {
                     @ApiResponse(responseCode = "404", description = "옷장을 찾을 수 없음")
             }
     )
-    @GetMapping
-    public ResponseEntity<PageResponse<ClosetClothesLinkGetResponse>> getClosetClothesLink(
+    ResponseEntity<PageResponse<ClosetClothesLinkGetResponse>> getClosetClothesLink(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long closetId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sort,
             @RequestParam(defaultValue = "DESC") String direction
-    ) {
-        Page<ClosetClothesLinkGetResponse> closetClothesLinkGetResponses = closetClothesLinkQueryService.getClothesInCloset(
-                authUser.getUserId(),
-                closetId,
-                page,
-                size,
-                sort,
-                direction
-        );
-
-        return PageResponse.success(closetClothesLinkGetResponses, ClosetClothesLinkSuccessCode.CLOSET_CLOTHES_LIST_OK);
-    }
+    );
 
     @Operation(
             summary = "옷장에서 옷 제거",
@@ -99,18 +69,9 @@ public class ClosetClothesLinkController {
                     @ApiResponse(responseCode = "404", description = "옷장을 찾을 수 없음")
             }
     )
-    @DeleteMapping("/{clothesId}")
-    public ResponseEntity<Response<ClosetClothesLinkDeleteResponse>> deleteClosetClothesLink(
+    ResponseEntity<Response<ClosetClothesLinkDeleteResponse>> deleteClosetClothesLink(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long closetId,
             @PathVariable Long clothesId
-    ) {
-        ClosetClothesLinkDeleteResponse closetClothesLinkDeleteResponse = closetClothesLinkCommandService.deleteClosetClothesLink(
-                authUser.getUserId(),
-                closetId,
-                clothesId
-        );
-
-        return Response.success(closetClothesLinkDeleteResponse, ClosetClothesLinkSuccessCode.CLOSET_CLOTHES_DELETED);
-    }
+    );
 }

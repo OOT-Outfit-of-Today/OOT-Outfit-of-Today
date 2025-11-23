@@ -15,7 +15,7 @@ import org.example.ootoutfitoftoday.domain.chatroom.entity.Chatroom;
 import org.example.ootoutfitoftoday.domain.closet.entity.Closet;
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
 import org.example.ootoutfitoftoday.domain.user.enums.UserRole;
-import org.example.ootoutfitoftoday.domain.userimage.entity.UserImage;
+import org.example.ootoutfitoftoday.domain.salepost.userimage.entity.UserImage;
 
 import java.util.ArrayList;
 import java.util.List;

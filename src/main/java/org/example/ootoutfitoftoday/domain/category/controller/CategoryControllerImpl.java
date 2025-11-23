@@ -19,7 +19,6 @@ public class CategoryControllerImpl implements CategoryController {
     private final CategoryCommandService categoryCommandService;
     private final CategoryQueryService categoryQueryService;
 
-
     @Override
     @PostMapping("/admin/v1/categories")
     public ResponseEntity<Response<CategoryResponse>> create(

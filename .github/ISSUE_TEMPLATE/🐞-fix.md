@@ -2,7 +2,7 @@
 name: "\U0001F41E Fix"
 about: 프로젝트에서 발견된 문제를 해결하는 템플릿입니다.
 title: "[fix] "
-labels: "\U0001F41E fix"
+labels: ''
 assignees: ''
 
 ---

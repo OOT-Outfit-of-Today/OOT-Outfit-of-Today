@@ -2,7 +2,7 @@
 name: "\U0001F3A8 Style"
 about: 코드 포맷팅, 세미콜론, 네이밍 등 기능에 영향을 주지 않는 스타일 변경 이슈 템플릿입니다.
 title: "[style] "
-labels: "\U0001F3A8 style"
+labels: ''
 assignees: ''
 
 ---

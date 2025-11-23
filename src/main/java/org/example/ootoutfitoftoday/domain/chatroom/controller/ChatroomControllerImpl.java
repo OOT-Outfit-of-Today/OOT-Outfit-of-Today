@@ -25,7 +25,6 @@ public class ChatroomControllerImpl implements ChatroomController {
     private final ChatroomCommandService chatroomCommandService;
     private final ChatroomQueryService chatroomQueryService;
 
-
     @Override
     @PostMapping
     public ResponseEntity<Response<Void>> createChatroom(

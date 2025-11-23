@@ -22,7 +22,7 @@ import java.util.UUID;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long ACCESS_TOKEN_TIME = 15 * 60 * 1000L;
+    private static final long ACCESS_TOKEN_TIME = 2 * 60 * 60 * 1000L;    // 15 * 60 * 1000L;에서 2시간으로 조정
     private static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
     private static final String USER_ROLE_CLAIM = "userRole";
     private static final String TOKEN_TYPE_CLAIM = "tokenType";

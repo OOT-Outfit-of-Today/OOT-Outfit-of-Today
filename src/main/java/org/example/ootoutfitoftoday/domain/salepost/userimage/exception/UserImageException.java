@@ -1,4 +1,4 @@
-package org.example.ootoutfitoftoday.domain.userimage.exception;
+package org.example.ootoutfitoftoday.domain.salepost.userimage.exception;
 
 import org.example.ootoutfitoftoday.common.exception.GlobalException;
 

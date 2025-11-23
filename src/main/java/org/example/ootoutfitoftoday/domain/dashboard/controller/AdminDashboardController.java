@@ -9,26 +9,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
-import org.example.ootoutfitoftoday.domain.dashboard.exception.DashboardSuccessCode;
-import org.example.ootoutfitoftoday.domain.dashboard.service.query.admin.DashboardAdminQueryService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
 @Tag(name = "관리자 대시보드", description = "관리자가 확인하는 통계 관련 API")
 @SecurityRequirement(name = "bearerAuth")
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/admin/v1/dashboards")
-public class DashboardAdminController {
-
-    private final DashboardAdminQueryService dashboardAdminQueryService;
+public interface AdminDashboardController {
 
     @Operation(
             summary = "대시보드 유저 통계자료 조회",
@@ -37,13 +26,9 @@ public class DashboardAdminController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @GetMapping("/users/statistics")
-    public ResponseEntity<Response<AdminUserStatisticsResponse>> adminUserStatistics(
+    ResponseEntity<Response<AdminUserStatisticsResponse>> adminUserStatistics(
             @Parameter(description = "기준 날짜 (기본값: 오늘)") @RequestParam(required = false) LocalDate baseDate
-    ) {
-
-        return Response.success(dashboardAdminQueryService.adminUserStatistics(baseDate), DashboardSuccessCode.DASHBOARD_ADMIN_USER_STATISTICS_OK);
-    }
+    );
 
     @Operation(
             summary = "대시보드 옷 통계자료 조회",
@@ -52,11 +37,7 @@ public class DashboardAdminController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @GetMapping("/clothes/statistics")
-    public ResponseEntity<Response<AdminClothesStatisticsResponse>> adminClothesStatistics() {
-
-        return Response.success(dashboardAdminQueryService.adminClothesStatistics(), DashboardSuccessCode.DASHBOARD_ADMIN_CLOTHES_STATISTICS_OK);
-    }
+    ResponseEntity<Response<AdminClothesStatisticsResponse>> adminClothesStatistics();
 
     @Operation(
             summary = "대시보드 판매글 통계자료 조회",
@@ -65,13 +46,9 @@ public class DashboardAdminController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @GetMapping("/sale-posts/statistics")
-    public ResponseEntity<Response<AdminSalePostStatisticsResponse>> adminSalePostStatistics(
+    ResponseEntity<Response<AdminSalePostStatisticsResponse>> adminSalePostStatistics(
             @Parameter(description = "기준 날짜 (기본값: 오늘)") @RequestParam(required = false) LocalDate baseDate
-    ) {
-
-        return Response.success(dashboardAdminQueryService.adminSalePostStatistics(baseDate), DashboardSuccessCode.DASHBOARD_ADMIN_SALE_POST_STATISTICS_OK);
-    }
+    );
 
     @Operation(
             summary = "대시보드 카테고리 통계자료 조회",
@@ -80,9 +57,5 @@ public class DashboardAdminController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @GetMapping("/popular")
-    public ResponseEntity<Response<AdminTopCategoryStatisticsResponse>> adminTopCategoryStatistics() {
-
-        return Response.success(dashboardAdminQueryService.adminTopCategoryStatistics(), DashboardSuccessCode.DASHBOARD_ADMIN_TOP10_CATEGORY_STATISTICS_OK);
-    }
+    ResponseEntity<Response<AdminTopCategoryStatisticsResponse>> adminTopCategoryStatistics();
 }

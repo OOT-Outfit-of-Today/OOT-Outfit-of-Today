@@ -6,25 +6,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.category.dto.request.CategoryRequest;
 import org.example.ootoutfitoftoday.domain.category.dto.response.CategoryResponse;
-import org.example.ootoutfitoftoday.domain.category.exception.CategorySuccessCode;
-import org.example.ootoutfitoftoday.domain.category.service.command.CategoryCommandService;
-import org.example.ootoutfitoftoday.domain.category.service.query.CategoryQueryService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "카테고리 관리", description = "카테고리 관련 API")
-@RestController
-@RequiredArgsConstructor
-public class CategoryController {
-
-    private final CategoryCommandService categoryCommandService;
-    private final CategoryQueryService categoryQueryService;
+public interface CategoryController {
 
     @Operation(
             summary = "카테고리 생성",
@@ -37,14 +27,9 @@ public class CategoryController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             }
     )
-    @PostMapping("/admin/v1/categories")
-    public ResponseEntity<Response<CategoryResponse>> create(
+    ResponseEntity<Response<CategoryResponse>> create(
             @Valid @RequestBody CategoryRequest categoryRequest
-    ) {
-        CategoryResponse response = categoryCommandService.createCategory(categoryRequest);
-
-        return Response.success(response, CategorySuccessCode.CATEGORY_CREATED);
-    }
+    );
 
     @Operation(
             summary = "카테고리 조회",
@@ -53,22 +38,12 @@ public class CategoryController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
             }
     )
-    @GetMapping("/v1/categories")
-    public ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(
+    ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "한 페이지에 보여질 개수") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "정렬 기준 컬럼") @RequestParam(defaultValue = "createdAt") String sort,
             @Parameter(description = "정렬 방향") @RequestParam(defaultValue = "DESC") String direction
-    ) {
-        Page<CategoryResponse> categories = categoryQueryService.getCategories(
-                page,
-                size,
-                sort,
-                direction
-        );
-
-        return PageResponse.success(categories, CategorySuccessCode.CATEGORY_OK);
-    }
+    );
 
     @Operation(
             summary = "카테고리 수정",
@@ -81,15 +56,10 @@ public class CategoryController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             }
     )
-    @PutMapping("/admin/v1/categories/{categoryId}")
-    public ResponseEntity<Response<CategoryResponse>> updateCategory(
+    ResponseEntity<Response<CategoryResponse>> updateCategory(
             @Parameter(description = "수정할 카테고리 ID") @PathVariable Long categoryId,
             @Valid @RequestBody CategoryRequest categoryRequest
-    ) {
-        CategoryResponse categoryResponse = categoryCommandService.updateCategory(categoryId, categoryRequest);
-
-        return Response.success(categoryResponse, CategorySuccessCode.CATEGORY_UPDATE);
-    }
+    );
 
     @Operation(
             summary = "카테고리 삭제",
@@ -101,12 +71,7 @@ public class CategoryController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             }
     )
-    @DeleteMapping("/admin/v1/categories/{categoryId}")
-    public ResponseEntity<Response<Void>> deleteCategory(
+    ResponseEntity<Response<Void>> deleteCategory(
             @Parameter(description = "삭제할 카테고리 ID") @PathVariable Long categoryId
-    ) {
-        categoryCommandService.deleteCategory(categoryId);
-
-        return Response.success(null, CategorySuccessCode.CATEGORY_DELETE);
-    }
+    );
 }

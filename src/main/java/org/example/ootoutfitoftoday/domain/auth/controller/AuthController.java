@@ -6,29 +6,21 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.auth.dto.request.*;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthLoginResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.DeviceInfoResponse;
-import org.example.ootoutfitoftoday.domain.auth.exception.AuthSuccessCode;
-import org.example.ootoutfitoftoday.domain.auth.service.command.AuthCommandService;
-import org.example.ootoutfitoftoday.domain.auth.service.query.AuthQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Tag(name = "회원 관리", description = "회원 관련 API")
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/v1/auth")
-public class AuthController {
-
-    private final AuthCommandService authCommandService;
-    private final AuthQueryService authQueryService;
+public interface AuthController {
 
     @Operation(
             summary = "회원 생성",
@@ -38,14 +30,9 @@ public class AuthController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청"),
                     @ApiResponse(responseCode = "409", description = "중복 요청")
             })
-    @PostMapping("/signup")
-    public ResponseEntity<Response<Void>> signup(
+    ResponseEntity<Response<Void>> signup(
             @Valid @RequestBody AuthSignupRequest request
-    ) {
-        authCommandService.signup(request);
-
-        return Response.success(null, AuthSuccessCode.USER_SIGNUP);
-    }
+    );
 
     @Operation(
             summary = "회원 로그인",
@@ -57,15 +44,10 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "로그인 성공, 토큰 생성"),
                     @ApiResponse(responseCode = "401", description = "로그인 실패(잘못된 아이디 또는 비밀번호)")
             })
-    @PostMapping("/login")
-    public ResponseEntity<Response<AuthLoginResponse>> login(
+    ResponseEntity<Response<AuthLoginResponse>> login(
             @Valid @RequestBody AuthLoginRequest request,
             HttpServletRequest httpRequest
-    ) {
-        AuthLoginResponse response = authCommandService.login(request, httpRequest);
-
-        return Response.success(response, AuthSuccessCode.USER_LOGIN);
-    }
+    );
 
     @Operation(
             summary = "내 디바이스 목록",
@@ -77,15 +59,10 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @GetMapping("/devices")
-    public ResponseEntity<Response<List<DeviceInfoResponse>>> getDevices(
+    ResponseEntity<Response<List<DeviceInfoResponse>>> getDevices(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam String currentDeviceId
-    ) {
-        List<DeviceInfoResponse> devices = authQueryService.getDeviceList(authUser, currentDeviceId);
-
-        return Response.success(devices, AuthSuccessCode.DEVICE_LIST_RETRIEVED);
-    }
+    );
 
     @Operation(
             summary = "토큰 재발급",
@@ -96,15 +73,10 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
                     @ApiResponse(responseCode = "401", description = "유효하지 않거나 만료된 리프레시 토큰")
             })
-    @PostMapping("/refresh")
-    public ResponseEntity<Response<AuthLoginResponse>> refresh(
+    ResponseEntity<Response<AuthLoginResponse>> refresh(
             @Valid @RequestBody RefreshTokenRequest request,
             HttpServletRequest httpRequest
-    ) {
-        AuthLoginResponse response = authCommandService.refresh(request.getRefreshToken(), request.getDeviceId(), httpRequest);
-
-        return Response.success(response, AuthSuccessCode.TOKEN_REFRESH);
-    }
+    );
 
     @Operation(
             summary = "OAuth2 임시 코드 교환",
@@ -116,16 +88,10 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "토큰 교환 성공"),
                     @ApiResponse(responseCode = "400", description = "유효하지 않거나 만료된 코드")
             })
-    @PostMapping("/oauth2/token/exchange")
-    public ResponseEntity<Response<AuthLoginResponse>> exchangeOAuthToken(
+    ResponseEntity<Response<AuthLoginResponse>> exchangeOAuthToken(
             @Valid @RequestBody TokenExchangeRequest request,
             HttpServletRequest httpRequest
-    ) {
-
-        AuthLoginResponse response = authCommandService.exchangeOAuthToken(request.getCode(), request.getDeviceId(), request.getDeviceName(), httpRequest);
-
-        return Response.success(response, AuthSuccessCode.TOKEN_EXCHANGE);
-    }
+    );
 
     @Operation(
             summary = "로그아웃",
@@ -137,15 +103,10 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @PostMapping("/logout")
-    public ResponseEntity<Response<Void>> logout(
+    ResponseEntity<Response<Void>> logout(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam String deviceId
-    ) {
-        authCommandService.logout(authUser, deviceId);
-
-        return Response.success(null, AuthSuccessCode.USER_LOGOUT);
-    }
+    );
 
     @Operation(
             summary = "전체 로그아웃",
@@ -157,14 +118,9 @@ public class AuthController {
                     @ApiResponse(responseCode = "200", description = "전체 로그아웃 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    @PostMapping("/logout/all")
-    public ResponseEntity<Response<Void>> logoutAll(
+    ResponseEntity<Response<Void>> logoutAll(
             @AuthenticationPrincipal AuthUser authUser
-    ) {
-        authCommandService.logoutAll(authUser);
-
-        return Response.success(null, AuthSuccessCode.USER_LOGOUT);
-    }
+    );
 
     @Operation(
             summary = "디바이스 제거",
@@ -179,16 +135,11 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "인증 실패"),
                     @ApiResponse(responseCode = "404", description = "디바이스를 찾을 수 없음")
             })
-    @DeleteMapping("/devices/{deviceId}")
-    public ResponseEntity<Response<Void>> removeDevice(
+    ResponseEntity<Response<Void>> removeDevice(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable String deviceId,
             @RequestParam String currentDeviceId
-    ) {
-        authCommandService.removeDevice(authUser, deviceId, currentDeviceId);
-
-        return Response.success(null, AuthSuccessCode.DEVICE_REMOVED);
-    }
+    );
 
     @Operation(
             summary = "회원 삭제",
@@ -201,13 +152,8 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "인증 실패"),
                     @ApiResponse(responseCode = "404", description = "존재하지 않는 회원"),
             })
-    @DeleteMapping("/withdraw")
-    public ResponseEntity<Response<Void>> withdraw(
+    ResponseEntity<Response<Void>> withdraw(
             @Valid @RequestBody AuthWithdrawRequest request,
             @AuthenticationPrincipal AuthUser authUser
-    ) {
-        authCommandService.withdraw(request, authUser);
-
-        return Response.success(null, AuthSuccessCode.USER_WITHDRAW);
-    }
+    );
 }

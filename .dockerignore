@@ -1,8 +1,9 @@
-### 기본 빌드 시스템 (Gradle) ###
+# 기본 빌드 시스템(Gradle)
+# 디렉토리임을 명확히 명시하기 위해 build/로 수정
 .gradle
 build/
 
-### 소스 관리 및 IDE 관련 기본 파일 ###
+# 소스 관리 및 IDE 관련 기본 파일
 .git
 .gitignore
 .gitattributes
@@ -11,9 +12,9 @@ build/
 *.ipr
 .DS_Store
 
-### 문서 및 기타 ###
+# 문서 및 기타
 HELP.md
 *.md
 
-### IntelliJ IDEA ###
+# IntelliJ IDEA
 .idea

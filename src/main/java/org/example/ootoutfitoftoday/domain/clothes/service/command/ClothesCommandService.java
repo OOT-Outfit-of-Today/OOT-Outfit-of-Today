@@ -26,5 +26,6 @@ public interface ClothesCommandService {
     void removeClothesImages(
             Long userId,
             Long clothesId,
-            ClothesImageUnlinkRequest clothesImageUnlinkRequest);
+            ClothesImageUnlinkRequest clothesImageUnlinkRequest
+    );
 }

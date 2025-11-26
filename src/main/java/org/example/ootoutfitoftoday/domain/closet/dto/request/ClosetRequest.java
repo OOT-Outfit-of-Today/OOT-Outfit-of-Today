@@ -7,7 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 
 @Builder(access = AccessLevel.PRIVATE)
-public record ClosetUpdateRequest(
+public record ClosetRequest(
 
         @NotBlank(message = "옷장 이름은 필수입니다.")
         @Size(max = 100, message = "옷장 이름은 100자를 초과할 수 없습니다.")
@@ -21,14 +21,14 @@ public record ClosetUpdateRequest(
         @NotNull(message = "공개 여부는 필수입니다.")
         Boolean isPublic
 ) {
-    public static ClosetUpdateRequest of(
+    public static ClosetRequest of(
             String name,
             String description,
             Long imageId,
             Boolean isPublic
     ) {
 
-        return ClosetUpdateRequest.builder()
+        return ClosetRequest.builder()
                 .name(name)
                 .description(description)
                 .imageId(imageId)

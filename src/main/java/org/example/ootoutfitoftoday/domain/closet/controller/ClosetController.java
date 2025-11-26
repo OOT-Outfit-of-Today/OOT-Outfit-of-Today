@@ -8,8 +8,7 @@ import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
-import org.example.ootoutfitoftoday.domain.closet.dto.request.ClosetCreateRequest;
-import org.example.ootoutfitoftoday.domain.closet.dto.request.ClosetUpdateRequest;
+import org.example.ootoutfitoftoday.domain.closet.dto.request.ClosetRequest;
 import org.example.ootoutfitoftoday.domain.closet.dto.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,7 +29,24 @@ public interface ClosetController {
     )
     ResponseEntity<Response<ClosetCreateResponse>> createCloset(
             @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody ClosetCreateRequest closetCreateRequest
+            @Valid @RequestBody ClosetRequest closetRequest
+    );
+
+    @Operation(
+            summary = "내 옷장 전체 조회",
+            description = "회원이 자신의 전체 옷장을 조회합니다.",
+            security = {@SecurityRequirement(name = "bearerAuth")},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "401", description = "인증 실패")
+            }
+    )
+    ResponseEntity<PageResponse<ClosetGetResponse>> getMyClosets(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") String direction
     );
 
     @Operation(
@@ -40,7 +56,9 @@ public interface ClosetController {
                     @ApiResponse(responseCode = "200", description = "조회 성공")
             }
     )
-    ResponseEntity<PageResponse<ClosetGetPublicResponse>> getPublicClosets(
+    ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(required = false) Long targetUserId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sort,
@@ -62,23 +80,6 @@ public interface ClosetController {
     );
 
     @Operation(
-            summary = "내 옷장 전체 조회",
-            description = "회원이 자신의 전체 옷장을 조회합니다.",
-            security = {@SecurityRequirement(name = "bearerAuth")},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공"),
-                    @ApiResponse(responseCode = "401", description = "인증 실패")
-            }
-    )
-    ResponseEntity<PageResponse<ClosetGetMyResponse>> getClosetByMe(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sort,
-            @RequestParam(defaultValue = "DESC") String direction
-    );
-
-    @Operation(
             summary = "내 옷장 정보 수정",
             description = "회원이 자신의 옷장 정보를 수정합니다.",
             security = {@SecurityRequirement(name = "bearerAuth")},
@@ -93,7 +94,7 @@ public interface ClosetController {
     ResponseEntity<Response<ClosetUpdateResponse>> updateCloset(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long closetId,
-            @Valid @RequestBody ClosetUpdateRequest closetUpdateRequest
+            @Valid @RequestBody ClosetRequest closetRequest
     );
 
     @Operation(

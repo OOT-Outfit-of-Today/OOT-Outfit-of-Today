@@ -2,8 +2,6 @@ package org.example.ootoutfitoftoday.domain.closet.service.query;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetMyResponse;
-import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetPublicResponse;
 import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetResponse;
 import org.example.ootoutfitoftoday.domain.closet.entity.Closet;
 import org.example.ootoutfitoftoday.domain.closet.exception.ClosetErrorCode;
@@ -16,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,32 +25,38 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
     private final ClosetRepository closetRepository;
 
     @Override
-    public Page<ClosetGetPublicResponse> getPublicClosets(
+    public Page<ClosetGetResponse> getClosets(
+            Long loginUserId, // 로그인 유저 id
+            Long targetUserId,
             int page,
             int size,
             String sort,
             String direction
     ) {
-        log.debug("공개 옷장 목록 조회 시작 - 페이지: {}, 크기: {}, 정렬: {}, 방향: {}", page, size, sort, direction);
+        Sort sortSpec = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sort).descending()
+                : Sort.by(sort).ascending();
 
-        Sort sortObj = Sort.by(Sort.Direction.fromString(direction), sort);
+        Pageable pageable = PageRequest.of(page, size, sortSpec);
 
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                sortObj
-        );
+        Page<Closet> closets;
 
-        Page<Closet> closets = closetRepository.findAllByIsPublicTrue(pageable);
+        if (targetUserId != null && Objects.equals(loginUserId, targetUserId)) {
+            // 로그인 유저의 옷장 전체 조회
+            closets = closetRepository.findAllByUser_Id(loginUserId, pageable);
+        } else if (targetUserId != null) {
+            // 타인의 공개 옷장 전체 조회
+            closets = closetRepository.findAllByUser_IdAndIsPublicTrue(targetUserId, pageable);
+        } else {
+            // 모든 유저의 공개 옷장 전체 조회
+            closets = closetRepository.findAllByIsPublicTrue(pageable);
+        }
 
-        log.info("공개 옷장 목록 조회 완료 - 조회 건수: {}, 전체 건수: {}", closets.getContent().size(), closets.getTotalElements());
-
-        return closets.map(ClosetGetPublicResponse::from);
+        return closets.map(ClosetGetResponse::from);
     }
 
     @Override
     public ClosetGetResponse getCloset(Long closetId) {
-        log.info("옷장 상세 조회 시작 - 옷장ID: {}", closetId);
 
         Closet closet = closetRepository.findById(closetId)
                 .orElseThrow(() -> {
@@ -63,45 +69,11 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
             throw new ClosetException(ClosetErrorCode.CLOSET_DELETED);
         }
 
-        log.debug("옷장 조회 완료 - 옷장ID: {}, 이름: {}, 공개여부: {}",
-                closetId, closet.getName(), closet.getIsPublic());
-
         return ClosetGetResponse.from(closet);
     }
 
     @Override
-    public Page<ClosetGetMyResponse> getMyClosets(
-            Long userId,
-            int page,
-            int size,
-            String sort,
-            String direction
-    ) {
-        log.info("내 옷장 목록 조회 시작 - 사용자: {}, 페이지: {}, 크기: {}, 정렬: {}, 방향: {}",
-                userId, page, size, sort, direction);
-
-        Sort sortObj = Sort.by(Sort.Direction.fromString(direction), sort);
-
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                sortObj
-        );
-
-        Page<Closet> closets = closetRepository.findAllByUser_Id(
-                userId,
-                pageable
-        );
-
-        log.info("내 옷장 목록 조회 완료 - 조회 건수: {}, 사용자: {}, 전체 건수: {}",
-                closets.getContent().size(), userId, closets.getTotalElements());
-
-        return closets.map(ClosetGetMyResponse::from);
-    }
-
-    @Override
     public Closet findClosetById(Long closetId) {
-        log.debug("옷장 조회 - 옷장ID: {}", closetId);
 
         return closetRepository.findById(closetId)
                 .orElseThrow(() -> {

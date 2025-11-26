@@ -1,7 +1,6 @@
 package org.example.ootoutfitoftoday.domain.image.service.command;
 
 import lombok.RequiredArgsConstructor;
-import org.example.ootoutfitoftoday.aws.config.AwsS3Properties;
 import org.example.ootoutfitoftoday.domain.image.dto.request.ImageSaveRequest;
 import org.example.ootoutfitoftoday.domain.image.dto.request.PresignedUrlRequest;
 import org.example.ootoutfitoftoday.domain.image.dto.response.ImageSaveResponse;
@@ -11,6 +10,7 @@ import org.example.ootoutfitoftoday.domain.image.entity.ImageType;
 import org.example.ootoutfitoftoday.domain.image.exception.ImageErrorCode;
 import org.example.ootoutfitoftoday.domain.image.exception.ImageException;
 import org.example.ootoutfitoftoday.domain.image.repository.ImageRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -30,9 +30,17 @@ public class ImageCommandServiceImpl implements ImageCommandService {
 
     private static final int PRESIGNED_URL_EXPIRATION_MINUTES = 5;
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif", "webp");
+    // Spring Cloud AWS가 자동으로 주입해주는 S3Presigner 사용
     private final S3Presigner s3Presigner;
-    private final AwsS3Properties awsS3Properties;
     private final ImageRepository imageRepository;
+
+    // yml에서 S3 버킷명과 리전 직접 주입
+    // 환경변수 직접 참조가 아닌 yml 경로 참조 방식
+    @Value("${spring.cloud.aws.s3.bucket}")
+    private String bucketName;
+
+    @Value("${spring.cloud.aws.region.static}")
+    private String region;
 
     @Override
     public PresignedUrlResponse generatePresignedUrl(Long userId, PresignedUrlRequest request) {
@@ -110,7 +118,7 @@ public class ImageCommandServiceImpl implements ImageCommandService {
     private String createPresignedUrl(String s3Key) {
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(awsS3Properties.getS3().getBucket())
+                    .bucket(bucketName)
                     .key(s3Key)
                     .build();
 
@@ -129,9 +137,7 @@ public class ImageCommandServiceImpl implements ImageCommandService {
     }
 
     private String generateFileUrl(String s3Key) {
-        String region = awsS3Properties.getRegion().getStaticRegion();
-        String bucket = awsS3Properties.getS3().getBucket();
 
-        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, s3Key);
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, s3Key);
     }
 }

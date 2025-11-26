@@ -27,9 +27,10 @@ spring:
       # credentials 설정 안 함(EC2 IAM Role 사용)
 
 springdoc:
-  api-docs.enabled: true
+  api-docs:
+    enabled: true
   swagger-ui:
     enabled: true
     path: /swagger-ui/index.html
     display-request-duration: true
-    tryItOutEnabled: true
+    try-it-out-enabled: true

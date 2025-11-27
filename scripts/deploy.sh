@@ -36,8 +36,28 @@ CMDS=(
   # 로그 디렉토리 생성 및 spring 유저(999:999)에게 권한
   "mkdir -p /app-logs && chown 999:999 /app-logs"
 
+  # Docker 네트워크 생성(컨테이너 간 통신용)
+  # 이미 존재하면 에러 무시(|| true)
+  "docker network create oot-network || true"
+
+  # Redis 컨테이너 실행
+  # - 이미 실행 중이면 재사용(docker run 전에 stop/rm 안 함)
+  # - 최대 메모리 256MB, LRU 정책으로 오래된 키 자동 삭제
+  "docker ps -q -f name=oot-redis || docker run -d \\
+    --name oot-redis \\
+    --network oot-network \\
+    --restart=always \\
+    redis:7-alpine redis-server --requirepass oot --maxmemory 256mb --maxmemory-policy allkeys-lru"
+
+  # Redis를 네트워크에 연결(이미 연결되어 있으면 에러 무시)
+  "docker network connect oot-network oot-redis 2>/dev/null || true"
+
+  # Spring Boot 애플리케이션 실행
+  # - oot-network에 연결하여 Redis 컨테이너와 통신 가능
+  # - Redis 호스트명은 'redis'로 접근(Parameter Store에서 설정)
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
+    --network oot-network \\
     --restart=always \\
     -p ${APP_PORT}:${APP_PORT} \\
     -v /app-logs:/app-logs \\

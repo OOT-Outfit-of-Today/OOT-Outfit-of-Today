@@ -32,6 +32,10 @@ CMDS=(
   "docker pull ${FULL_URI}"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
+
+  # 로그 디렉토리 생성 및 spring 유저(999:999)에게 권한
+  "mkdir -p /app-logs && chown 999:999 /app-logs"
+
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=always \\

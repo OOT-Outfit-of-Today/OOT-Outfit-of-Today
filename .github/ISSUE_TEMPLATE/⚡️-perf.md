@@ -2,7 +2,7 @@
 name: "⚡️ Perf"
 about: 성능 최적화 및 리소스 효율 개선과 관련된 이슈 템플릿입니다.
 title: ''
-labels: ''
+labels: "⚡️ perf"
 assignees: ''
 
 ---

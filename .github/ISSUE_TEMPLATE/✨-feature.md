@@ -2,7 +2,7 @@
 name: "✨ Feature"
 about: 새로운 기능을 직접 개발할 때 사용하는 템플릿입니다.
 title: "[feat] "
-labels: ''
+labels: "✨ feature"
 assignees: ''
 
 ---

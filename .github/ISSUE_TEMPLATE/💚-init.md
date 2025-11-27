@@ -2,7 +2,7 @@
 name: "\U0001F49A Init"
 about: 도메인 초기 세팅에 대한 템플릿입니다.
 title: "[init] "
-labels: ''
+labels: "\U0001F49A init"
 assignees: ''
 
 ---

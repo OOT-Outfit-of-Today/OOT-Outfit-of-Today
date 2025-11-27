@@ -1,44 +1,77 @@
+# ================================================================
+# CI/CD 테스트 환경 전용 설정
+# ================================================================
 spring:
+  # ================================================================
+  # 데이터베이스 연결 설정
+  # ================================================================
   datasource:
-    # 💡 CI 워크플로우의 Docker 서비스 주소와 포트 (127.0.0.1:3306)를 사용
+    # GitHub Actions Docker 서비스의 MySQL 컨테이너 연결 정보
+    # 127.0.0.1:3306 - CI 워크플로우에서 실행되는 MySQL 서비스 주소
+    # test_db - CI에서 생성한 테스트용 데이터베이스
+    # useSSL=false - 테스트 환경에서는 SSL 불필요
+    # allowPublicKeyRetrieval=true - MySQL 8.0+ 인증 방식 호환성
     url: jdbc:mysql://127.0.0.1:3306/test_db?useSSL=false&allowPublicKeyRetrieval=true
-    driver-class-name: com.mysql.cj.jdbc.Driver # MySQL JDBC 드라이버 명시
-    username: root # CI Docker Compose에서 설정한 사용자 이름
-    password: root # CI Docker Compose에서 설정한 비밀번호
-  #    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-  #    driver-class-name: org.h2.Driver
-  #    username: ${USER_NAME:sa}
-  #    password: ${PASSWORD:}
+    # CI 워크플로우의 services.mysql.env에서 설정한 값과 동일
+    username: root
+    password: root
+
   jpa:
     hibernate:
+      # create-drop: 테스트 시작 시 테이블 생성, 종료 시 삭제
+      # 매 테스트마다 깨끗한 DB 상태 보장(격리된 테스트 환경)
       ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect # MySQL 방언 설정
-  #        dialect: org.hibernate.dialect.H2Dialect
+        # MySQL 방언 명시(테스트 환경도 실제 DB와 동일한 방언 사용)
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # .env 파일 로드 비활성화(CI 환경에는 .env 파일이 없음)
+  # GitHub Actions에서 환경 변수로 직접 주입하므로 불필요
   config:
     import: optional:file:.env[.properties]
 
-  cache:
-    type: redis # <- 이 부분 변경(기존: redis)none
+  # ================================================================
+  # SQL 초기화 설정
+  # ================================================================
+  sql:
+    init:
+      # 테스트는 data.sql 사용 안 함(테스트마다 필요한 데이터만 삽입)
+      mode: never
 
-  # Redis 연결 설정(로컬 개발용)
+  # ================================================================
+  # Redis 설정
+  # ================================================================
   data:
     redis:
-      host: 127.0.0.1                  # Docker Compose로 실행한 Redis 주소
-      port: 6379                       # Redis 기본 포트
-      password: ${REDIS_PASSWORD:}     # 환경변수 우선, 없으면 빈 문자열(CI 호환)
-      timeout: 3000ms                  # 연결 타임아웃(3초)
-      lettuce: # Lettuce 클라이언트 설정(기본 클라이언트)
+      # GitHub Actions Docker 서비스의 Redis 컨테이너 연결 정보
+      host: 127.0.0.1
+      port: 6379
+      # CI Redis는 비밀번호 없음(빈 문자열)
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+      lettuce:
         pool:
-          max-active: 8                # 최대 연결 수
-          max-idle: 8                  # 유휴 상태 최대 연결 수
-          min-idle: 2                  # 유휴 상태 최소 연결 수
-          max-wait: -1ms               # 연결 대기 시간(-1은 무제한)
+          # 테스트 환경은 동시성이 낮으므로 연결 풀 작게 설정
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
 
+  # ================================================================
+  # Spring Cache 설정
+  # ================================================================
+  cache:
+    # Redis 캐싱 활성화(실제 운영과 동일한 환경에서 테스트)
+    type: redis
+
+# ================================================================
+# Redisson 분산 락 설정
+# ================================================================
 redisson:
+  # 실제 운영 환경과 동일한 Redisson 설정으로 테스트
   single-server:
     address: redis://127.0.0.1:6379
     connection-pool-size: 64
@@ -50,10 +83,17 @@ redisson:
   threads: 4
   netty-threads: 4
 
+# ================================================================
+# JWT 설정
+# ================================================================
 jwt:
   secret:
-    key: JUeuMQYOTYa1zq2TSHmzZz5BnHf8hHQnkGeT9aRuAAr05a32bspdCHH8B+3sNcfOV5tYe5yfyypgF9lWV68zEA==
+    # 테스트 전용 JWT 시크릿 키(GitHub Secrets에서 주입)
+    key: ${JWT_SECRET_KEY}
 
+# ================================================================
+# AWS S3 설정
+# ================================================================
 cloud:
   aws:
     s3:
@@ -61,11 +101,38 @@ cloud:
     region:
       static: ${AWS_REGION}
     credentials:
+      # GitHub Secrets에서 주입된 CI/CD 전용 AWS 키 사용
       access-key: ${AWS_ACCESS_KEY_ID}
       secret-key: ${AWS_SECRET_ACCESS_KEY}
 
+# ================================================================
+# 토스 결제 API 설정
+# ================================================================
 toss:
+  # 테스트 환경용 토스 시크릿 키(GitHub Secrets에서 주입)
   secret-key: ${TOSS_SECRET_KEY}
   api:
     url:
+      # 결제 승인 API 엔드포인트
       confirm: https://api.tosspayments.com/v1/payments/confirm
+
+# ================================================================
+# 서버 설정
+# ================================================================
+server:
+  # 테스트 환경 포트(CI에서는 포트 충돌 없음)
+  port: 8080
+  servlet:
+    context-path: /api
+
+# ================================================================
+# 로깅 설정
+# ================================================================
+logging:
+  level:
+    # 테스트 실패 시 디버깅을 위한 상세 로그
+    root: INFO
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    # SQL 파라미터 바인딩 로그(어떤 값이 들어갔는지 확인)
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

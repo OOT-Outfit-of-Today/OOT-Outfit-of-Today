@@ -36,8 +36,27 @@ CMDS=(
   # 로그 디렉토리 생성 및 spring 유저(999:999)에게 권한
   "mkdir -p /app-logs && chown 999:999 /app-logs"
 
+  # Docker 네트워크 생성(컨테이너 간 통신용)
+  # 이미 존재하면 에러 무시(|| true)
+  "docker network create oot-network || true"
+
+  # Parameter Store에서 Redis 비밀번호 가져오기
+  "REDIS_PASSWORD=\$(aws ssm get-parameter --name /config/dev/REDIS_PASSWORD --with-decryption --query Parameter.Value --output text --region ${AWS_REGION})"
+
+  # Redis 컨테이너 실행
+  # 중지된 컨테이너가 있으면 시작, 없으면 새로 생성
+  # 컨테이너 이름: redis(Spring에서 호스트명으로 사용)
+  "docker start redis 2>/dev/null || docker run -d \\
+    --name redis \\
+    --network oot-network \\
+    --restart=always \\
+    redis:7-alpine redis-server --requirepass \$REDIS_PASSWORD --maxmemory 256mb --maxmemory-policy allkeys-lru"
+
+  # Spring Boot 애플리케이션 실행
+  # oot-network에 연결하여 Redis 컨테이너('redis')와 통신 가능
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
+    --network oot-network \\
     --restart=always \\
     -p ${APP_PORT}:${APP_PORT} \\
     -v /app-logs:/app-logs \\

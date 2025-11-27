@@ -1,81 +1,117 @@
-#spring:
-#  config:
-#    import:
-#      - "aws-parameterstore:/config/common/"
-#      - "aws-parameterstore:/config/dev/"
-#
-#  datasource:
-#    url: jdbc:mysql://${db.host}:${db.port:3306}/${db.name}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-#    username: ${db.username}
-#    password: ${db.password}
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    properties:
-#      hibernate:
-#        dialect: org.hibernate.dialect.MySQLDialect
-#
-#  # Redis 연결 설정(DEV)
-#  data:
-#    redis:
-#      host: ${redis.host}
-#      port: ${redis.port:6379}
-#      password: ${redis.password}
-#      timeout: 3000ms
-#      lettuce:
-#        pool:
-#          max-active: 10
-#          max-idle: 10
-#          min-idle: 2
-#          max-wait: -1ms
-#
-#  # 캐시 설정(DEV)
-#  cache:
-#    type: redis
-#    redis:
-#      cache-null-values: false
-#      key-prefix: "oot:dev:cache:"
-#      use-key-prefix: true
-#
-#springdoc:
-#  api-docs:
-#    enabled: true
-#  swagger-ui:
-#    enabled: true
-#    display-request-duration: true
-#    tryItOutEnabled: true
-#
-#cloud:
-#  aws:
-#    region:
-#      static-region: ${aws.s3.region}
-#    s3:
-#      bucket: ${aws.s3.bucket}
-#    stack:
-#      auto: true
-#
-#jwt:
-#  secret:
-#    key: ${JWT_SECRET_KEY}
-#
-#toss:
-#  secret-key: ${TOSS_SECRET_KEY}
-#  api:
-#    url:
-#      confirm: https://api.tosspayments.com/v1/payments/confirm
-#
-## Logging 설정 (Loki로 전송)
-#logging:
-#  file:
-#    name: /app-logs/application.log
-#    max-size: 100MB
-#    max-history: 7
-#    total-size-cap: 1GB
-#  pattern:
-#    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-#    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-#  level:
-#    root: INFO
-#    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+# ================================================================
+# AWS Parameter Store 설정
+# ================================================================
+spring:
+  config:
+    import:
+      # AWS Parameter Store에서 공통 설정 로드
+      - "aws-parameterstore:/config/common/"
+      # AWS Parameter Store에서 dev 환경 설정 로드
+      - "aws-parameterstore:/config/dev/"
+
+  # ================================================================
+  # 데이터베이스 연결 설정
+  # ================================================================
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  # Redis 연결 설정 추가(Lettuce 연결 풀)
+  # host, port, password는 RedisConfig가 환경변수에서 직접 읽음
+  data:
+    redis:
+      # Redis 연결 타임아웃
+      timeout: 3000ms
+      lettuce:
+        pool:
+          # 최대 활성 연결 수
+          max-active: 10
+          # 유휴 상태 최대 연결 수
+          max-idle: 10
+          # 유휴 상태 최소 연결 수(미리 생성)
+          min-idle: 2
+          # 연결 대기 시간(-1: 무제한)
+          max-wait: -1ms
+
+  # ================================================================
+  # Spring Cache 설정 - Redis로 사용
+  # ================================================================
+  cache:
+    type: redis
+    redis:
+      # null 값 캐싱 방지
+      cache-null-values: false
+      # 캐시 키 접두사(환경별 구분)
+      key-prefix: "oot:dev:cache:"
+      use-key-prefix: true
+
+  # ================================================================
+  # AWS 설정
+  # ================================================================
+  cloud:
+    aws:
+      parameter-store:
+        # Parameter Store 활성화(EC2 IAM Role 사용)
+        enabled: true
+      region:
+        static: ${AWS_REGION}
+      s3:
+        bucket: ${AWS_S3_BUCKET}
+        # Spring Cloud AWS 3.x에서 더 이상 지원 안 함
+        # stack:
+        # auto: false
+      # credentials 설정 안 함(EC2 IAM Role 사용)
+
+# ================================================================
+# 서버 포트 설정
+# ================================================================
+server:
+  port: 8080
+
+# ================================================================
+# Swagger UI 설정
+# ================================================================
+springdoc:
+  api-docs:
+    # API 문서 생성 활성화
+    enabled: true
+  # Swagger UI 활성화
+  swagger-ui:
+    enabled: true
+    # Swagger UI 접근 경로
+    path: /swagger-ui/index.html
+    # 요청 소요 시간 표시
+    display-request-duration: true
+    # Try it out 버튼 활성화
+    try-it-out-enabled: true
+
+# ================================================================
+# 파일 로깅 설정(Loki 수집용)
+# ================================================================
+# 없으면 콘솔 로그만 출력되고 파일로 저장되지 않아 로그 수집 불가
+logging:
+  file:
+    # 로그 파일 경로(Docker 볼륨 마운트 경로)
+    name: /app-logs/application.log
+  logback:
+    rolling-policy:
+      # 로그 파일 최대 크기(100MB 도달 시 새 파일 생성)
+      max-file-size: 100MB
+      # 보관할 로그 파일 개수(7일치)
+      max-history: 7
+      # 전체 로그 파일 최대 용량(1GB 초과 시 오래된 파일 삭제)
+      total-size-cap: 1GB
+  pattern:
+    # 콘솔 로그 포맷
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    # 파일 로그 포맷
+    file: "%d{yyyy-MM-d HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    # SQL 파라미터 바인딩 로그(디버깅용)
+    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG

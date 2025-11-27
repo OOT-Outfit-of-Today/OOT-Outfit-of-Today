@@ -47,7 +47,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final ObjectMapper objectMapper;
 
-    @Value("${spring.cors.allowed-origins}")
+    @Value("${cors.allowed-origins}")
     private String allowedOrigins;
 
     @Value("${frontend.url}")

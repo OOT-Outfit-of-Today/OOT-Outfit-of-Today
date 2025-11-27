@@ -1,3 +1,5 @@
+# Gradle 빌드 결과물 및 설정 무시
+# ! 붙은 항목: Git이 파일 또는 폴더 추적
 HELP.md
 .gradle
 build/
@@ -5,7 +7,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### STS ###
+# STS
 .apt_generated
 .classpath
 .factorypath
@@ -17,7 +19,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-### IntelliJ IDEA ###
+# IntelliJ IDEA
 .idea
 *.iws
 *.iml
@@ -26,24 +28,22 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# VS Code
 .vscode/
 
-### .env ###
+# .env
 .env
 *.env/
 
-### QueryDSL ###
+# QueryDSL
 **/Q*.java
-build/
-out/
 
-### performance ###
+# performance
 performance/

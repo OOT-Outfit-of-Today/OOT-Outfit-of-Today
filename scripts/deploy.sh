@@ -33,13 +33,14 @@ CMDS=(
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
   "docker run -d \\
-      --name ${CONTAINER_NAME} \\
-      --restart=always \\
-      -p ${APP_PORT}:${APP_PORT} \\
-      -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \\
-      -e AWS_REGION=${AWS_REGION} \\
-      ${FULL_URI}"
-  )
+    --name ${CONTAINER_NAME} \\
+    --restart=always \\
+    -p ${APP_PORT}:${APP_PORT} \\
+    -v /app-logs:/app-logs \\
+    -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \\
+    -e AWS_REGION=${AWS_REGION} \\
+    ${FULL_URI}"
+)
 
 # Bash 배열 → JSON 배열 변환 (jq 필수)
 COMMANDS_JSON=$(jq -Rn --argjson arr "$(printf '%s\n' "${CMDS[@]}" | jq -R . | jq -s .)" '$arr')

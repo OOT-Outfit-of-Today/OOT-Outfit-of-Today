@@ -40,21 +40,20 @@ CMDS=(
   # 이미 존재하면 에러 무시(|| true)
   "docker network create oot-network || true"
 
+  # Parameter Store에서 Redis 비밀번호 가져오기
+  "REDIS_PASSWORD=\$(aws ssm get-parameter --name /config/dev/REDIS_PASSWORD --with-decryption --query Parameter.Value --output text --region ${AWS_REGION})"
+
   # Redis 컨테이너 실행
-  # - 이미 실행 중이면 재사용(docker run 전에 stop/rm 안 함)
-  # - 최대 메모리 256MB, LRU 정책으로 오래된 키 자동 삭제
-  "docker ps -q -f name=oot-redis || docker run -d \\
-    --name oot-redis \\
+  # 중지된 컨테이너가 있으면 시작, 없으면 새로 생성
+  # 컨테이너 이름: redis(Spring에서 호스트명으로 사용)
+  "docker start redis 2>/dev/null || docker run -d \\
+    --name redis \\
     --network oot-network \\
     --restart=always \\
-    redis:7-alpine redis-server --requirepass oot --maxmemory 256mb --maxmemory-policy allkeys-lru"
-
-  # Redis를 네트워크에 연결(이미 연결되어 있으면 에러 무시)
-  "docker network connect oot-network oot-redis 2>/dev/null || true"
+    redis:7-alpine redis-server --requirepass \$REDIS_PASSWORD --maxmemory 256mb --maxmemory-policy allkeys-lru"
 
   # Spring Boot 애플리케이션 실행
-  # - oot-network에 연결하여 Redis 컨테이너와 통신 가능
-  # - Redis 호스트명은 'redis'로 접근(Parameter Store에서 설정)
+  # oot-network에 연결하여 Redis 컨테이너('redis')와 통신 가능
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --network oot-network \\

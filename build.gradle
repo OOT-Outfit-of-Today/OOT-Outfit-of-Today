@@ -113,9 +113,6 @@ dependencies {
 
     // 공통 DTO 레포
     implementation 'com.github.Princess-Maker-s-OOT:OOT-Common:v.1.0.7'
-
-    // Spring Dotenv - dotenv 로더
-    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 }
 
 // Spring Cloud AWS BOM (버전 통합 관리)

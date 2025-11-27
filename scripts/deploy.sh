@@ -32,14 +32,19 @@ CMDS=(
   "docker pull ${FULL_URI}"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
+
+  # 로그 디렉토리 생성 및 spring 유저(999:999)에게 권한
+  "mkdir -p /app-logs && chown 999:999 /app-logs"
+
   "docker run -d \\
-      --name ${CONTAINER_NAME} \\
-      --restart=always \\
-      -p ${APP_PORT}:${APP_PORT} \\
-      -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \\
-      -e AWS_REGION=${AWS_REGION} \\
-      ${FULL_URI}"
-  )
+    --name ${CONTAINER_NAME} \\
+    --restart=always \\
+    -p ${APP_PORT}:${APP_PORT} \\
+    -v /app-logs:/app-logs \\
+    -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \\
+    -e AWS_REGION=${AWS_REGION} \\
+    ${FULL_URI}"
+)
 
 # Bash 배열 → JSON 배열 변환 (jq 필수)
 COMMANDS_JSON=$(jq -Rn --argjson arr "$(printf '%s\n' "${CMDS[@]}" | jq -R . | jq -s .)" '$arr')

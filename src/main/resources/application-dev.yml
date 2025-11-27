@@ -5,7 +5,7 @@ spring:
   config:
     import:
       # AWS Parameter Store에서 공통 설정 로드
-      - "aws-parameterstore:/config/common/"
+      #- "aws-parameterstore:/config/common/"
       # AWS Parameter Store에서 dev 환경 설정 로드
       - "aws-parameterstore:/config/dev/"
 

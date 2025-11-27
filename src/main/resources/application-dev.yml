@@ -13,9 +13,9 @@ spring:
   # 데이터베이스 연결 설정
   # ================================================================
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://${db.host}:${db.port}/${db.name}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${db.username}
+    password: ${db.password}
 
   jpa:
     hibernate:

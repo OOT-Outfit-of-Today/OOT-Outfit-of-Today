@@ -1,26 +1,73 @@
+# ================================================================
+# 데이터베이스 연결 설정
+# ================================================================
 spring:
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: create-drop
 
+  # ================================================================
+  # Redis 연결 설정(로컬용 Lettuce 연결 풀)
+  # ================================================================
+  data:
+    redis:
+      timeout: 3000ms
+      lettuce:
+        pool:
+          # 로컬은 dev보다 적은 연결 수 사용
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+
+  # ================================================================
+  # Spring Cache 설정 - Redis로 사용
+  # ================================================================
+  # RedisConfig의 CacheManager 빈이 이 설정을 참조
+  # 없으면 캐싱 동작하지 않음
+  cache:
+    type: redis
+    redis:
+      cache-null-values: false
+      # 로컬 환경 키 접두사
+      key-prefix: "oot:local:cache:"
+      use-key-prefix: true
+
+  # ================================================================
+  # AWS 설정(로컬용)
+  # ================================================================
   cloud:
     aws:
+      # Parameter Store 비활성화(로컬에서는 .env 파일 사용)
+      parameter-store:
+        enabled: false
       region:
-        static: ${AWS_REGION}  # .env에서 자동으로 읽힘
+        # .env에서 자동으로 읽음
+        static: ${AWS_REGION}
       credentials:
+        # 로컬 개발용 AWS 자격증명
         access-key: ${AWS_ACCESS_KEY_ID}
         secret-key: ${AWS_SECRET_ACCESS_KEY}
       s3:
         bucket: ${AWS_S3_BUCKET}
-      stack:
-        auto: false  # CloudFormation 비활성화
+        # Spring Cloud AWS 3.x에서 더 이상 지원 안 함
+      # stack:
+        # auto: false  # CloudFormation 비활성화
 
+# ================================================================
+# 서버 포트 설정
+# ================================================================
+server:
+  port: 8080
+
+# ================================================================
+# Swagger UI 설정
+# ================================================================
 springdoc:
   api-docs:
     enabled: true

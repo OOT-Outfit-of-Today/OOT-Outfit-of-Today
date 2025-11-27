@@ -1,15 +1,95 @@
+# ================================================================
+# Spring Boot 공통 설정
+# ================================================================
 spring:
   application:
     name: aws-demo
   profiles:
-    active: local
+    # 환경변수 우선, 없으면 local 프로파일 사용
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  # ================================================================
+  # .env 파일 로드 설정
+  # ================================================================
+  config:
+    # optional: 파일이 없어도 애플리케이션 시작 가능
+    # .env 파일을 properties 형식으로 읽어옴
+    import: optional:file:.env[.properties]
+
+  # ================================================================
+  # DB 설정
+  # ================================================================
+  # 데이터소스 드라이버 공통 정의
+  datasource:
+    # dev, local 등 모든 프로파일에서 driver 중복 선언 방지
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA 공통 정책
   jpa:
+    # JPA 초기화(데이블 생성) 후 data.sql 실행하도록 순서 보장
+    defer-datasource-initialization: true
+    # SQL 콘솔 출력 설정
+    show-sql: true
     properties:
       hibernate:
+        # SQL 포맷팅(가독성 향상)
         format_sql: true
-    show-sql: true
+        # Dialect 명시(DB 방언 설정)
+        # 없으면 Hibernate가 자동 감지하나, 명시하는 게 더 안전
+        dialect: org.hibernate.dialect.MySQLDialect
 
-  # OAuth2 설정
+  # ================================================================
+  # SQL 초기화 설정(data.sql 초기 데이터 자동 삽입 설정)
+  # ================================================================
+  sql:
+    init:
+      # 항상 data.sql 실행
+      mode: always
+      encoding: UTF-8
+      # 에러 발생 시 중단(데이터 무결성 보장)
+      continue-on-error: false
+
+  # ================================================================
+  # Redis 설정
+  # ================================================================
+  data:
+    redis:
+      # JPA Repository 자동 생성 비활성화(수동 설정 사용)
+      repositories:
+        enabled: false
+
+  # ================================================================
+  # Jackson JSON 직렬화 설정
+  # ================================================================
+  jackson:
+    # JSON 응답에서 null 제외 -> 응답 크기 감소 효과
+    default-property-inclusion: non_null
+
+  # ================================================================
+  # 파일 업로드 설정
+  # ================================================================
+  servlet:
+    multipart:
+      # S3 이미지 업로드 크기 제한
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+  # ================================================================
+  # Spring Batch 설정
+  # ================================================================
+  # Spring Batch 자동 실행 방지(스케줄러로 Job 수동 실행)
+  # 없으면 애플리케이션 시작 시 배치 Job이 자동 실행되어 의도치 않은 동작 발생
+  batch:
+    job:
+      # 스케줄러를 통한 수동 실행만 허용(자동 실행 방지)
+      enabled: false
+    jdbc:
+      # 배치 메타데이터 테이블 자동 생성
+      initialize-schema: always
+
+  # ================================================================
+  # OAuth2 소셜 로그인 설정
+  # ================================================================
   security:
     oauth2:
       client:
@@ -20,54 +100,136 @@ spring:
             scope:
               - email
               - profile
+            # OAuth2 리다이렉트 URI 패턴
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
 
         provider:
           google:
+            # Google 로그인 화면 URL(계정 선택 프롬프트 포함)
             # prompt 파라미터를 URL에 직접 추가
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?prompt=select_account    # 사용자가 로그인할 때 브라우저가 이동하는 URL(Google 로그인 화면)
-            token-uri: https://www.googleapis.com/oauth2/v4/token                                    # 로그인 완료 후 서버가 Google에게 access token 전송 요청을 보내는 URL
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo                             # 발급받은 token으로 사용자 정보(email, name 등)를 가져오는 API
-            user-name-attribute: sub                                                                 # 사용자 정보 중 고유 식별자로 쓸 필드명(sub = Google의 unique user id)
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?prompt=select_account
+            # 로그인 완료 후 서버가 Google에게 Access Token 전송 요청을 보내는 URL
+            token-uri: https://www.googleapis.com/oauth2/v4/token
+            # 발급받은 token으로 사용자 정보(email, name 등) 조회 URL
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            # 사용자 정보 중 고유 식별자로 쓸 필드명(sub = Google의 unique user id)
+            user-name-attribute: sub
 
+# ================================================================
+# JWT 설정
+# ================================================================
+jwt:
+  # 사용자당 최대 동시 로그인 디바이스 수
+  max-devices-per-user: 5
+
+# ================================================================
+# OAuth 설정
+# ================================================================
+oauth:
+  # OAuth 임시 코드 TTL(코드에서 사용)
+  temp-code-ttl-minutes: 3
+
+# ================================================================
 # CORS 설정
+# ================================================================
 cors:
+  # 허용할 프론트엔드 Origin(환경별 override 필요)
   allowed-origins: http://localhost:3000
 
+# ================================================================
 # 프론트엔드 URL
+# ================================================================
 frontend:
+  # 프론트엔드 베이스 URL(리다이렉트 등에 사용)
   url: http://localhost:3000
 
-# 카카오 맵
+# ================================================================
+# 카카오 맵 API 설정
+# ================================================================
 kakao:
   map:
     api-key: ${KAKAO_MAP_API_KEY}
     base-url: https://dapi.kakao.com
 
-# 토스
+# ================================================================
+# 토스 결제 API 설정
+# ================================================================
 toss:
+  # TODO: 커스텀 프로퍼티이므로 @ConfigurationProperties로 매핑하는 Configuration 클래스 생성해야 함
   secret-key: ${TOSS_SECRET_KEY}
   api:
     url:
+      # 결제 승인 API 엔드포인트
       confirm: https://api.tosspayments.com/v1/payments/confirm
 
+# ================================================================
+# 서버 공통 설정
+# ================================================================
 server:
-  port: 8080
+  # 포트는 환경별로 다르므로 공통에서는 제거 -> dev/local/prod yml 프로파일에서 설정
+  # port: 8080
 
+  # Context Path 설정(API 경로 접두사)
+  servlet:
+    context-path: /api
+
+    # OAuth2 세션 관리 - 세션 쿠키 보안 설정
+    # 없으면 OAuth2 로그인 과정에서 세션이 유실되어 로그인 실패
+    session:
+      cookie:
+        # CSRF 공격 방지(Lax: 일반적인 GET 요청은 허용)
+        same-site: lax
+        # HTTPS에서만 전송
+        # 환경별 override(로컬(HTTP)=false, 프로덕션(HTTPS)=true)) 필요 -> 각 프로파일에서 변경
+        secure: ${COOKIE_SECURE:false}
+        # XSS 공격 방지(JavaScript 접근 차단)
+        http-only: true
+        # 쿠키 경로
+        path: /
+        # 쿠키 유효 시간(30분, OAuth2 완료까지 충분)
+        max-age: 1800
+      # 세션 타임아웃
+      timeout: 30m
+
+# ================================================================
+# Actuator & Prometheus 모니터링
+# ================================================================
 management:
   endpoints:
     web:
+      # Actuator 엔드포인트 베이스 경로
+      base-path: /actuator
+      # Prometheus 메트릭 노출
       exposure:
-        include: health,info
+        # Prometheus 추가(모니터링용)
+        include: health,info,prometheus
+
   endpoint:
     health:
-      show-details: always
+      # 보안 강화: 인증된 사용자만 상세 정보 조회
+      show-details: when-authorized
 
+  # 매트릭 설정
+  metrics:
+    tags:
+      # 모니터링 시스템에서 애플리케이션 구분용 태그
+      application: OOT-observability
+    distribution:
+      percentiles-histogram:
+        # HTTP 요청 히스토그램 활성화(응답 시간 분포 수집)
+        http.server.requests: true
+
+# ================================================================
+# 로깅 설정
+# ================================================================
 logging:
   level:
     root: INFO
+    # Spring Web 요청/응답 로그
     org.springframework.web: DEBUG
+    # 환경 변수 및 프로퍼티 로딩 과정 로그
     org.springframework.core.env: DEBUG
     org.springframework.boot.context.config: DEBUG
+    # HikariCP 커넥션 풀 로그
     com.zaxxer.hikari: DEBUG

@@ -51,8 +51,7 @@ public class ClosetControllerImpl implements ClosetController {
     ) {
         Long loginUserId = authUser.getUserId();
 
-        Page<ClosetGetResponse> closetGetResponses = closetQueryService.getClosets(
-                loginUserId,
+        Page<ClosetGetResponse> closetGetResponses = closetQueryService.getMyClosets(
                 loginUserId,
                 page,
                 size,
@@ -64,19 +63,15 @@ public class ClosetControllerImpl implements ClosetController {
     }
 
     @Override
-    @GetMapping("/public/{targetUserId}")
+    @GetMapping("/public")
     public ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
-            AuthUser authUser,
             Long targetUserId,
             int page,
             int size,
             String sort,
             String direction
     ) {
-        Long loginUserId = authUser.getUserId();
-
-        Page<ClosetGetResponse> closetGetPublicResponses = closetQueryService.getClosets(
-                loginUserId,
+        Page<ClosetGetResponse> closetGetPublicResponses = closetQueryService.getPublicClosets(
                 targetUserId,
                 page,
                 size,

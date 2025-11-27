@@ -14,8 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,31 +22,49 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
 
     private final ClosetRepository closetRepository;
 
+    // 페이지네이션
+    private Pageable createPageable(int page, int size, String sort, String direction) {
+        Sort sortSpec = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sort).descending()
+                : Sort.by(sort).ascending();
+
+        return PageRequest.of(page, size, sortSpec);
+    }
+
+    // 로그인 유저의 옷장 조회
     @Override
-    public Page<ClosetGetResponse> getClosets(
-            Long loginUserId, // 로그인 유저 id
+    public Page<ClosetGetResponse> getMyClosets(
+            Long loginUserId,
+            int page,
+            int size,
+            String sort,
+            String direction
+    ) {
+        Pageable pageable = createPageable(page, size, sort, direction);
+
+        Page<Closet> closets = closetRepository.findAllByUser_Id(loginUserId, pageable);
+
+        return closets.map(ClosetGetResponse::from);
+    }
+
+    // 공개 옷장(특정 유저 or 전체)
+    @Override
+    public Page<ClosetGetResponse> getPublicClosets(
             Long targetUserId,
             int page,
             int size,
             String sort,
             String direction
     ) {
-        Sort sortSpec = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sort).descending()
-                : Sort.by(sort).ascending();
-
-        Pageable pageable = PageRequest.of(page, size, sortSpec);
+        Pageable pageable = createPageable(page, size, sort, direction);
 
         Page<Closet> closets;
 
-        if (targetUserId != null && Objects.equals(loginUserId, targetUserId)) {
-            // 로그인 유저의 옷장 전체 조회
-            closets = closetRepository.findAllByUser_Id(loginUserId, pageable);
-        } else if (targetUserId != null) {
-            // 타인의 공개 옷장 전체 조회
+        if (targetUserId != null) {
+            // 특정 유저의 공개된 옷장
             closets = closetRepository.findAllByUser_IdAndIsPublicTrue(targetUserId, pageable);
         } else {
-            // 모든 유저의 공개 옷장 전체 조회
+            // 전체 공개된 옷장
             closets = closetRepository.findAllByIsPublicTrue(pageable);
         }
 

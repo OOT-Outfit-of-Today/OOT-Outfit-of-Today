@@ -57,7 +57,6 @@ public interface ClosetController {
             }
     )
     ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
-            @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) Long targetUserId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

@@ -79,10 +79,14 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/test_db?useSSL=false&allowPublicKeyRetrieval=true
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
-          # Redis
+          # Redis(Spring Boot 표준)
           SPRING_DATA_REDIS_HOST: 127.0.0.1
           SPRING_DATA_REDIS_PORT: 6379
           SPRING_DATA_REDIS_PASSWORD: ""
+          # Redis(커스텀 - RedisConfig에서 직접 읽는 경우)
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: ""
         run: |
           echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE" >> $GITHUB_ENV
           echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
@@ -100,9 +104,48 @@ jobs:
           echo "SPRING_DATA_REDIS_HOST=$SPRING_DATA_REDIS_HOST" >> $GITHUB_ENV
           echo "SPRING_DATA_REDIS_PORT=$SPRING_DATA_REDIS_PORT" >> $GITHUB_ENV
           echo "SPRING_DATA_REDIS_PASSWORD=$SPRING_DATA_REDIS_PASSWORD" >> $GITHUB_ENV
+          echo "REDIS_HOST=$REDIS_HOST" >> $GITHUB_ENV
+          echo "REDIS_PORT=$REDIS_PORT" >> $GITHUB_ENV
+          echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> $GITHUB_ENV
+
+      # ================================================================
+      # 디버깅: 환경 변수 확인
+      # ================================================================
+      - name: Debug - Print environment variables
+        run: |
+          echo "=== Spring Config ==="
+          echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
+          echo ""
+          echo "=== AWS Config ==="
+          echo "AWS_REGION=$AWS_REGION"
+          echo "AWS_S3_BUCKET=$AWS_S3_BUCKET"
+          echo "AWS_ACCESS_KEY_ID exists: $([[ -n "$AWS_ACCESS_KEY_ID" ]] && echo 'YES' || echo 'NO')"
+          echo "AWS_SECRET_ACCESS_KEY exists: $([[ -n "$AWS_SECRET_ACCESS_KEY" ]] && echo 'YES' || echo 'NO')"
+          echo ""
+          echo "=== Auth Config ==="
+          echo "JWT_SECRET_KEY exists: $([[ -n "$JWT_SECRET_KEY" ]] && echo 'YES' || echo 'NO')"
+          echo "GOOGLE_CLIENT_ID exists: $([[ -n "$GOOGLE_CLIENT_ID" ]] && echo 'YES' || echo 'NO')"
+          echo "GOOGLE_CLIENT_SECRET exists: $([[ -n "$GOOGLE_CLIENT_SECRET" ]] && echo 'YES' || echo 'NO')"
+          echo "KAKAO_MAP_API_KEY exists: $([[ -n "$KAKAO_MAP_API_KEY" ]] && echo 'YES' || echo 'NO')"
+          echo "TOSS_SECRET_KEY exists: $([[ -n "$TOSS_SECRET_KEY" ]] && echo 'YES' || echo 'NO')"
+          echo ""
+          echo "=== Database Config ==="
+          echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD exists: $([[ -n "$SPRING_DATASOURCE_PASSWORD" ]] && echo 'YES' || echo 'NO')"
+          echo ""
+          echo "=== Redis Config (Spring Boot) ==="
+          echo "SPRING_DATA_REDIS_HOST=$SPRING_DATA_REDIS_HOST"
+          echo "SPRING_DATA_REDIS_PORT=$SPRING_DATA_REDIS_PORT"
+          echo "SPRING_DATA_REDIS_PASSWORD='$SPRING_DATA_REDIS_PASSWORD'"
+          echo ""
+          echo "=== Redis Config (Custom) ==="
+          echo "REDIS_HOST=$REDIS_HOST"
+          echo "REDIS_PORT=$REDIS_PORT"
+          echo "REDIS_PASSWORD='$REDIS_PASSWORD'"
 
       # ================================================================
       # 빌드 및 테스트 실행
       # ================================================================
       - name: Run tests with coverage check
-        run: ./gradlew clean check
+        run: ./gradlew clean check --stacktrace --info

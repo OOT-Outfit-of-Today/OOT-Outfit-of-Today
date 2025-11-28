@@ -34,7 +34,7 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
     // 로그인 유저의 옷장 조회
     @Override
     public Page<ClosetGetResponse> getMyClosets(
-            Long loginUserId,
+            Long userId,
             int page,
             int size,
             String sort,
@@ -42,7 +42,7 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
     ) {
         Pageable pageable = createPageable(page, size, sort, direction);
 
-        Page<Closet> closets = closetRepository.findAllByUser_Id(loginUserId, pageable);
+        Page<Closet> closets = closetRepository.findAllMyClosets(userId, pageable);
 
         return closets.map(ClosetGetResponse::from);
     }
@@ -50,7 +50,7 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
     // 공개 옷장(특정 유저 or 전체)
     @Override
     public Page<ClosetGetResponse> getPublicClosets(
-            Long targetUserId,
+            Long userId,
             int page,
             int size,
             String sort,
@@ -60,30 +60,34 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
 
         Page<Closet> closets;
 
-        if (targetUserId != null) {
+        if (userId != null) {
             // 특정 유저의 공개된 옷장
-            closets = closetRepository.findAllByUser_IdAndIsPublicTrue(targetUserId, pageable);
+            closets = closetRepository.findAllClosetsByUser_Id(userId, pageable);
         } else {
             // 전체 공개된 옷장
-            closets = closetRepository.findAllByIsPublicTrue(pageable);
+            closets = closetRepository.findAllPublicClosets(pageable);
         }
 
         return closets.map(ClosetGetResponse::from);
     }
 
+    // 해당 옷장 조회
     @Override
-    public ClosetGetResponse getCloset(Long closetId) {
+    public ClosetGetResponse getMyCloset(Long userId, Long closetId) {
 
-        Closet closet = closetRepository.findById(closetId)
-                .orElseThrow(() -> {
-                    log.warn("옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
-                    return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
-                });
+        Closet closet = closetRepository.findMyCloset(userId, closetId).orElseThrow(
+                () -> new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND)
+        );
 
-        if (closet.isDeleted()) {
-            log.warn("삭제된 옷장 - 옷장ID: {}", closetId);
-            throw new ClosetException(ClosetErrorCode.CLOSET_DELETED);
-        }
+        return ClosetGetResponse.from(closet);
+    }
+
+    @Override
+    public ClosetGetResponse getPublicCloset(Long closetId) {
+
+        Closet closet = closetRepository.findPublicCloset(closetId).orElseThrow(
+                () -> new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND)
+        );
 
         return ClosetGetResponse.from(closet);
     }

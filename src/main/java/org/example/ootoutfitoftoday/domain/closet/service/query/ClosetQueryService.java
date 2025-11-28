@@ -8,7 +8,7 @@ public interface ClosetQueryService {
 
     // 내 옷장(비공개 포함)
     Page<ClosetGetResponse> getMyClosets(
-            Long loginUserId,
+            Long userId,
             int page,
             int size,
             String sort,
@@ -17,14 +17,18 @@ public interface ClosetQueryService {
 
     // 공개 옷장(특정 유저 or 전체)
     Page<ClosetGetResponse> getPublicClosets(
-            Long targetUserId,
+            Long userId,
             int page,
             int size,
             String sort,
             String direction
     );
 
-    ClosetGetResponse getCloset(Long closetId);
+    // 단건
+    ClosetGetResponse getMyCloset(Long userId, Long closetId);
+
+    // 공개 옷장 단건
+    ClosetGetResponse getPublicCloset(Long closetId);
 
     Closet findClosetById(Long closetId);
 }

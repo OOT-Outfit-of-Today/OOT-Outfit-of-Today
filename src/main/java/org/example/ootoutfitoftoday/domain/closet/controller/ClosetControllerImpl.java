@@ -49,10 +49,10 @@ public class ClosetControllerImpl implements ClosetController {
             String sort,
             String direction
     ) {
-        Long loginUserId = authUser.getUserId();
+        Long userId = authUser.getUserId();
 
         Page<ClosetGetResponse> closetGetResponses = closetQueryService.getMyClosets(
-                loginUserId,
+                userId,
                 page,
                 size,
                 sort,
@@ -62,17 +62,18 @@ public class ClosetControllerImpl implements ClosetController {
         return PageResponse.success(closetGetResponses, ClosetSuccessCode.CLOSETS_GET_MY_OK);
     }
 
+    // 공개 옷장 조회(비회원 가능)
     @Override
     @GetMapping("/public")
     public ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
-            Long targetUserId,
+            Long userId,
             int page,
             int size,
             String sort,
             String direction
     ) {
         Page<ClosetGetResponse> closetGetPublicResponses = closetQueryService.getPublicClosets(
-                targetUserId,
+                userId,
                 page,
                 size,
                 sort,
@@ -82,19 +83,35 @@ public class ClosetControllerImpl implements ClosetController {
         return PageResponse.success(closetGetPublicResponses, ClosetSuccessCode.CLOSETS_GET_PUBLIC_OK);
     }
 
+    // 자신의 옷장 단건 조회
     @Override
-    @GetMapping("/{closetId}")
-    public ResponseEntity<Response<ClosetGetResponse>> getCloset(
+    @GetMapping("/me/{closetId}")
+    public ResponseEntity<Response<ClosetGetResponse>> getMyCloset(
+            AuthUser authUser,
             Long closetId
     ) {
+        Long userId = authUser.getUserId();
 
-        ClosetGetResponse closetGetResponse = closetQueryService.getCloset(closetId);
+        ClosetGetResponse closetGetResponse = closetQueryService.getMyCloset(userId, closetId);
 
         return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_OK);
     }
 
+    // Todo: 비회원도 조회할 수 있도록 구현해야함!
+    // 공개 옷장 단건 조회
     @Override
-    @PutMapping("/{closetId}")
+    @GetMapping("/public/{closetId}")
+    public ResponseEntity<Response<ClosetGetResponse>> getPublicCloset(
+            Long closetId
+    ) {
+        ClosetGetResponse closetGetResponse = closetQueryService.getPublicCloset(closetId);
+
+        return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_OK);
+    }
+
+    // 자신의 옷장 수정
+    @Override
+    @PutMapping("/me/{closetId}")
     public ResponseEntity<Response<ClosetUpdateResponse>> updateCloset(
             AuthUser authUser,
             Long closetId,

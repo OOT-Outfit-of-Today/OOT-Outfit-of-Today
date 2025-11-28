@@ -57,7 +57,7 @@ public interface ClosetController {
             }
     )
     ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
-            @RequestParam(required = false) Long targetUserId,
+            @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sort,
@@ -65,7 +65,7 @@ public interface ClosetController {
     );
 
     @Operation(
-            summary = "옷장 상세 조회",
+            summary = "내 옷장 상세 조회",
             description = "회원이 옷장의 상세 정보를 조회합니다.",
             security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
@@ -74,7 +74,21 @@ public interface ClosetController {
                     @ApiResponse(responseCode = "404", description = "옷장을 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<ClosetGetResponse>> getCloset(
+    ResponseEntity<Response<ClosetGetResponse>> getMyCloset(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId
+    );
+
+    @Operation(
+            summary = "공개 옷장 상세 조회",
+            description = "공개 옷장의 상세 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "401", description = "인증 실패"),
+                    @ApiResponse(responseCode = "404", description = "옷장을 찾을 수 없음")
+            }
+    )
+    ResponseEntity<Response<ClosetGetResponse>> getPublicCloset(
             @PathVariable Long closetId
     );
 

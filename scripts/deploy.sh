@@ -40,8 +40,8 @@ CMDS=(
   # 이미 존재하면 에러 무시(|| true)
   "docker network create oot-network || true"
 
-  # Parameter Store에서 Redis 비밀번호 가져오기
-  "REDIS_PASSWORD=\$(aws ssm get-parameter --name /config/dev/REDIS_PASSWORD --with-decryption --query Parameter.Value --output text --region ${AWS_REGION})"
+  # Parameter Store에서 Redis 비밀번호 가져오기(환경별 동적 경로)
+  "REDIS_PASSWORD=\$(aws ssm get-parameter --name /config/${SPRING_PROFILE}/REDIS_PASSWORD --with-decryption --query Parameter.Value --output text --region ${AWS_REGION})"
 
   # Redis 컨테이너 실행
   # 중지된 컨테이너가 있으면 시작, 없으면 새로 생성

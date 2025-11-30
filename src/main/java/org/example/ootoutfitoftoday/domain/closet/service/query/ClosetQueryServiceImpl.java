@@ -82,6 +82,7 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
         return ClosetGetResponse.from(closet);
     }
 
+    // 공개 옷장 상세 조회
     @Override
     public ClosetGetResponse getPublicCloset(Long closetId) {
 

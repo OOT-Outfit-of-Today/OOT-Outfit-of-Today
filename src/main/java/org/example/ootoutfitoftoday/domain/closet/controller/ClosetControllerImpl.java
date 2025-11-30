@@ -97,7 +97,6 @@ public class ClosetControllerImpl implements ClosetController {
         return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_OK);
     }
 
-    // Todo: 비회원도 조회할 수 있도록 구현해야함!
     // 공개 옷장 단건 조회
     @Override
     @GetMapping("/public/{closetId}")

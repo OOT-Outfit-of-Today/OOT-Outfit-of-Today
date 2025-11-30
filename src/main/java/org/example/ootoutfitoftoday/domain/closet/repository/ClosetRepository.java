@@ -61,4 +61,13 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
               AND c.id = :closetId
             """)
     Optional<Closet> findPublicCloset(@Param("closetId") Long closetId);
+
+    // 수정 혹은 삭제할 옷장 조회
+    @Query("""
+            SELECT c
+            FROM Closet c
+            WHERE c.isDeleted = false
+              AND c.id = :closetId
+            """)
+    Optional<Closet> findClosetById(@Param("closetId") Long closetId);
 }

@@ -62,18 +62,19 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
             Long closetId,
             ClosetRequest request
     ) {
-        log.debug("수정 요청 상세 - 이름: {}, 공개여부: {}, 이미지ID: {}",
-                request.name(), request.isPublic(), request.imageId());
 
-        Closet updatedCloset = closetRepository.findById(closetId)
-                .orElseThrow(() -> {
+        Closet updatedCloset = closetRepository.findClosetById(closetId).orElseThrow(
+                () -> {
                     log.warn("옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
                 });
 
-        if (!updatedCloset.getUserId().equals(userId)) {
+        if (!Objects.equals(updatedCloset.getUser().getId(), userId)) {
             log.warn("옷장 접근 권한 없음 - 옷장ID: {}, 요청사용자: {}, 소유자: {}",
-                    closetId, userId, updatedCloset.getUserId());
+                    closetId,
+                    userId,
+                    updatedCloset.getUserId()
+            );
             throw new ClosetException(ClosetErrorCode.CLOSET_FORBIDDEN);
         }
 
@@ -97,15 +98,18 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
     @Override
     public ClosetDeleteResponse deleteCloset(Long userId, Long closetId) {
 
-        Closet closet = closetRepository.findById(closetId)
-                .orElseThrow(() -> {
+        Closet closet = closetRepository.findClosetById(closetId).orElseThrow(
+                () -> {
                     log.warn("삭제할 옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
                 });
 
         if (!Objects.equals(closet.getUserId(), userId)) {
             log.warn("옷장 삭제 권한 없음 - 옷장ID: {}, 요청사용자: {}, 소유자: {}",
-                    closetId, userId, closet.getUserId());
+                    closetId,
+                    userId,
+                    closet.getUserId()
+            );
             throw new ClosetException(ClosetErrorCode.CLOSET_FORBIDDEN);
         }
 

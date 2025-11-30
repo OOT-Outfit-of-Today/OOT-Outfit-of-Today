@@ -13,9 +13,9 @@ spring:
   # 데이터베이스 연결 설정
   # ================================================================
   datasource:
-    url: jdbc:mysql://${db.host}:${db.port}/${db.name}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: ${db.username}
-    password: ${db.password}
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -115,10 +115,3 @@ logging:
     root: INFO
     # SQL 파라미터 바인딩 로그(디버깅용)
     org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
-    # 개발 서버 테스트를 위해 로그 레벨 추가
-    # AWS SDK 로그
-    com.amazonaws: DEBUG
-    software.amazon.awssdk: DEBUG
-    # Spring Cloud AWS 로그
-    io.awspring.cloud: DEBUG
-    org.springframework.cloud.aws: DEBUG

@@ -14,11 +14,8 @@ echo "[ECR] Login to ${REG_URI}"
 aws ecr get-login-password --region "${AWS_REGION}" \
   | docker login --username AWS --password-stdin "${REG_URI}"
 
-echo "[ECR] Build ${ECR_REPO}:${IMAGE_TAG}"
-docker build -t "${ECR_REPO}:${IMAGE_TAG}" .
-
-echo "[ECR] Tag -> ${FULL_URI}"
-docker tag "${ECR_REPO}:${IMAGE_TAG}" "${FULL_URI}"
+echo "[ECR] Build & Tag -> ${FULL_URI}"
+docker build -t "${FULL_URI}" .
 
 echo "[ECR] Push -> ${FULL_URI}"
 docker push "${FULL_URI}"

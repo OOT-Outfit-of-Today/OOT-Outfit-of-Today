@@ -141,7 +141,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtUtil.extractClaims(jwt);
 
             // 로그 추가(디버깅용)
-            log.info("JWT 토큰 파싱 완료 - userId: {}, URI: {}", claims.getSubject(), request.getRequestURI());
+            log.debug("JWT 토큰 파싱 완료 - userId: {}, URI: {}", claims.getSubject(), request.getRequestURI());
 
             // 항상 새로운 Authentication 설정
             setAuthentication(claims);

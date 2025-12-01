@@ -84,7 +84,7 @@ springdoc:
   swagger-ui:
     enabled: true
     # Swagger UI 접근 경로
-    path: /swagger-ui/index.html
+    path: /swagger-ui.html
     # 요청 소요 시간 표시
     display-request-duration: true
     # Try it out 버튼 활성화

@@ -140,9 +140,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Claims claims = jwtUtil.extractClaims(jwt);
 
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                setAuthentication(claims);
-            }
+            // 로그 추가(디버깅용)
+            log.info("JWT 토큰 파싱 완료 - userId: {}, URI: {}", claims.getSubject(), request.getRequestURI());
+
+            // 항상 새로운 Authentication 설정
+            setAuthentication(claims);
 
             return true;
 

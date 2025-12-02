@@ -11,6 +11,7 @@ import org.example.ootoutfitoftoday.domain.dashboard.service.query.admin.Dashboa
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -25,7 +26,7 @@ public class AdminDashboardControllerImpl implements AdminDashboardController {
     @Override
     @GetMapping("/users/statistics")
     public ResponseEntity<Response<AdminUserStatisticsResponse>> adminUserStatistics(
-            LocalDate baseDate
+            @RequestParam(required = false) LocalDate baseDate
     ) {
 
         return Response.success(dashboardAdminQueryService.adminUserStatistics(baseDate), DashboardSuccessCode.DASHBOARD_ADMIN_USER_STATISTICS_OK);
@@ -41,7 +42,7 @@ public class AdminDashboardControllerImpl implements AdminDashboardController {
     @Override
     @GetMapping("/sale-posts/statistics")
     public ResponseEntity<Response<AdminSalePostStatisticsResponse>> adminSalePostStatistics(
-            LocalDate baseDate
+            @RequestParam(required = false) LocalDate baseDate
     ) {
 
         return Response.success(dashboardAdminQueryService.adminSalePostStatistics(baseDate), DashboardSuccessCode.DASHBOARD_ADMIN_SALE_POST_STATISTICS_OK);

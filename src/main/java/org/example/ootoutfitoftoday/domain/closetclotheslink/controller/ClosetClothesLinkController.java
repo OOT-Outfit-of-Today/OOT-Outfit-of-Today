@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -13,10 +12,6 @@ import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.response.Closet
 import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.response.ClosetClothesLinkGetResponse;
 import org.example.ootoutfitoftoday.domain.closetclotheslink.dto.response.ClosetClothesLinkResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "옷장-옷 관리", description = "옷장에 옷을 등록, 조회, 삭제하는 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -34,9 +29,9 @@ public interface ClosetClothesLinkController {
             }
     )
     ResponseEntity<Response<ClosetClothesLinkResponse>> createClosetClothesLink(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long closetId,
-            @Valid @RequestBody ClosetClothesLinkRequest closetClothesLinkRequest
+            AuthUser authUser,
+            Long closetId,
+            ClosetClothesLinkRequest closetClothesLinkRequest
     );
 
     @Operation(
@@ -50,12 +45,12 @@ public interface ClosetClothesLinkController {
             }
     )
     ResponseEntity<PageResponse<ClosetClothesLinkGetResponse>> getClosetClothesLink(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long closetId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sort,
-            @RequestParam(defaultValue = "DESC") String direction
+            AuthUser authUser,
+            Long closetId,
+            int page,
+            int size,
+            String sort,
+            String direction
     );
 
     @Operation(
@@ -70,8 +65,8 @@ public interface ClosetClothesLinkController {
             }
     )
     ResponseEntity<Response<ClosetClothesLinkDeleteResponse>> deleteClosetClothesLink(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long closetId,
-            @PathVariable Long clothesId
+            AuthUser authUser,
+            Long closetId,
+            Long clothesId
     );
 }

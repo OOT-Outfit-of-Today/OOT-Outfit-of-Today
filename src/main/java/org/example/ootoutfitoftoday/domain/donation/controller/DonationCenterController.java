@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.donation.dto.response.DonationCenterSearchResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -36,26 +35,19 @@ public interface DonationCenterController {
                     description = "위도 (예: 37.5665)",
                     required = true,
                     example = "37.5665"
-            )
-            @RequestParam Double latitude,
-
+            ) Double latitude,
             @Parameter(
                     description = "경도 (예: 126.9780)",
                     required = true,
                     example = "126.9780"
-            )
-            @RequestParam Double longitude,
-
+            ) Double longitude,
             @Parameter(
                     description = "검색 반경 (미터 단위, 기본값: 5000m = 5km)",
                     example = "5000"
-            )
-            @RequestParam(required = false) Integer radius,
-
+            ) Integer radius,
             @Parameter(
                     description = "검색 키워드 (선택사항, 없으면 기본 키워드로 검색)",
                     example = "의류기부"
-            )
-            @RequestParam(required = false) String keyword
+            ) String keyword
     );
 }

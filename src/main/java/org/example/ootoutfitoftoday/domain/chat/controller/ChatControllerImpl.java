@@ -10,9 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -25,9 +23,9 @@ public class ChatControllerImpl implements ChatController {
     @Override
     @GetMapping
     public ResponseEntity<SliceResponse<ChatResponse>> getChats(
-            Long chatroomId,
-            int page,
-            int size
+            @PathVariable Long chatroomId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
 
         log.info("[GET] /v1/chatrooms/{}/chats : Controller 작동", chatroomId);

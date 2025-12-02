@@ -9,9 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 
@@ -28,7 +26,7 @@ public interface UserDashboardController {
             })
     @GetMapping("/overview")
     ResponseEntity<Response<DashboardUserSummaryResponse>> getUserDashboardSummary(
-            @AuthenticationPrincipal AuthUser authUser
+            AuthUser authUser
     );
 
     @Operation(
@@ -39,7 +37,7 @@ public interface UserDashboardController {
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
     ResponseEntity<Response<DashboardUserWearStatisticsResponse>> getUserWearStatistics(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(required = false) LocalDate baseDate
+            AuthUser authUser,
+            LocalDate baseDate
     );
 }

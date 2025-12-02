@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.transaction.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -13,9 +14,8 @@ import org.example.ootoutfitoftoday.domain.transaction.dto.response.TransactionR
 import org.example.ootoutfitoftoday.domain.transaction.exception.TransactionSuccessCode;
 import org.example.ootoutfitoftoday.domain.transaction.service.command.TransactionCommandService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/transactions")
@@ -27,8 +27,8 @@ public class TransactionControllerImpl implements TransactionController {
     @Override
     @PostMapping("/request")
     public ResponseEntity<Response<TransactionResponse>> requestTransaction(
-            AuthUser authUser,
-            TransactionRequest request
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody TransactionRequest request
     ) {
         TransactionResponse response = transactionCommandService.requestTransaction(
                 authUser.getUserId(),
@@ -41,9 +41,9 @@ public class TransactionControllerImpl implements TransactionController {
     @Override
     @PostMapping("/{transactionId}/confirm")
     public ResponseEntity<Response<TransactionResponse>> confirmTransaction(
-            AuthUser authUser,
-            Long transactionId,
-            TransactionConfirmRequest request
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long transactionId,
+            @Valid @RequestBody TransactionConfirmRequest request
     ) {
         TransactionResponse response = transactionCommandService.confirmTransaction(
                 authUser.getUserId(),
@@ -57,8 +57,8 @@ public class TransactionControllerImpl implements TransactionController {
     @Override
     @PostMapping("/{transactionId}/accept")
     public ResponseEntity<Response<TransactionAcceptResponse>> acceptTransaction(
-            AuthUser authUser,
-            Long transactionId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long transactionId
     ) {
         TransactionAcceptResponse response = transactionCommandService.acceptTransaction(
                 authUser.getUserId(),
@@ -71,8 +71,8 @@ public class TransactionControllerImpl implements TransactionController {
     @Override
     @PostMapping("/{transactionId}/complete")
     public ResponseEntity<Response<TransactionCompleteResponse>> completeTransaction(
-            Long transactionId,
-            AuthUser authUser
+            @PathVariable Long transactionId,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         TransactionCompleteResponse response = transactionCommandService.completeTransaction(
                 authUser.getUserId(),
@@ -85,8 +85,8 @@ public class TransactionControllerImpl implements TransactionController {
     @Override
     @PostMapping("/{transactionId}/cancel-buyer")
     public ResponseEntity<Response<TransactionCancelResponse>> cancelByBuyer(
-            AuthUser authUser,
-            Long transactionId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long transactionId
     ) {
         TransactionCancelResponse response = transactionCommandService.cancelByBuyer(
                 authUser.getUserId(),

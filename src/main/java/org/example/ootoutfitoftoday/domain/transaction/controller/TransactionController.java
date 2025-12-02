@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.transaction.dto.request.TransactionConfirmRequest;
@@ -14,9 +13,6 @@ import org.example.ootoutfitoftoday.domain.transaction.dto.response.TransactionC
 import org.example.ootoutfitoftoday.domain.transaction.dto.response.TransactionCompleteResponse;
 import org.example.ootoutfitoftoday.domain.transaction.dto.response.TransactionResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "거래 관리", description = "거래 관련 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -33,8 +29,8 @@ public interface TransactionController {
             }
     )
     ResponseEntity<Response<TransactionResponse>> requestTransaction(
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody TransactionRequest request
+            AuthUser authUser,
+            TransactionRequest request
     );
 
     @Operation(
@@ -50,9 +46,9 @@ public interface TransactionController {
             }
     )
     ResponseEntity<Response<TransactionResponse>> confirmTransaction(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long transactionId,
-            @Valid @RequestBody TransactionConfirmRequest request
+            AuthUser authUser,
+            Long transactionId,
+            TransactionConfirmRequest request
     );
 
     @Operation(
@@ -67,8 +63,8 @@ public interface TransactionController {
             }
     )
     ResponseEntity<Response<TransactionAcceptResponse>> acceptTransaction(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long transactionId
+            AuthUser authUser,
+            Long transactionId
     );
 
     @Operation(
@@ -83,8 +79,8 @@ public interface TransactionController {
             }
     )
     ResponseEntity<Response<TransactionCompleteResponse>> completeTransaction(
-            @PathVariable Long transactionId,
-            @AuthenticationPrincipal AuthUser authUser
+            Long transactionId,
+            AuthUser authUser
     );
 
     @Operation(
@@ -99,7 +95,7 @@ public interface TransactionController {
             }
     )
     ResponseEntity<Response<TransactionCancelResponse>> cancelByBuyer(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long transactionId
+            AuthUser authUser,
+            Long transactionId
     );
 }

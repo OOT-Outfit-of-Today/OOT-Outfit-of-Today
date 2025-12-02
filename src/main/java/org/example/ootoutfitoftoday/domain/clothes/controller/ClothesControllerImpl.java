@@ -2,6 +2,7 @@ package org.example.ootoutfitoftoday.domain.clothes.controller;
 
 import com.ootcommon.clothes.enums.ClothesColor;
 import com.ootcommon.clothes.enums.ClothesSize;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
@@ -14,6 +15,7 @@ import org.example.ootoutfitoftoday.domain.clothes.service.command.ClothesComman
 import org.example.ootoutfitoftoday.domain.clothes.service.query.ClothesQueryService;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,8 +29,8 @@ public class ClothesControllerImpl implements ClothesController {
     @Override
     @PostMapping
     public ResponseEntity<Response<ClothesResponse>> createClothes(
-            AuthUser authUser,
-            ClothesRequest clothesRequest
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody ClothesRequest clothesRequest
     ) {
         ClothesResponse clothesResponse = clothesCommandService.createClothes(authUser.getUserId(), clothesRequest);
 
@@ -38,12 +40,12 @@ public class ClothesControllerImpl implements ClothesController {
     @Override
     @GetMapping
     public ResponseEntity<SliceResponse<ClothesResponse>> getClothes(
-            AuthUser authUser,
-            Long categoryId,
-            ClothesColor clothesColor,
-            ClothesSize clothesSize,
-            Long lastClothesId,
-            int size
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) ClothesColor clothesColor,
+            @RequestParam(required = false) ClothesSize clothesSize,
+            @RequestParam(required = false) Long lastClothesId,
+            @RequestParam(defaultValue = "10") int size
     ) {
         Slice<ClothesResponse> clothes = clothesQueryService.getClothes(
                 authUser.getUserId(),
@@ -60,8 +62,8 @@ public class ClothesControllerImpl implements ClothesController {
     @Override
     @GetMapping("/{clothesId}")
     public ResponseEntity<Response<ClothesResponse>> getClothesById(
-            AuthUser authUser,
-            Long clothesId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long clothesId
     ) {
         ClothesResponse clothesResponse = clothesQueryService.getClothesById(authUser.getUserId(), clothesId);
 
@@ -72,9 +74,9 @@ public class ClothesControllerImpl implements ClothesController {
     @Override
     @PutMapping("/{clothesId}")
     public ResponseEntity<Response<ClothesResponse>> updateClothes(
-            AuthUser authUser,
-            Long clothesId,
-            ClothesRequest clothesRequest
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long clothesId,
+            @Valid @RequestBody ClothesRequest clothesRequest
     ) {
         ClothesResponse clothesResponse = clothesCommandService.updateClothes(authUser.getUserId(), clothesId, clothesRequest);
 
@@ -84,8 +86,8 @@ public class ClothesControllerImpl implements ClothesController {
     @Override
     @DeleteMapping("/{clothesId}")
     public ResponseEntity<Response<Void>> deleteClothes(
-            AuthUser authUser,
-            Long clothesId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long clothesId
     ) {
         clothesCommandService.deleteClothes(authUser.getUserId(), clothesId);
 
@@ -95,9 +97,9 @@ public class ClothesControllerImpl implements ClothesController {
     @Override
     @PostMapping("/{clothesId}/images/remove")
     public ResponseEntity<Response<Void>> removeClothesImages(
-            AuthUser authUser,
-            Long clothesId,
-            ClothesImageUnlinkRequest clothesImageUnlinkRequest
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long clothesId,
+            @RequestBody ClothesImageUnlinkRequest clothesImageUnlinkRequest
     ) {
         clothesCommandService.removeClothesImages(
                 authUser.getUserId(),

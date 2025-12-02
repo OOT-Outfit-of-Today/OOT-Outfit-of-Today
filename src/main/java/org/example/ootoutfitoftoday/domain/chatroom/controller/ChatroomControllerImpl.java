@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -28,8 +29,8 @@ public class ChatroomControllerImpl implements ChatroomController {
     @Override
     @PostMapping
     public ResponseEntity<Response<Void>> createChatroom(
-            ChatroomRequest chatroomRequest,
-            AuthUser authUser
+            @RequestBody ChatroomRequest chatroomRequest,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         log.info("[POST] /v1/chatrooms : Controller 작동");
 
@@ -43,9 +44,9 @@ public class ChatroomControllerImpl implements ChatroomController {
     @Override
     @GetMapping
     public ResponseEntity<SliceResponse<ChatroomResponse>> getChatrooms(
-            AuthUser authUser,
-            int page,
-            int size
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         log.info("[GET] /v1/chatrooms : Controller 작동");
 
@@ -61,8 +62,8 @@ public class ChatroomControllerImpl implements ChatroomController {
     @Override
     @DeleteMapping("/{chatroomId}")
     public ResponseEntity<Response<Void>> deleteChatroom(
-            AuthUser authUser,
-            Long chatroomId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long chatroomId
     ) {
         log.info("[DELETE] /v1/chatrooms/{} : Controller 작동", chatroomId);
 

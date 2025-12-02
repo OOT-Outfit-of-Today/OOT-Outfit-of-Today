@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.closet.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
@@ -14,6 +15,7 @@ import org.example.ootoutfitoftoday.domain.closet.service.command.ClosetCommandS
 import org.example.ootoutfitoftoday.domain.closet.service.query.ClosetQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,8 +29,8 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @PostMapping
     public ResponseEntity<Response<ClosetCreateResponse>> createCloset(
-            AuthUser authUser,
-            ClosetRequest closetRequest
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody ClosetRequest closetRequest
     ) {
 
         ClosetCreateResponse closetCreateResponse = closetCommandService.createCloset(
@@ -43,11 +45,11 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @GetMapping("/me")
     public ResponseEntity<PageResponse<ClosetGetResponse>> getMyClosets(
-            AuthUser authUser,
-            int page,
-            int size,
-            String sort,
-            String direction
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
         Long userId = authUser.getUserId();
 
@@ -66,11 +68,11 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @GetMapping("/public")
     public ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
-            Long userId,
-            int page,
-            int size,
-            String sort,
-            String direction
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
         Page<ClosetGetResponse> closetGetPublicResponses = closetQueryService.getPublicClosets(
                 userId,
@@ -87,8 +89,8 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @GetMapping("/me/{closetId}")
     public ResponseEntity<Response<ClosetGetResponse>> getMyCloset(
-            AuthUser authUser,
-            Long closetId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId
     ) {
         Long userId = authUser.getUserId();
 
@@ -101,7 +103,7 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @GetMapping("/public/{closetId}")
     public ResponseEntity<Response<ClosetGetResponse>> getPublicCloset(
-            Long closetId
+            @PathVariable Long closetId
     ) {
         ClosetGetResponse closetGetResponse = closetQueryService.getPublicCloset(closetId);
 
@@ -112,9 +114,9 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @PutMapping("/me/{closetId}")
     public ResponseEntity<Response<ClosetUpdateResponse>> updateCloset(
-            AuthUser authUser,
-            Long closetId,
-            ClosetRequest closetRequest
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId,
+            @Valid @RequestBody ClosetRequest closetRequest
     ) {
 
         ClosetUpdateResponse closetUpdateResponse = closetCommandService.updateCloset(
@@ -129,8 +131,8 @@ public class ClosetControllerImpl implements ClosetController {
     @Override
     @DeleteMapping("/{closetId}")
     public ResponseEntity<Response<ClosetDeleteResponse>> deleteCloset(
-            AuthUser authUser,
-            Long closetId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId
     ) {
 
         ClosetDeleteResponse response = closetCommandService.deleteCloset(

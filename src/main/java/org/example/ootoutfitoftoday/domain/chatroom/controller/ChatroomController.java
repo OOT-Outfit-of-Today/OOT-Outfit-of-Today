@@ -10,10 +10,6 @@ import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.chatroom.dto.request.ChatroomRequest;
 import org.example.ootoutfitoftoday.domain.chatroom.dto.response.ChatroomResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "채팅방", description = "채팅방 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -30,8 +26,8 @@ public interface ChatroomController {
             }
     )
     ResponseEntity<Response<Void>> createChatroom(
-            @RequestBody ChatroomRequest chatroomRequest,
-            @AuthenticationPrincipal AuthUser authUser
+            ChatroomRequest chatroomRequest,
+            AuthUser authUser
     );
 
     @Operation(
@@ -44,9 +40,9 @@ public interface ChatroomController {
             }
     )
     ResponseEntity<SliceResponse<ChatroomResponse>> getChatrooms(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            AuthUser authUser,
+            int page,
+            int size
     );
 
     @Operation(
@@ -60,7 +56,7 @@ public interface ChatroomController {
             }
     )
     ResponseEntity<Response<Void>> deleteChatroom(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long chatroomId
+            AuthUser authUser,
+            Long chatroomId
     );
 }

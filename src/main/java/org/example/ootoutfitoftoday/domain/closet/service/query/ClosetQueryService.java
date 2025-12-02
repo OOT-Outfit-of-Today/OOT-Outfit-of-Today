@@ -1,29 +1,34 @@
 package org.example.ootoutfitoftoday.domain.closet.service.query;
 
-import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetMyResponse;
-import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetPublicResponse;
 import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetResponse;
 import org.example.ootoutfitoftoday.domain.closet.entity.Closet;
 import org.springframework.data.domain.Page;
 
 public interface ClosetQueryService {
 
-    Page<ClosetGetPublicResponse> getPublicClosets(
-            int page,
-            int size,
-            String sort,
-            String direction
-    );
-
-    ClosetGetResponse getCloset(Long closetId);
-
-    Page<ClosetGetMyResponse> getMyClosets(
+    // 내 옷장(비공개 포함)
+    Page<ClosetGetResponse> getMyClosets(
             Long userId,
             int page,
             int size,
             String sort,
             String direction
     );
+
+    // 공개 옷장(특정 유저 or 전체)
+    Page<ClosetGetResponse> getPublicClosets(
+            Long userId,
+            int page,
+            int size,
+            String sort,
+            String direction
+    );
+
+    // 단건
+    ClosetGetResponse getMyCloset(Long userId, Long closetId);
+
+    // 공개 옷장 단건
+    ClosetGetResponse getPublicCloset(Long closetId);
 
     Closet findClosetById(Long closetId);
 }

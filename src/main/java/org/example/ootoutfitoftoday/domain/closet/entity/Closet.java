@@ -19,7 +19,6 @@ import java.util.Optional;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Where(clause = "is_deleted = false")
 @Table(name = "closets")
 public class Closet extends BaseEntity {
 

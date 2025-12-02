@@ -165,8 +165,7 @@ public class SecurityConfig {
                                 "/v1/auth/refresh",
                                 "/v1/auth/oauth2/token/exchange").permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/v1/closets/public",
-                                "/v1/closets/{closetId}",
+                                "/v1/closets/public/**",
                                 "/v1/sale-posts/public",
                                 "/v1/sale-posts/{salePostId}",
                                 "/v1/categories",

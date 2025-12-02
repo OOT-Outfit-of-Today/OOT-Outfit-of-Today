@@ -33,7 +33,10 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
     public ClosetCreateResponse createCloset(Long userId, ClosetRequest request) {
         log.debug("옷장 생성 시작 - 사용자: {}", userId);
         log.debug("옷장 상세 정보 - 이름: {}, 공개여부: {}, 이미지ID: {}",
-                request.name(), request.isPublic(), request.imageId());
+                request.name(),
+                request.isPublic(),
+                request.imageId()
+        );
 
         User user = userQueryService.findByIdAndIsDeletedFalse(userId);
         log.debug("사용자 조회 완료 - 사용자: {}", user.getId());
@@ -63,7 +66,7 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
             ClosetRequest request
     ) {
 
-        Closet updatedCloset = closetRepository.findClosetById(closetId).orElseThrow(
+        Closet updatedCloset = closetRepository.findClosetByIdIsDeletedFalse(closetId).orElseThrow(
                 () -> {
                     log.warn("옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
@@ -98,13 +101,13 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
     @Override
     public ClosetDeleteResponse deleteCloset(Long userId, Long closetId) {
 
-        Closet closet = closetRepository.findClosetById(closetId).orElseThrow(
+        Closet closet = closetRepository.findClosetByIdIsDeletedFalse(closetId).orElseThrow(
                 () -> {
                     log.warn("삭제할 옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
                 });
 
-        if (!Objects.equals(closet.getUserId(), userId)) {
+        if (!Objects.equals(closet.getUser().getId(), userId)) {
             log.warn("옷장 삭제 권한 없음 - 옷장ID: {}, 요청사용자: {}, 소유자: {}",
                     closetId,
                     userId,

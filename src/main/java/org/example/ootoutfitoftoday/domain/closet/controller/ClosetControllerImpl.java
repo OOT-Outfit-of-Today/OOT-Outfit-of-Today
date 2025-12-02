@@ -94,7 +94,7 @@ public class ClosetControllerImpl implements ClosetController {
 
         ClosetGetResponse closetGetResponse = closetQueryService.getMyCloset(userId, closetId);
 
-        return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_OK);
+        return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_MY_OK);
     }
 
     // 공개 옷장 단건 조회
@@ -105,7 +105,7 @@ public class ClosetControllerImpl implements ClosetController {
     ) {
         ClosetGetResponse closetGetResponse = closetQueryService.getPublicCloset(closetId);
 
-        return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_OK);
+        return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_PUBLIC_OK);
     }
 
     // 자신의 옷장 수정

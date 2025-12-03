@@ -54,6 +54,23 @@ spring:
       # JPA Repository 자동 생성 비활성화(수동 설정 사용)
       repositories:
         enabled: false
+      # Redis 연결 타임아웃
+      timeout: 3000ms
+      lettuce:
+        pool:
+          # 연결 대기 시간(-1: 무제한)
+          max-wait: -1ms
+
+  # ================================================================
+  # Spring Cache 설정 - Redis로 사용
+  # ================================================================
+  cache:
+    type: redis
+    redis:
+      # null 값 캐싱 방지
+      cache-null-values: false
+      # 캐시 키 접두사 사용 여부
+      use-key-prefix: true
 
   # ================================================================
   # Jackson JSON 직렬화 설정

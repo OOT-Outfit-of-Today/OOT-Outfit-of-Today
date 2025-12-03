@@ -21,7 +21,9 @@ spring:
     hibernate:
       ddl-auto: update
 
-  # Redis 연결 설정 추가(Lettuce 연결 풀)
+  # ================================================================
+  # Redis 연결 설정(Lettuce 연결 풀 - Dev)
+  # ================================================================
   # host, port, password는 RedisConfig가 환경변수에서 직접 읽음
   data:
     redis:

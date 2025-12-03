@@ -25,29 +25,23 @@ spring:
   # ================================================================
   # Redis 연결 설정(로컬용 Lettuce 연결 풀)
   # ================================================================
+  # host, port, password는 RedisConfig가 환경변수에서 직접 읽음
   data:
     redis:
-      timeout: 3000ms
       lettuce:
         pool:
           # 로컬은 dev보다 적은 연결 수 사용
           max-active: 8
           max-idle: 8
           min-idle: 2
-          max-wait: -1ms
 
   # ================================================================
   # Spring Cache 설정 - Redis로 사용
   # ================================================================
-  # RedisConfig의 CacheManager 빈이 이 설정을 참조
-  # 없으면 캐싱 동작하지 않음
   cache:
-    type: redis
     redis:
-      cache-null-values: false
-      # 로컬 환경 키 접두사
+      # local 환경 키 접두사
       key-prefix: "oot:local:cache:"
-      use-key-prefix: true
 
   # ================================================================
   # AWS 설정(로컬용)
@@ -75,15 +69,3 @@ spring:
 # ================================================================
 server:
   port: 8080
-
-# ================================================================
-# Swagger UI 설정
-# ================================================================
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    display-request-duration: true
-    try-it-out-enabled: true

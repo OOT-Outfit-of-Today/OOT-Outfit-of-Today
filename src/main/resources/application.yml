@@ -47,13 +47,36 @@ spring:
       mode: never
 
   # ================================================================
-  # Redis 설정
+  # Redis 공통 설정(Spring Boot 자동 설정 활용)
   # ================================================================
   data:
     redis:
+      # .env에서 가져오는 민감정보
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
       # JPA Repository 자동 생성 비활성화(수동 설정 사용)
       repositories:
         enabled: false
+      # Redis 연결 타임아웃
+      timeout: 3000ms
+      lettuce:
+        pool:
+          # 연결 대기 시간(-1: 무제한)
+          max-wait: -1ms
+
+  # ================================================================
+  # Spring Cache 설정 - Redis 사용
+  # ================================================================
+  cache:
+    type: redis
+    redis:
+      # null 값 캐싱 방지
+      cache-null-values: false
+      # 캐시 키 접두사 사용
+      use-key-prefix: true
+      # 기본 TTL(1시간)
+      time-to-live: 3600000
 
   # ================================================================
   # Jackson JSON 직렬화 설정
@@ -188,6 +211,23 @@ server:
         max-age: 1800
       # 세션 타임아웃
       timeout: 30m
+
+# ================================================================
+# Swagger UI 공통 설정
+# ================================================================
+springdoc:
+  api-docs:
+    # API 문서 생성 활성화
+    enabled: true
+  swagger-ui:
+    # Swagger UI 활성화
+    enabled: true
+    # Swagger UI 접근 경로
+    path: /swagger-ui.html
+    # 요청 소요 시간 표시
+    display-request-duration: true
+    # Try it out 버튼 활성화
+    try-it-out-enabled: true
 
 # ================================================================
 # Actuator & Prometheus 모니터링

@@ -4,18 +4,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.user.dto.request.UserPasswordVerificationRequest;
 import org.example.ootoutfitoftoday.domain.user.dto.request.UserUpdateInfoRequest;
 import org.example.ootoutfitoftoday.domain.user.dto.request.UserUpdateProfileImageRequest;
+import org.example.ootoutfitoftoday.domain.user.dto.request.UserUpdateTradeLocationRequest;
 import org.example.ootoutfitoftoday.domain.user.dto.response.UserGetMyInfoResponse;
 import org.example.ootoutfitoftoday.domain.user.dto.response.UserUpdateInfoResponse;
 import org.example.ootoutfitoftoday.domain.user.dto.response.UserUpdateProfileImageResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "회원 관리", description = "회원 관련 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -27,7 +25,7 @@ public interface UserController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "성공"),
             })
-    ResponseEntity<Response<UserGetMyInfoResponse>> getMyInfo(@AuthenticationPrincipal AuthUser authUser);
+    ResponseEntity<Response<UserGetMyInfoResponse>> getMyInfo(AuthUser authUser);
 
     @Operation(
             summary = "회원정보 수정 전 비밀번호 검증",
@@ -40,8 +38,8 @@ public interface UserController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             })
     ResponseEntity<Response<Void>> verifyPassword(
-            @Valid @RequestBody UserPasswordVerificationRequest request,
-            @AuthenticationPrincipal AuthUser authUser
+            UserPasswordVerificationRequest request,
+            AuthUser authUser
     );
 
     @Operation(
@@ -53,8 +51,8 @@ public interface UserController {
                     @ApiResponse(responseCode = "401", description = "인증 실패"),
             })
     ResponseEntity<Response<UserUpdateInfoResponse>> updateInfo(
-            @Valid @RequestBody UserUpdateInfoRequest request,
-            @AuthenticationPrincipal AuthUser authUser
+            UserUpdateInfoRequest request,
+            AuthUser authUser
     );
 
     @Operation(
@@ -66,8 +64,8 @@ public interface UserController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음"),
             })
     ResponseEntity<Response<UserUpdateProfileImageResponse>> updateProfileImage(
-            @Valid @RequestBody UserUpdateProfileImageRequest request,
-            @AuthenticationPrincipal AuthUser authUser
+            UserUpdateProfileImageRequest request,
+            AuthUser authUser
     );
 
     @Operation(
@@ -79,6 +77,17 @@ public interface UserController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음"),
             })
     ResponseEntity<Response<Void>> deleteProfileImage(
-            @AuthenticationPrincipal AuthUser authUser
+            AuthUser authUser
+    );
+
+    @Operation(
+            summary = "이건 추후에 테스트 후 내용 작성하길 바랍니다!",
+            description = "test",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "성공")
+            })
+    ResponseEntity<Response<Void>> updateUserTradeLocation(
+            UserUpdateTradeLocationRequest request,
+            AuthUser authUser
     );
 }

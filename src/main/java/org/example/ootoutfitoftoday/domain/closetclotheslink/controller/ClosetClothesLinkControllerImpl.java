@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.closetclotheslink.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
@@ -13,6 +14,7 @@ import org.example.ootoutfitoftoday.domain.closetclotheslink.service.command.Clo
 import org.example.ootoutfitoftoday.domain.closetclotheslink.service.query.ClosetClothesLinkQueryService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,9 +28,9 @@ public class ClosetClothesLinkControllerImpl implements ClosetClothesLinkControl
     @Override
     @PostMapping
     public ResponseEntity<Response<ClosetClothesLinkResponse>> createClosetClothesLink(
-            AuthUser authUser,
-            Long closetId,
-            ClosetClothesLinkRequest closetClothesLinkRequest
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId,
+            @Valid @RequestBody ClosetClothesLinkRequest closetClothesLinkRequest
     ) {
         ClosetClothesLinkResponse closetClothesLinkResponse = closetClothesLinkCommandService.createClosetClothesLink(
                 authUser.getUserId(),
@@ -42,12 +44,12 @@ public class ClosetClothesLinkControllerImpl implements ClosetClothesLinkControl
     @Override
     @GetMapping
     public ResponseEntity<PageResponse<ClosetClothesLinkGetResponse>> getClosetClothesLink(
-            AuthUser authUser,
-            Long closetId,
-            int page,
-            int size,
-            String sort,
-            String direction
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
         Page<ClosetClothesLinkGetResponse> closetClothesLinkGetResponses = closetClothesLinkQueryService.getClothesInCloset(
                 authUser.getUserId(),
@@ -64,9 +66,9 @@ public class ClosetClothesLinkControllerImpl implements ClosetClothesLinkControl
     @Override
     @DeleteMapping("/{clothesId}")
     public ResponseEntity<Response<ClosetClothesLinkDeleteResponse>> deleteClosetClothesLink(
-            AuthUser authUser,
-            Long closetId,
-            Long clothesId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long closetId,
+            @PathVariable Long clothesId
     ) {
         ClosetClothesLinkDeleteResponse closetClothesLinkDeleteResponse = closetClothesLinkCommandService.deleteClosetClothesLink(
                 authUser.getUserId(),

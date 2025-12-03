@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostCreateRequest;
@@ -17,9 +16,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "판매글 관리", description = "판매글 관련 API")
 public interface SalePostController {
@@ -36,8 +32,8 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<SalePostCreateResponse>> createSalePost(
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody SalePostCreateRequest request
+            AuthUser authUser,
+            SalePostCreateRequest request
     );
 
     @Operation(
@@ -50,7 +46,7 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(
-            @PathVariable Long salePostId
+            Long salePostId
     );
 
     @Operation(
@@ -63,13 +59,13 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<Slice<SalePostListResponse>>> getSalePosts(
-            @Parameter(description = "카테고리 ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") @RequestParam(required = false) SaleStatus status,
-            @Parameter(description = "검색어 (제목/내용 검색)") @RequestParam(required = false) String keyword,
-            @Parameter(description = "해당 페이지") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "한 페이지 판매글 수") @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "정렬 기준") @RequestParam(defaultValue = "createdAt") String sort,
-            @Parameter(description = "정렬 순서") @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @Parameter(description = "카테고리 ID") Long categoryId,
+            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
+            @Parameter(description = "검색어 (제목/내용 검색)") String keyword,
+            @Parameter(description = "해당 페이지") int page,
+            @Parameter(description = "한 페이지 판매글 수") int size,
+            @Parameter(description = "정렬 기준") String sort,
+            @Parameter(description = "정렬 순서") Sort.Direction direction,
             @AuthenticationPrincipal AuthUser authUser
     );
 
@@ -86,9 +82,9 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
-            @PathVariable Long salePostId,
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody SalePostUpdateRequest request
+            Long salePostId,
+            AuthUser authUser,
+            SalePostUpdateRequest request
     );
 
     @Operation(
@@ -104,8 +100,8 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<Void>> deleteSalePost(
-            @PathVariable Long salePostId,
-            @AuthenticationPrincipal AuthUser authUser
+            Long salePostId,
+            AuthUser authUser
     );
 
     @Operation(
@@ -120,9 +116,9 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
-            @PathVariable Long salePostId,
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody SaleStatusUpdateRequest request
+            Long salePostId,
+            AuthUser authUser,
+            SaleStatusUpdateRequest request
     );
 
     @Operation(
@@ -136,12 +132,12 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<Slice<SalePostSummaryResponse>>> getMySalePosts(
-            @AuthenticationPrincipal AuthUser authUser,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") @RequestParam(required = false) SaleStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt") String sort,
-            @RequestParam(defaultValue = "DESC") Sort.Direction direction
+            AuthUser authUser,
+            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
+            int page,
+            int size,
+            String sort,
+            Sort.Direction direction
     );
 
     @Operation(
@@ -152,12 +148,12 @@ public interface SalePostController {
             }
     )
     ResponseEntity<Response<Slice<SalePostPublicListResponse>>> getNotAuthSalePosts(
-            @Parameter(description = "카테고리 ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") @RequestParam(required = false) SaleStatus status,
-            @Parameter(description = "검색어 (제목/내용 검색)") @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt") String sort,
-            @RequestParam(defaultValue = "DESC") Sort.Direction direction
+            @Parameter(description = "카테고리 ID") Long categoryId,
+            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
+            @Parameter(description = "검색어 (제목/내용 검색)") String keyword,
+            int page,
+            int size,
+            String sort,
+            Sort.Direction direction
     );
 }

@@ -4,15 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.closet.dto.request.ClosetRequest;
-import org.example.ootoutfitoftoday.domain.closet.dto.response.*;
+import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetCreateResponse;
+import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetDeleteResponse;
+import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetGetResponse;
+import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetUpdateResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "옷장 관리", description = "옷장관련 API")
 public interface ClosetController {
@@ -28,8 +28,8 @@ public interface ClosetController {
             }
     )
     ResponseEntity<Response<ClosetCreateResponse>> createCloset(
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody ClosetRequest closetRequest
+            AuthUser authUser,
+            ClosetRequest closetRequest
     );
 
     @Operation(
@@ -42,11 +42,11 @@ public interface ClosetController {
             }
     )
     ResponseEntity<PageResponse<ClosetGetResponse>> getMyClosets(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sort,
-            @RequestParam(defaultValue = "DESC") String direction
+            AuthUser authUser,
+            int page,
+            int size,
+            String sort,
+            String direction
     );
 
     @Operation(
@@ -57,11 +57,11 @@ public interface ClosetController {
             }
     )
     ResponseEntity<PageResponse<ClosetGetResponse>> getPublicClosets(
-            @RequestParam(required = false) Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sort,
-            @RequestParam(defaultValue = "DESC") String direction
+            Long userId,
+            int page,
+            int size,
+            String sort,
+            String direction
     );
 
     @Operation(
@@ -75,8 +75,8 @@ public interface ClosetController {
             }
     )
     ResponseEntity<Response<ClosetGetResponse>> getMyCloset(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long closetId
+            AuthUser authUser,
+            Long closetId
     );
 
     @Operation(
@@ -89,7 +89,7 @@ public interface ClosetController {
             }
     )
     ResponseEntity<Response<ClosetGetResponse>> getPublicCloset(
-            @PathVariable Long closetId
+            Long closetId
     );
 
     @Operation(
@@ -105,9 +105,9 @@ public interface ClosetController {
             }
     )
     ResponseEntity<Response<ClosetUpdateResponse>> updateCloset(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long closetId,
-            @Valid @RequestBody ClosetRequest closetRequest
+            AuthUser authUser,
+            Long closetId,
+            ClosetRequest closetRequest
     );
 
     @Operation(
@@ -122,7 +122,7 @@ public interface ClosetController {
             }
     )
     ResponseEntity<Response<ClosetDeleteResponse>> deleteCloset(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long closetId
+            AuthUser authUser,
+            Long closetId
     );
 }

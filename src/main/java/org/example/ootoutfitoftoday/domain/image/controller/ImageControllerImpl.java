@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.image.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -10,7 +11,9 @@ import org.example.ootoutfitoftoday.domain.image.dto.response.PresignedUrlRespon
 import org.example.ootoutfitoftoday.domain.image.exception.ImageSuccessCode;
 import org.example.ootoutfitoftoday.domain.image.service.command.ImageCommandService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,8 +27,8 @@ public class ImageControllerImpl implements ImageController {
     @Override
     @PostMapping("/presigned-urls")
     public ResponseEntity<Response<PresignedUrlResponse>> generatePresignedUrl(
-            AuthUser authUser,
-            PresignedUrlRequest request
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody PresignedUrlRequest request
     ) {
         PresignedUrlResponse response = imageCommandService.generatePresignedUrl(
                 authUser.getUserId(),
@@ -38,7 +41,7 @@ public class ImageControllerImpl implements ImageController {
     @Override
     @PostMapping
     public ResponseEntity<Response<ImageSaveResponse>> saveImage(
-            ImageSaveRequest request
+            @Valid @RequestBody ImageSaveRequest request
     ) {
         ImageSaveResponse response = imageCommandService.saveImage(request);
 

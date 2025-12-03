@@ -1,6 +1,7 @@
 package org.example.ootoutfitoftoday.domain.salepost.controller;
 
 import com.ootcommon.salepost.enums.SaleStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.common.response.Response;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -31,8 +33,8 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @PostMapping
     public ResponseEntity<Response<SalePostCreateResponse>> createSalePost(
-            AuthUser authUser,
-            SalePostCreateRequest request
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody SalePostCreateRequest request
     ) {
         SalePostCreateResponse response = salePostCommandService.createSalePost(
                 authUser.getUserId(),
@@ -44,7 +46,7 @@ public class SalePostControllerImpl implements SalePostController {
 
     @Override
     @GetMapping("/{salePostId}")
-    public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(Long salePostId) {
+    public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(@PathVariable Long salePostId) {
 
         SalePostDetailResponse response = salePostQueryService.getSalePostDetail(salePostId);
 
@@ -54,14 +56,14 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @GetMapping
     public ResponseEntity<Response<Slice<SalePostListResponse>>> getSalePosts(
-            Long categoryId,
-            SaleStatus status,
-            String keyword,
-            int page,
-            int size,
-            String sort,
-            Sort.Direction direction,
-            AuthUser authUser
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) SaleStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
@@ -81,9 +83,9 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @PutMapping("/{salePostId}")
     public ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
-            Long salePostId,
-            AuthUser authUser,
-            SalePostUpdateRequest request
+            @PathVariable Long salePostId,
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody SalePostUpdateRequest request
     ) {
         SalePostDetailResponse response = salePostCommandService.updateSalePost(
                 salePostId,
@@ -97,8 +99,8 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @DeleteMapping("/{salePostId}")
     public ResponseEntity<Response<Void>> deleteSalePost(
-            Long salePostId,
-            AuthUser authUser
+            @PathVariable Long salePostId,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         salePostCommandService.deleteSalePost(salePostId, authUser.getUserId());
 
@@ -108,9 +110,9 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @PatchMapping("/{salePostId}/status")
     public ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
-            Long salePostId,
-            AuthUser authUser,
-            SaleStatusUpdateRequest request
+            @PathVariable Long salePostId,
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @RequestBody SaleStatusUpdateRequest request
     ) {
         SalePostDetailResponse response = salePostCommandService.updateSaleStatus(
                 salePostId,
@@ -124,12 +126,12 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @GetMapping("/my")
     public ResponseEntity<Response<Slice<SalePostSummaryResponse>>> getMySalePosts(
-            AuthUser authUser,
-            SaleStatus status,
-            int page,
-            int size,
-            String sort,
-            Sort.Direction direction
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(required = false) SaleStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
@@ -145,13 +147,13 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @GetMapping("/public")
     public ResponseEntity<Response<Slice<SalePostPublicListResponse>>> getNotAuthSalePosts(
-            Long categoryId,
-            SaleStatus status,
-            String keyword,
-            int page,
-            int size,
-            String sort,
-            Sort.Direction direction
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) SaleStatus status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 

@@ -5,13 +5,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.category.dto.request.CategoryRequest;
 import org.example.ootoutfitoftoday.domain.category.dto.response.CategoryResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "카테고리 관리", description = "카테고리 관련 API")
 public interface CategoryController {
@@ -28,7 +26,7 @@ public interface CategoryController {
             }
     )
     ResponseEntity<Response<CategoryResponse>> create(
-            @Valid @RequestBody CategoryRequest categoryRequest
+            CategoryRequest categoryRequest
     );
 
     @Operation(
@@ -39,10 +37,10 @@ public interface CategoryController {
             }
     )
     ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "한 페이지에 보여질 개수") @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "정렬 기준 컬럼") @RequestParam(defaultValue = "createdAt") String sort,
-            @Parameter(description = "정렬 방향") @RequestParam(defaultValue = "DESC") String direction
+            @Parameter(description = "페이지 번호") int page,
+            @Parameter(description = "한 페이지에 보여질 개수") int size,
+            @Parameter(description = "정렬 기준 컬럼") String sort,
+            @Parameter(description = "정렬 방향") String direction
     );
 
     @Operation(
@@ -57,8 +55,8 @@ public interface CategoryController {
             }
     )
     ResponseEntity<Response<CategoryResponse>> updateCategory(
-            @Parameter(description = "수정할 카테고리 ID") @PathVariable Long categoryId,
-            @Valid @RequestBody CategoryRequest categoryRequest
+            @Parameter(description = "수정할 카테고리 ID") Long categoryId,
+            CategoryRequest categoryRequest
     );
 
     @Operation(
@@ -72,6 +70,6 @@ public interface CategoryController {
             }
     )
     ResponseEntity<Response<Void>> deleteCategory(
-            @Parameter(description = "삭제할 카테고리 ID") @PathVariable Long categoryId
+            @Parameter(description = "삭제할 카테고리 ID") Long categoryId
     );
 }

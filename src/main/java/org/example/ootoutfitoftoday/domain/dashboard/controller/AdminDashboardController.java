@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 
@@ -27,7 +26,7 @@ public interface AdminDashboardController {
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
     ResponseEntity<Response<AdminUserStatisticsResponse>> adminUserStatistics(
-            @Parameter(description = "기준 날짜 (기본값: 오늘)") @RequestParam(required = false) LocalDate baseDate
+            @Parameter(description = "기준 날짜 (기본값: 오늘)") LocalDate baseDate
     );
 
     @Operation(
@@ -47,7 +46,7 @@ public interface AdminDashboardController {
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
     ResponseEntity<Response<AdminSalePostStatisticsResponse>> adminSalePostStatistics(
-            @Parameter(description = "기준 날짜 (기본값: 오늘)") @RequestParam(required = false) LocalDate baseDate
+            @Parameter(description = "기준 날짜 (기본값: 오늘)") LocalDate baseDate
     );
 
     @Operation(

@@ -12,7 +12,6 @@ import org.example.ootoutfitoftoday.domain.image.dto.request.PresignedUrlRequest
 import org.example.ootoutfitoftoday.domain.image.dto.response.ImageSaveResponse;
 import org.example.ootoutfitoftoday.domain.image.dto.response.PresignedUrlResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "이미지 관리", description = "S3 이미지 업로드 관련 API")
@@ -31,8 +30,8 @@ public interface ImageController {
             }
     )
     ResponseEntity<Response<PresignedUrlResponse>> generatePresignedUrl(
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody PresignedUrlRequest request
+            AuthUser authUser,
+            PresignedUrlRequest request
     );
 
     @Operation(

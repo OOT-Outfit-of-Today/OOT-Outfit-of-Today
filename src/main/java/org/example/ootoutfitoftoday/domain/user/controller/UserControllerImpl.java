@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -27,7 +28,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @GetMapping
-    public ResponseEntity<Response<UserGetMyInfoResponse>> getMyInfo(AuthUser authUser) {
+    public ResponseEntity<Response<UserGetMyInfoResponse>> getMyInfo(@AuthenticationPrincipal AuthUser authUser) {
 
         UserGetMyInfoResponse response = userQueryService.getMyInfo(authUser.getUserId());
 
@@ -37,8 +38,8 @@ public class UserControllerImpl implements UserController {
     @Override
     @PostMapping("/password-verification")
     public ResponseEntity<Response<Void>> verifyPassword(
-            UserPasswordVerificationRequest request,
-            AuthUser authUser
+            @Valid @RequestBody UserPasswordVerificationRequest request,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
 
         userQueryService.verifyPassword(request, authUser);
@@ -49,8 +50,8 @@ public class UserControllerImpl implements UserController {
     @Override
     @PatchMapping
     public ResponseEntity<Response<UserUpdateInfoResponse>> updateInfo(
-            UserUpdateInfoRequest request,
-            AuthUser authUser
+            @Valid @RequestBody UserUpdateInfoRequest request,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
 
         UserUpdateInfoResponse response = userCommandService.updateInfo(request, authUser);
@@ -61,8 +62,8 @@ public class UserControllerImpl implements UserController {
     @Override
     @PutMapping("/profile-image")
     public ResponseEntity<Response<UserUpdateProfileImageResponse>> updateProfileImage(
-            UserUpdateProfileImageRequest request,
-            AuthUser authUser
+            @Valid @RequestBody UserUpdateProfileImageRequest request,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         UserUpdateProfileImageResponse response = userCommandService.updateProfileImage(authUser.getUserId(), request.getImageId()
         );
@@ -73,14 +74,14 @@ public class UserControllerImpl implements UserController {
     @Override
     @DeleteMapping("/profile-image")
     public ResponseEntity<Response<Void>> deleteProfileImage(
-            AuthUser authUser
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         userCommandService.deleteProfileImage(authUser.getUserId());
 
         return Response.success(null, UserSuccessCode.DELETE_PROFILE_IMAGE);
     }
 
-    // 이건 뭘까??... 일단 스웨거가 없네?
+    @Override
     @PatchMapping("/locations")
     public ResponseEntity<Response<Void>> updateUserTradeLocation(
             @RequestBody UserUpdateTradeLocationRequest request,

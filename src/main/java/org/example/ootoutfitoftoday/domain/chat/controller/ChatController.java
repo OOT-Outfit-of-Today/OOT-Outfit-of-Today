@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
 import org.example.ootoutfitoftoday.domain.chat.dto.response.ChatResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "채팅", description = "채팅 관련 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -24,8 +22,8 @@ public interface ChatController {
             }
     )
     ResponseEntity<SliceResponse<ChatResponse>> getChats(
-            @PathVariable Long chatroomId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            Long chatroomId,
+            int page,
+            int size
     );
 }

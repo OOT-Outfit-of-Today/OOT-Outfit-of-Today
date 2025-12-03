@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -16,9 +15,6 @@ import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "옷 관리", description = "옷관련 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -34,8 +30,8 @@ public interface ClothesController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             })
     ResponseEntity<Response<ClothesResponse>> createClothes(
-            @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody ClothesRequest clothesRequest
+            AuthUser authUser,
+            ClothesRequest clothesRequest
     );
 
     @Operation(
@@ -47,11 +43,11 @@ public interface ClothesController {
             })
     ResponseEntity<SliceResponse<ClothesResponse>> getClothes(
             @AuthenticationPrincipal AuthUser authUser,
-            @Parameter(description = "카테고리 ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "옷 색상") @RequestParam(required = false) ClothesColor clothesColor,
-            @Parameter(description = "옷 사이즈") @RequestParam(required = false) ClothesSize clothesSize,
-            @Parameter(description = "마지막 조회 옷 아이디") @RequestParam(required = false) Long lastClothesId,
-            @Parameter(description = "페이지당 개수") @RequestParam(defaultValue = "10") int size
+            @Parameter(description = "카테고리 ID") Long categoryId,
+            @Parameter(description = "옷 색상") ClothesColor clothesColor,
+            @Parameter(description = "옷 사이즈") ClothesSize clothesSize,
+            @Parameter(description = "마지막 조회 옷 아이디") Long lastClothesId,
+            @Parameter(description = "페이지당 개수") int size
     );
 
     @Operation(
@@ -63,8 +59,8 @@ public interface ClothesController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             })
     ResponseEntity<Response<ClothesResponse>> getClothesById(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long clothesId
+            AuthUser authUser,
+            Long clothesId
     );
 
     @Operation(
@@ -77,9 +73,9 @@ public interface ClothesController {
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             })
     ResponseEntity<Response<ClothesResponse>> updateClothes(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long clothesId,
-            @Valid @RequestBody ClothesRequest clothesRequest
+            AuthUser authUser,
+            Long clothesId,
+            ClothesRequest clothesRequest
     );
 
     @Operation(
@@ -102,8 +98,8 @@ public interface ClothesController {
                     @ApiResponse(responseCode = "200", description = "삭제 성공")
             })
     ResponseEntity<Response<Void>> removeClothesImages(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long clothesId,
-            @RequestBody ClothesImageUnlinkRequest clothesImageUnlinkRequest
+            AuthUser authUser,
+            Long clothesId,
+            ClothesImageUnlinkRequest clothesImageUnlinkRequest
     );
 }

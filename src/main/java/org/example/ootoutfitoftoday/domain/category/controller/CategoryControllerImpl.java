@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.category.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.PageResponse;
 import org.example.ootoutfitoftoday.common.response.Response;
@@ -22,7 +23,7 @@ public class CategoryControllerImpl implements CategoryController {
     @Override
     @PostMapping("/admin/v1/categories")
     public ResponseEntity<Response<CategoryResponse>> create(
-            CategoryRequest categoryRequest
+            @Valid @RequestBody CategoryRequest categoryRequest
     ) {
         CategoryResponse response = categoryCommandService.createCategory(categoryRequest);
 
@@ -32,10 +33,10 @@ public class CategoryControllerImpl implements CategoryController {
     @Override
     @GetMapping("/v1/categories")
     public ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(
-            int page,
-            int size,
-            String sort,
-            String direction
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
         Page<CategoryResponse> categories = categoryQueryService.getCategories(
                 page,
@@ -50,8 +51,8 @@ public class CategoryControllerImpl implements CategoryController {
     @Override
     @PutMapping("/admin/v1/categories/{categoryId}")
     public ResponseEntity<Response<CategoryResponse>> updateCategory(
-            Long categoryId,
-            CategoryRequest categoryRequest
+            @PathVariable Long categoryId,
+            @Valid @RequestBody CategoryRequest categoryRequest
     ) {
         CategoryResponse categoryResponse = categoryCommandService.updateCategory(categoryId, categoryRequest);
 
@@ -61,7 +62,7 @@ public class CategoryControllerImpl implements CategoryController {
     @Override
     @DeleteMapping("/admin/v1/categories/{categoryId}")
     public ResponseEntity<Response<Void>> deleteCategory(
-            Long categoryId
+            @PathVariable Long categoryId
     ) {
         categoryCommandService.deleteCategory(categoryId);
 

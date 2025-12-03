@@ -5,17 +5,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.auth.dto.request.*;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthLoginResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.DeviceInfoResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -31,7 +26,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "409", description = "중복 요청")
             })
     ResponseEntity<Response<Void>> signup(
-            @Valid @RequestBody AuthSignupRequest request
+            AuthSignupRequest request
     );
 
     @Operation(
@@ -45,7 +40,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "401", description = "로그인 실패(잘못된 아이디 또는 비밀번호)")
             })
     ResponseEntity<Response<AuthLoginResponse>> login(
-            @Valid @RequestBody AuthLoginRequest request,
+            AuthLoginRequest request,
             HttpServletRequest httpRequest
     );
 
@@ -60,8 +55,8 @@ public interface AuthController {
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
     ResponseEntity<Response<List<DeviceInfoResponse>>> getDevices(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam String currentDeviceId
+            AuthUser authUser,
+            String currentDeviceId
     );
 
     @Operation(
@@ -74,7 +69,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "401", description = "유효하지 않거나 만료된 리프레시 토큰")
             })
     ResponseEntity<Response<AuthLoginResponse>> refresh(
-            @Valid @RequestBody RefreshTokenRequest request,
+            RefreshTokenRequest request,
             HttpServletRequest httpRequest
     );
 
@@ -89,7 +84,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "400", description = "유효하지 않거나 만료된 코드")
             })
     ResponseEntity<Response<AuthLoginResponse>> exchangeOAuthToken(
-            @Valid @RequestBody TokenExchangeRequest request,
+            TokenExchangeRequest request,
             HttpServletRequest httpRequest
     );
 
@@ -104,8 +99,8 @@ public interface AuthController {
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
     ResponseEntity<Response<Void>> logout(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam String deviceId
+            AuthUser authUser,
+            String deviceId
     );
 
     @Operation(
@@ -119,7 +114,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
     ResponseEntity<Response<Void>> logoutAll(
-            @AuthenticationPrincipal AuthUser authUser
+            AuthUser authUser
     );
 
     @Operation(
@@ -136,9 +131,9 @@ public interface AuthController {
                     @ApiResponse(responseCode = "404", description = "디바이스를 찾을 수 없음")
             })
     ResponseEntity<Response<Void>> removeDevice(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable String deviceId,
-            @RequestParam String currentDeviceId
+            AuthUser authUser,
+            String deviceId,
+            String currentDeviceId
     );
 
     @Operation(
@@ -153,7 +148,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "404", description = "존재하지 않는 회원"),
             })
     ResponseEntity<Response<Void>> withdraw(
-            @Valid @RequestBody AuthWithdrawRequest request,
-            @AuthenticationPrincipal AuthUser authUser
+            AuthWithdrawRequest request,
+            AuthUser authUser
     );
 }

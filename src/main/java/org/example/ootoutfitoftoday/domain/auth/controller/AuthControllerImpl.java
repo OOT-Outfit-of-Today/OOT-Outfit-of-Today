@@ -1,6 +1,7 @@
 package org.example.ootoutfitoftoday.domain.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -11,6 +12,7 @@ import org.example.ootoutfitoftoday.domain.auth.exception.AuthSuccessCode;
 import org.example.ootoutfitoftoday.domain.auth.service.command.AuthCommandService;
 import org.example.ootoutfitoftoday.domain.auth.service.query.AuthQueryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping("/signup")
     public ResponseEntity<Response<Void>> signup(
-            AuthSignupRequest request
+            @Valid @RequestBody AuthSignupRequest request
     ) {
         authCommandService.signup(request);
 
@@ -36,7 +38,7 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping("/login")
     public ResponseEntity<Response<AuthLoginResponse>> login(
-            AuthLoginRequest request,
+            @Valid @RequestBody AuthLoginRequest request,
             HttpServletRequest httpRequest
     ) {
         AuthLoginResponse response = authCommandService.login(request, httpRequest);
@@ -47,8 +49,8 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @GetMapping("/devices")
     public ResponseEntity<Response<List<DeviceInfoResponse>>> getDevices(
-            AuthUser authUser,
-            String currentDeviceId
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam String currentDeviceId
     ) {
         List<DeviceInfoResponse> devices = authQueryService.getDeviceList(authUser, currentDeviceId);
 
@@ -58,7 +60,7 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping("/refresh")
     public ResponseEntity<Response<AuthLoginResponse>> refresh(
-            RefreshTokenRequest request,
+            @Valid @RequestBody RefreshTokenRequest request,
             HttpServletRequest httpRequest
     ) {
         AuthLoginResponse response = authCommandService.refresh(request.getRefreshToken(), request.getDeviceId(), httpRequest);
@@ -69,7 +71,7 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping("/oauth2/token/exchange")
     public ResponseEntity<Response<AuthLoginResponse>> exchangeOAuthToken(
-            TokenExchangeRequest request,
+            @Valid @RequestBody TokenExchangeRequest request,
             HttpServletRequest httpRequest
     ) {
 
@@ -81,8 +83,8 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping("/logout")
     public ResponseEntity<Response<Void>> logout(
-            AuthUser authUser,
-            String deviceId
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam String deviceId
     ) {
         authCommandService.logout(authUser, deviceId);
 
@@ -92,7 +94,7 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping("/logout/all")
     public ResponseEntity<Response<Void>> logoutAll(
-            AuthUser authUser
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         authCommandService.logoutAll(authUser);
 
@@ -102,9 +104,9 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @DeleteMapping("/devices/{deviceId}")
     public ResponseEntity<Response<Void>> removeDevice(
-            AuthUser authUser,
-            String deviceId,
-            String currentDeviceId
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable String deviceId,
+            @RequestParam String currentDeviceId
     ) {
         authCommandService.removeDevice(authUser, deviceId, currentDeviceId);
 
@@ -114,8 +116,8 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @DeleteMapping("/withdraw")
     public ResponseEntity<Response<Void>> withdraw(
-            AuthWithdrawRequest request,
-            AuthUser authUser
+            @Valid @RequestBody AuthWithdrawRequest request,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         authCommandService.withdraw(request, authUser);
 

@@ -25,6 +25,24 @@ public class ClosetClothesLinkQueryServiceImpl implements ClosetClothesLinkQuery
     private final ClosetQueryService closetQueryService;
     private final ClosetClothesLinkRepository closetClothesLinkRepository;
 
+    // 페이지네이션
+    private Pageable createPageable(
+            int page,
+            int size,
+            String sort,
+            String direction
+    ) {
+        Sort sortSpec = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sort).descending()
+                : Sort.by(sort).ascending();
+
+        return PageRequest.of(
+                page,
+                size,
+                sortSpec
+        );
+    }
+
     @Override
     public Page<ClosetClothesLinkGetResponse> getClothesInCloset(
             Long userId,
@@ -40,8 +58,12 @@ public class ClosetClothesLinkQueryServiceImpl implements ClosetClothesLinkQuery
             throw new ClosetClothesLinkException(ClosetClothesLinkErrorCode.CLOSET_CLOTHES_FORBIDDEN);
         }
 
-        Sort sortObj = Sort.by(Sort.Direction.fromString(direction), sort);
-        Pageable pageable = PageRequest.of(page, size, sortObj);
+        Pageable pageable = createPageable(
+                page,
+                size,
+                sort,
+                direction
+        );
 
         Page<ClosetClothesLink> links = closetClothesLinkRepository.findAllByClosetId(closetId, pageable);
 

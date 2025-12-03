@@ -12,30 +12,33 @@ import java.time.Duration;
 
 /**
  * Redisson 설정(분산 락용)
- * Redis 연결 정보를 .env에서 직접 읽어옴
- * RedisConfig와 동일한 환경변수를 사용하여 같은 Redis 서버에 연결
+ * Redis 연결 정보:
+ * - yml이 .env 환경변수를 참조(spring.data.redis.host: ${REDIS_HOST})
+ * - 이 클래스는 yml 설정을 읽어서 Redisson 구성에 사용
+ * RedisConfig와 동일한 Redis 서버에 연결
  * Redisson은 Redis 기반 분산 락 구현에 사용
  */
 @Configuration
 public class RedissonConfig {
 
-    // 민감정보: .env 파일에서 환경변수로 주입
-    @Value("${REDIS_HOST}")
+    // 민감정보: yml의 spring.data.redis 설정에서 주입
+    // yml이 .env 파일의 환경변수를 참조 -> RedisConfig와 일관성 유지
+    @Value("${spring.data.redis.host}")
     private String host;
 
-    @Value("${REDIS_PORT}")
+    @Value("${spring.data.redis.port}")
     private int port;
 
-    @Value("${REDIS_PASSWORD}")
+    @Value("${spring.data.redis.password}")
     private String password;
 
     // 설정값: yml 파일에서 프로퍼티로 주입(환경별 다른 값)
-    // 환경별 커넥션 풀 설정값 주입(local=8, dev=10) -> 기본값 dev 기준
-    @Value("${spring.data.redis.pool.max-active:}")
-    private int connectionPoolSize;
+    // 환경별 값: local=8, dev=10
+    @Value("${spring.data.redis.lettuce.pool.max-active}")
+    private int maxActive;
 
-    @Value("${spring.data.redis.pool.min-idle}")
-    private int connectionMinimumIdleSize;
+    @Value("${spring.data.redis.lettuce.pool.min-idle}")
+    private int minIdle;
 
     // 공통 설정: application.yml에서 주입
     // Redis 타임아웃 설정값 주입
@@ -49,8 +52,8 @@ public class RedissonConfig {
         var singleServerConfig = config.useSingleServer()
                 .setAddress("redis://" + host + ":" + port)
                 // yml에서 주입받은 환경별 커넥션 풀 설정 적용
-                .setConnectionPoolSize(connectionPoolSize)
-                .setConnectionMinimumIdleSize(connectionMinimumIdleSize)
+                .setConnectionPoolSize(maxActive)
+                .setConnectionMinimumIdleSize(minIdle)
                 .setIdleConnectionTimeout(10000)
                 // yml에서 주입받은 타임아웃 설정 적용
                 .setConnectTimeout((int) timeout.toMillis())

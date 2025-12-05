@@ -15,8 +15,6 @@ import org.example.ootoutfitoftoday.domain.clothes.service.query.ClothesQuerySer
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,13 +30,8 @@ public class ClosetClothesLinkCommandServiceImpl implements ClosetClothesLinkCom
             Long closetId,
             ClosetClothesLinkRequest request
     ) {
-        Closet closet = closetQueryService.findClosetById(closetId);
-
-        if (!Objects.equals(closet.getUserId(), userId)) {
-            throw new ClosetClothesLinkException(ClosetClothesLinkErrorCode.CLOSET_CLOTHES_FORBIDDEN);
-        }
-
-        Clothes clothes = clothesQueryService.findClothesById(request.clothesId());
+        Closet closet = closetQueryService.findClosetByIdAndUserIdAndIsDeletedFalse(closetId, userId);
+        Clothes clothes = clothesQueryService.findClothesByIdAndUserIdAndIsDeletedFalse(request.clothesId(), userId);
 
         if (closetClothesLinkRepository.existsByClosetIdAndClothesId(closetId, request.clothesId())) {
             throw new ClosetClothesLinkException(ClosetClothesLinkErrorCode.CLOSET_CLOTHES_ALREADY_LINKED);
@@ -56,15 +49,11 @@ public class ClosetClothesLinkCommandServiceImpl implements ClosetClothesLinkCom
             Long closetId,
             Long clothesId
     ) {
-        Closet closet = closetQueryService.findClosetById(closetId);
+        closetQueryService.findClosetByIdAndUserIdAndIsDeletedFalse(closetId, userId);
 
-        if (!Objects.equals(closet.getUserId(), userId)) {
-            throw new ClosetClothesLinkException(ClosetClothesLinkErrorCode.CLOSET_CLOTHES_FORBIDDEN);
-        }
-
-        ClosetClothesLink link = closetClothesLinkRepository
-                .findByClosetIdAndClothesIdAndIsDeletedFalse(closetId, clothesId)
-                .orElseThrow(() -> new ClosetClothesLinkException(ClosetClothesLinkErrorCode.CLOTHES_NOT_LINKED));
+        ClosetClothesLink link = closetClothesLinkRepository.findByClosetIdAndClothesIdAndIsDeletedFalse(closetId, clothesId).orElseThrow(
+                        () -> new ClosetClothesLinkException(ClosetClothesLinkErrorCode.CLOTHES_NOT_LINKED)
+                );
 
         link.softDelete();
 

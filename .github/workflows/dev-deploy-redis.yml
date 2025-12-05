@@ -1,4 +1,4 @@
-name: Deploy Redis (dev)
+name: Deploy Redis(dev)
 
 on:
   workflow_dispatch:    # 수동 실행만
@@ -74,7 +74,7 @@ jobs:
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --targets "Key=instanceIds,Values=${REDIS_INSTANCE_ID}" \
+            --targets "Key=instanceIds,Values=${REDIS_EC2_INSTANCE_ID}" \ 
             --parameters commands="[
               \"docker ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}'\",
               \"docker exec redis redis-cli -a \$(aws ssm get-parameter --name /config/dev/REDIS_PASSWORD --with-decryption --query Parameter.Value --output text --region ap-northeast-2) ping\"

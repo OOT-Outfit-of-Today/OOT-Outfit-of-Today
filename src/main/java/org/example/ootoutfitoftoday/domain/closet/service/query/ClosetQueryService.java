@@ -30,5 +30,6 @@ public interface ClosetQueryService {
     // 공개 옷장 단건
     ClosetGetResponse getPublicCloset(Long closetId);
 
-    Closet findClosetById(Long closetId);
+    // 옷장과 옷을 연결할 때, 사용할 옷장 조회
+    Closet findClosetByIdAndUserIdAndIsDeletedFalse(Long userId, Long closetId);
 }

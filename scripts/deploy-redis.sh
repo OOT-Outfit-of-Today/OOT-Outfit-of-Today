@@ -67,7 +67,8 @@ CMDS=(
   "docker ps | grep ${CONTAINER_NAME}"
 
   # Redis 연결 테스트
-  "docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" ping || echo 'Redis health check failed'"
+  # 수정된 코드
+  "docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" ping || { echo 'Error: Redis health check failed' >&2; exit 1; }"
 )
 
 # Bash 배열 → JSON 배열 변환(jq 필수)

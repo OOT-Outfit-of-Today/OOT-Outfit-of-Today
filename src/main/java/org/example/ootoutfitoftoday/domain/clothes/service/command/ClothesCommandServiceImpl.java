@@ -65,21 +65,22 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     @Override
     public ClothesResponse updateClothes(
             Long userId,
-            Long id,
+            Long clothesId,
             ClothesRequest clothesRequest
     ) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(clothesId).orElseThrow(
                 () -> {
-                    log.warn("updateClothes - 옷 없음. clothesId={}", id);
+                    log.warn("updateClothes - 옷 없음. clothesId={}", clothesId);
 
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 });
 
+        // Todo: 조회할 때 검증까지하는 게 더 클린코드가 아닐지? 다시 생각하고 리팩토링 해보기!
         if (!Objects.equals(userId, clothes.getUser().getId())) {
             log.warn("updateClothes - 다른 유저의 의류 접근 시도. userId={}, clothesOwnerId={}, clothesId={}",
                     userId,
                     clothes.getUser().getId(),
-                    id
+                    clothesId
             );
             throw new ClothesException(ClothesErrorCode.CLOTHES_FORBIDDEN);
         }
@@ -103,10 +104,10 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     }
 
     @Override
-    public void deleteClothes(Long userId, Long id) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+    public void deleteClothes(Long userId, Long clothesId) {
+        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(clothesId).orElseThrow(
                 () -> {
-                    log.warn("deleteClothes - 옷 없음. clothesId={}", id);
+                    log.warn("deleteClothes - 옷 없음. clothesId={}", clothesId);
 
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 });
@@ -115,14 +116,14 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
             log.warn("deleteClothes - 다른 유저의 의류 삭제 시도. userId={}, clothesOwnerId={}, clothesId={}",
                     userId,
                     clothes.getUser().getId(),
-                    id
+                    clothesId
             );
             throw new ClothesException(ClothesErrorCode.CLOTHES_FORBIDDEN);
         }
 
         clothes.softDelete();
 
-        clothesImageCommandService.softDeleteAllByClothesId(id);
+        clothesImageCommandService.softDeleteAllByClothesId(clothesId);
     }
 
     @Override
@@ -156,6 +157,7 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 });
 
+        // Todo: 조회할 때 검증까지하는 게 더 클린코드가 아닐지? 다시 생각하고 리팩토링 해보기!
         if (!Objects.equals(userId, clothes.getUser().getId())) {
             log.warn("removeClothesImages - 타 유저 이미지 삭제 시도. userId={}, clothesOwnerId={}, clothesId={}",
                     userId,

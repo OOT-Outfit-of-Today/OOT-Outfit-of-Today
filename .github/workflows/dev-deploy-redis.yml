@@ -21,8 +21,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     concurrency:
-      group: deploy-redis-dev
-      cancel-in-progress: true
+      group: deploy-redis-${{ github.run_id }}    # 각 실행을 독립적으로 처리
+      cancel-in-progress: false                   # 진행 중인 작업 취소 방지
 
     steps:
       - name: Checkout

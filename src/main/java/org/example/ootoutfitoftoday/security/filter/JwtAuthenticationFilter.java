@@ -107,22 +107,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         log.info("JwtAuthenticationFilter 진입: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
 
-        String authorizationHeader = httpRequest.getHeader("Authorization");
+        // try-finally 블록으로 감싸서 SecurityContext 정리 보장
+        try {
+            String authorizationHeader = httpRequest.getHeader("Authorization");
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            sendErrorResponse(httpResponse, HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다.");
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                sendErrorResponse(httpResponse, HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다.");
 
-            return;
+                return;
+            }
+
+            String jwt = jwtUtil.substringToken(authorizationHeader);
+
+            if (!processAuthentication(jwt, httpRequest, httpResponse)) {
+
+                return;
+            }
+
+            chain.doFilter(httpRequest, httpResponse);
+
+        } finally {
+            // 이중 안전장치: 요청 처리 완료 후 반드시 SecurityContext 정리
+            // Spring Security가 자동으로 clear하지만, ThreadLocal 오염 방지를 위해 명시적으로 정리
+            // 예외 발생 시에도 반드시 실행되어 Thread 재사용 시 이전 인증 정보가 남지 않도록 보장
+            SecurityContextHolder.clearContext();
+            log.debug("SecurityContext 명시적 정리 완료");
         }
-
-        String jwt = jwtUtil.substringToken(authorizationHeader);
-
-        if (!processAuthentication(jwt, httpRequest, httpResponse)) {
-
-            return;
-        }
-
-        chain.doFilter(httpRequest, httpResponse);
     }
 
     private boolean processAuthentication(

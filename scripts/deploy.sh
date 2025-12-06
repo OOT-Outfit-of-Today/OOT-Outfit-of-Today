@@ -38,17 +38,17 @@ CMDS=(
 
   # 이미지 자동 정리: 7일(168시간) 이상 된 오래된 이미지 삭제
   "echo ''"
-  "echo '[Step 2/6] Cleaning up old Docker images...'"
+  "echo '[Step 2/7] Cleaning up old Docker images...'"
   "docker image prune -a --filter 'until=168h' --force || true"
   "echo '✓ Cleanup completed'"
 
   "echo ''"
-  "echo '[Step 3/6] Pulling new image...'"
+  "echo '[Step 3/7] Pulling new image...'"
   "docker pull ${FULL_URI}"
   "echo '✓ Image pulled successfully'"
 
   "echo ''"
-  "echo '[Step 4/6] Stopping and removing old container...'"
+  "echo '[Step 4/7] Stopping and removing old container...'"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
   "echo '✓ Old container removed'"
@@ -58,7 +58,7 @@ CMDS=(
 
   # Parameter Store에서 Redis 설정 가져오기
   "echo ''"
-  "echo '[Step 5/6] Fetching Redis configuration from Parameter Store...'"
+  "echo '[Step 5/7] Fetching Redis configuration from Parameter Store...'"
   "REDIS_HOST=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_HOST \\
     --query Parameter.Value \\
@@ -86,7 +86,7 @@ CMDS=(
 
   # Spring Boot 실행(메모리 제한 추가)
   "echo ''"
-  "echo '[Step 6/6] Starting new container with memory limits...'"
+  "echo '[Step 6/7] Starting new container with memory limits...'"
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=always \\
@@ -127,11 +127,46 @@ CMDS=(
     sleep 1
   done"
 
+  # 애플리케이션 헬스체크(Spring Boot Actuator health endpoint)
+  "echo ''"
+  "echo '[Step 7/7] Checking application health...'"
+  "for i in {1..60}; do
+    HEALTH_STATUS=\$(curl -f -s http://localhost:${APP_PORT}/actuator/health 2>/dev/null | grep -o '\"status\":\"UP\"' || echo '')
+    if [ -n \"\$HEALTH_STATUS\" ]; then
+      echo \"✓ Application is healthy (attempt \$i/60)\"
+      echo \"Health response: \$(curl -s http://localhost:${APP_PORT}/actuator/health 2>/dev/null)\"
+      break
+    fi
+    if [ \$i -eq 60 ]; then
+      echo '========================================' >&2
+      echo '✗ ERROR: Application failed to become healthy' >&2
+      echo '========================================' >&2
+      echo '' >&2
+      echo 'Health Check Endpoint:' >&2
+      curl -v http://localhost:${APP_PORT}/actuator/health >&2 || echo 'Health endpoint not responding' >&2
+      echo '' >&2
+      echo 'Container Status:' >&2
+      docker ps --filter name=${CONTAINER_NAME} >&2
+      echo '' >&2
+      echo 'Container Logs (last 50 lines):' >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2
+      echo '' >&2
+      echo '========================================' >&2
+      exit 1
+    fi
+    echo \"Waiting for application health... (attempt \$i/60)\"
+    sleep 1
+  done"
+
   "echo ''"
   "echo '========================================'"
   "echo '  Deployment Status'"
   "echo '========================================'"
+  "echo 'Container Status:'"
   "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+  "echo ''"
+  "echo 'Application Health:'"
+  "curl -s http://localhost:${APP_PORT}/actuator/health | head -20 || echo 'Unable to fetch health status'"
   "echo ''"
   "echo 'Memory Status:'"
   "free -h"

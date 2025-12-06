@@ -32,7 +32,7 @@ CMDS=(
   "echo '  Deployment Started'"
   "echo '========================================'"
 
-  "echo '[Step 1/6] Logging in to ECR...'"
+  "echo '[Step 1/7] Logging in to ECR...'"
   "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REG_URI}"
   "echo '✓ ECR login successful'"
 
@@ -101,12 +101,13 @@ CMDS=(
     -e REDIS_PASSWORD=\${REDIS_PASSWORD} \\
     ${FULL_URI}"
 
-  # 동적 컨테이너 시작 대기 및 실패 감지
+  # 동적 컨테이너 시작 대기 및 실패 감지(docker inspect로 정확한 상태 확인)
   "echo ''"
   "echo 'Waiting for container to start...'"
   "for i in {1..30}; do
-    if docker ps --filter name=${CONTAINER_NAME} --filter status=running --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}\$'; then
-      echo \"✓ Container is running(attempt \$i/30)\"
+    CONTAINER_STATUS=\$(docker inspect -f '{{.State.Status}}' ${CONTAINER_NAME} 2>/dev/null || echo 'not_found')
+    if [ \"\$CONTAINER_STATUS\" = \"running\" ]; then
+      echo \"✓ Container is running (attempt \$i/30)\"
       break
     fi
     if [ \$i -eq 30 ]; then
@@ -114,27 +115,28 @@ CMDS=(
       echo '✗ ERROR: Container failed to start' >&2
       echo '========================================' >&2
       echo '' >&2
-      echo 'Container Status:' >&2
+      echo \"Container Status: \$CONTAINER_STATUS\" >&2
+      echo '' >&2
       docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
       echo '' >&2
-      echo 'Container Logs(last 50 lines):' >&2
+      echo 'Container Logs (last 50 lines):' >&2
       docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
       echo '' >&2
       echo '========================================' >&2
       exit 1
     fi
-    echo \"Waiting for container... (attempt \$i/30)\"
+    echo \"Waiting for container... (attempt \$i/30, status: \$CONTAINER_STATUS)\"
     sleep 1
   done"
 
-  # 애플리케이션 헬스체크(Spring Boot Actuator health endpoint)
+  # 애플리케이션 헬스체크(Spring Boot Actuator health endpoint with /api context path)
   "echo ''"
   "echo '[Step 7/7] Checking application health...'"
   "for i in {1..60}; do
-    HEALTH_STATUS=\$(curl -f -s http://localhost:${APP_PORT}/actuator/health 2>/dev/null | grep -o '\"status\":\"UP\"' || echo '')
+    HEALTH_STATUS=\$(curl -f -s http://localhost:${APP_PORT}/api/actuator/health 2>/dev/null | grep -o '\"status\":\"UP\"' || echo '')
     if [ -n \"\$HEALTH_STATUS\" ]; then
       echo \"✓ Application is healthy (attempt \$i/60)\"
-      echo \"Health response: \$(curl -s http://localhost:${APP_PORT}/actuator/health 2>/dev/null)\"
+      echo \"Health response: \$(curl -s http://localhost:${APP_PORT}/api/actuator/health 2>/dev/null)\"
       break
     fi
     if [ \$i -eq 60 ]; then
@@ -143,7 +145,7 @@ CMDS=(
       echo '========================================' >&2
       echo '' >&2
       echo 'Health Check Endpoint:' >&2
-      curl -v http://localhost:${APP_PORT}/actuator/health >&2 || echo 'Health endpoint not responding' >&2
+      curl -v http://localhost:${APP_PORT}/api/actuator/health >&2 || echo 'Health endpoint not responding' >&2
       echo '' >&2
       echo 'Container Status:' >&2
       docker ps --filter name=${CONTAINER_NAME} >&2
@@ -166,7 +168,7 @@ CMDS=(
   "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
   "echo ''"
   "echo 'Application Health:'"
-  "curl -s http://localhost:${APP_PORT}/actuator/health | head -20 || echo 'Unable to fetch health status'"
+  "curl -s http://localhost:${APP_PORT}/api/actuator/health | head -20 || echo 'Unable to fetch health status'"
   "echo ''"
   "echo 'Memory Status:'"
   "free -h"
@@ -208,7 +210,38 @@ for i in {1..30}; do
 
   case "${STATUS}" in
     Success) exit 0 ;;
-    Failed|Cancelled|TimedOut) echo "[ERROR] SSM failed: ${STATUS}"; exit 1 ;;
+    Failed|Cancelled|TimedOut)
+      echo "========================================"
+      echo "  SSM Command Failed: ${STATUS}"
+      echo "========================================"
+      echo ""
+      echo "Fetching error logs from EC2..."
+      echo ""
+
+      # 실패 원인 파악을 위한 로그 출력
+      SSM_RESULT=$(aws ssm get-command-invocation \
+        --command-id "${CMD_ID}" \
+        --instance-id "${EC2_INSTANCE_ID}" \
+        --query '{stdOut: StandardOutputContent, stdErr: StandardErrorContent}' \
+        --output json \
+        --region "${AWS_REGION}" 2>/dev/null)
+
+      if [ $? -ne 0 ] || [ -z "$SSM_RESULT" ]; then
+        echo "Unable to fetch logs from SSM"
+        exit 1
+      fi
+
+      echo "--- Standard Output ---"
+      echo "${SSM_RESULT}" | jq -r '.stdOut // "No output available"'
+
+      echo ""
+      echo "--- Standard Error ---"
+      echo "${SSM_RESULT}" | jq -r '.stdErr // "No errors available"'
+
+      echo ""
+      echo "========================================"
+      exit 1
+      ;;
   esac
 
   sleep 5

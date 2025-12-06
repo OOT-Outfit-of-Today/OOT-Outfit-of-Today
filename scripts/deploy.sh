@@ -67,10 +67,12 @@ CMDS=(
   "[ -n \"\$REDIS_PORT\" ] || { echo 'Error: REDIS_PORT is empty' >&2; exit 1; }"
   "[ -n \"\$REDIS_PASSWORD\" ] || { echo 'Error: REDIS_PASSWORD is empty' >&2; exit 1; }"
 
-  # Spring Boot 실행
+  # Spring Boot 실행(메모리 제한 추가)
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=always \\
+    --memory=650m \\
+    --memory-swap=650m \\
     -p ${APP_PORT}:${APP_PORT} \\
     -v /app-logs:/app-logs \\
     -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \\

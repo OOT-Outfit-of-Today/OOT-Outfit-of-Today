@@ -43,7 +43,6 @@ CMDS=(
     --output text \\
     --region ${AWS_REGION}) || { echo 'Error: Failed to retrieve REDIS_HOST' >&2; exit 1; }"
 
-  # ⭐ REDIS_PORT 추가
   "REDIS_PORT=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_PORT \\
     --query Parameter.Value \\

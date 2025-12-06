@@ -228,12 +228,11 @@ for i in {1..30}; do
 
       # AWS CLI 명령 자체의 성공/실패 확인
       if [ $? -ne 0 ]; then
-        echo "Failed to fetch logs from SSM(command may have expired or been deleted)"
+        echo "Failed to fetch detailed logs from EC2 instance"
+        echo "This can occur when the command has expired or been deleted"
+        echo ""
         echo "AWS CLI Error:"
         echo "${SSM_RESULT}"
-        echo ""
-        echo "This is likely because the command execution happened too long ago."
-        echo "For current failures, logs will be displayed above."
         exit 1
       fi
 

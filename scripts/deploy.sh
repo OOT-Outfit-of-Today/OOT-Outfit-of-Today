@@ -29,6 +29,12 @@ echo "[INFO] COMMENT=${COMMENT}"
 # ===== EC2에서 실행할 커맨드(배열로 안전하게 정의) =====
 CMDS=(
   "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REG_URI}"
+
+  # 이미지 자동 정리: 7일(168시간) 이상 된 오래된 이미지 삭제
+  "echo '[Cleanup] Removing Docker images older than 7 days...'"
+  "docker image prune -a --filter 'until=168h' --force || true"
+  "echo '[Cleanup] Completed'"
+
   "docker pull ${FULL_URI}"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"

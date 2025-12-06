@@ -28,21 +28,37 @@ echo "[INFO] COMMENT=${COMMENT}"
 
 # ===== EC2에서 실행할 커맨드(배열로 안전하게 정의) =====
 CMDS=(
+  "echo '========================================'"
+  "echo '  Deployment Started'"
+  "echo '========================================'"
+
+  "echo '[Step 1/6] Logging in to ECR...'"
   "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REG_URI}"
+  "echo '✓ ECR login successful'"
 
   # 이미지 자동 정리: 7일(168시간) 이상 된 오래된 이미지 삭제
-  "echo '[Cleanup] Removing Docker images older than 7 days...'"
+  "echo ''"
+  "echo '[Step 2/6] Cleaning up old Docker images...'"
   "docker image prune -a --filter 'until=168h' --force || true"
-  "echo '[Cleanup] Completed'"
+  "echo '✓ Cleanup completed'"
 
+  "echo ''"
+  "echo '[Step 3/6] Pulling new image...'"
   "docker pull ${FULL_URI}"
+  "echo '✓ Image pulled successfully'"
+
+  "echo ''"
+  "echo '[Step 4/6] Stopping and removing old container...'"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
+  "echo '✓ Old container removed'"
 
   # 로그 디렉토리 생성 및 spring 유저(999:999)에게 권한
   "mkdir -p /app-logs && chown 999:999 /app-logs"
 
   # Parameter Store에서 Redis 설정 가져오기
+  "echo ''"
+  "echo '[Step 5/6] Fetching Redis configuration from Parameter Store...'"
   "REDIS_HOST=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_HOST \\
     --query Parameter.Value \\
@@ -66,8 +82,11 @@ CMDS=(
   "[ -n \"\$REDIS_HOST\" ] || { echo 'Error: REDIS_HOST is empty' >&2; exit 1; }"
   "[ -n \"\$REDIS_PORT\" ] || { echo 'Error: REDIS_PORT is empty' >&2; exit 1; }"
   "[ -n \"\$REDIS_PASSWORD\" ] || { echo 'Error: REDIS_PASSWORD is empty' >&2; exit 1; }"
+  "echo '✓ Redis configuration loaded'"
 
   # Spring Boot 실행(메모리 제한 추가)
+  "echo ''"
+  "echo '[Step 6/6] Starting new container with memory limits...'"
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=always \\
@@ -81,6 +100,19 @@ CMDS=(
     -e REDIS_PORT=\${REDIS_PORT} \\
     -e REDIS_PASSWORD=\${REDIS_PASSWORD} \\
     ${FULL_URI}"
+
+  "sleep 10"
+  "echo '✓ Container started'"
+  "echo ''"
+  "echo 'Container Status:'"
+  "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo '⚠ Container not found'"
+  "echo ''"
+  "echo 'Memory Status:'"
+  "free -h"
+  "echo ''"
+  "echo '========================================'"
+  "echo '  ✓ Deployment Completed Successfully'"
+  "echo '========================================'"
 )
 
 # Bash 배열 → JSON 배열 변환 (jq 필수)

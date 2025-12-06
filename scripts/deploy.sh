@@ -28,22 +28,43 @@ echo "[INFO] COMMENT=${COMMENT}"
 
 # ===== EC2에서 실행할 커맨드(배열로 안전하게 정의) =====
 CMDS=(
+  "echo '========================================'"
+  "echo '  Deployment Started'"
+  "echo '========================================'"
+
+  "echo '[Step 1/6] Logging in to ECR...'"
   "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REG_URI}"
+  "echo '✓ ECR login successful'"
+
+  # 이미지 자동 정리: 7일(168시간) 이상 된 오래된 이미지 삭제
+  "echo ''"
+  "echo '[Step 2/7] Cleaning up old Docker images...'"
+  "docker image prune -a --filter 'until=168h' --force || true"
+  "echo '✓ Cleanup completed'"
+
+  "echo ''"
+  "echo '[Step 3/7] Pulling new image...'"
   "docker pull ${FULL_URI}"
+  "echo '✓ Image pulled successfully'"
+
+  "echo ''"
+  "echo '[Step 4/7] Stopping and removing old container...'"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
+  "echo '✓ Old container removed'"
 
   # 로그 디렉토리 생성 및 spring 유저(999:999)에게 권한
   "mkdir -p /app-logs && chown 999:999 /app-logs"
 
   # Parameter Store에서 Redis 설정 가져오기
+  "echo ''"
+  "echo '[Step 5/7] Fetching Redis configuration from Parameter Store...'"
   "REDIS_HOST=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_HOST \\
     --query Parameter.Value \\
     --output text \\
     --region ${AWS_REGION}) || { echo 'Error: Failed to retrieve REDIS_HOST' >&2; exit 1; }"
 
-  # ⭐ REDIS_PORT 추가
   "REDIS_PORT=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_PORT \\
     --query Parameter.Value \\
@@ -61,11 +82,16 @@ CMDS=(
   "[ -n \"\$REDIS_HOST\" ] || { echo 'Error: REDIS_HOST is empty' >&2; exit 1; }"
   "[ -n \"\$REDIS_PORT\" ] || { echo 'Error: REDIS_PORT is empty' >&2; exit 1; }"
   "[ -n \"\$REDIS_PASSWORD\" ] || { echo 'Error: REDIS_PASSWORD is empty' >&2; exit 1; }"
+  "echo '✓ Redis configuration loaded'"
 
-  # Spring Boot 실행
+  # Spring Boot 실행(메모리 제한 추가)
+  "echo ''"
+  "echo '[Step 6/7] Starting new container with memory limits...'"
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=always \\
+    --memory=650m \\
+    --memory-swap=650m \\
     -p ${APP_PORT}:${APP_PORT} \\
     -v /app-logs:/app-logs \\
     -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \\
@@ -74,9 +100,86 @@ CMDS=(
     -e REDIS_PORT=\${REDIS_PORT} \\
     -e REDIS_PASSWORD=\${REDIS_PASSWORD} \\
     ${FULL_URI}"
+
+  # 동적 컨테이너 시작 대기 및 실패 감지
+  "echo ''"
+  "echo 'Waiting for container to start...'"
+  "for i in {1..30}; do
+    if docker ps --filter name=${CONTAINER_NAME} --filter status=running --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}\$'; then
+      echo \"✓ Container is running(attempt \$i/30)\"
+      break
+    fi
+    if [ \$i -eq 30 ]; then
+      echo '========================================' >&2
+      echo '✗ ERROR: Container failed to start' >&2
+      echo '========================================' >&2
+      echo '' >&2
+      echo 'Container Status:' >&2
+      docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
+      echo '' >&2
+      echo 'Container Logs(last 50 lines):' >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
+      echo '' >&2
+      echo '========================================' >&2
+      exit 1
+    fi
+    echo \"Waiting for container... (attempt \$i/30)\"
+    sleep 1
+  done"
+
+  # 애플리케이션 헬스체크(Spring Boot Actuator health endpoint)
+  "echo ''"
+  "echo '[Step 7/7] Checking application health...'"
+  "for i in {1..60}; do
+    HEALTH_STATUS=\$(curl -f -s http://localhost:${APP_PORT}/actuator/health 2>/dev/null | grep -o '\"status\":\"UP\"' || echo '')
+    if [ -n \"\$HEALTH_STATUS\" ]; then
+      echo \"✓ Application is healthy (attempt \$i/60)\"
+      echo \"Health response: \$(curl -s http://localhost:${APP_PORT}/actuator/health 2>/dev/null)\"
+      break
+    fi
+    if [ \$i -eq 60 ]; then
+      echo '========================================' >&2
+      echo '✗ ERROR: Application failed to become healthy' >&2
+      echo '========================================' >&2
+      echo '' >&2
+      echo 'Health Check Endpoint:' >&2
+      curl -v http://localhost:${APP_PORT}/actuator/health >&2 || echo 'Health endpoint not responding' >&2
+      echo '' >&2
+      echo 'Container Status:' >&2
+      docker ps --filter name=${CONTAINER_NAME} >&2
+      echo '' >&2
+      echo 'Container Logs (last 50 lines):' >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2
+      echo '' >&2
+      echo '========================================' >&2
+      exit 1
+    fi
+    echo \"Waiting for application health... (attempt \$i/60)\"
+    sleep 1
+  done"
+
+  "echo ''"
+  "echo '========================================'"
+  "echo '  Deployment Status'"
+  "echo '========================================'"
+  "echo 'Container Status:'"
+  "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+  "echo ''"
+  "echo 'Application Health:'"
+  "curl -s http://localhost:${APP_PORT}/actuator/health | head -20 || echo 'Unable to fetch health status'"
+  "echo ''"
+  "echo 'Memory Status:'"
+  "free -h"
+  "echo ''"
+  "echo 'Recent Logs(last 10 lines):'"
+  "docker logs ${CONTAINER_NAME} --tail 10"
+  "echo ''"
+  "echo '========================================'"
+  "echo '  ✓ Deployment Completed Successfully'"
+  "echo '========================================'"
 )
 
-# Bash 배열 → JSON 배열 변환 (jq 필수)
+# Bash 배열 → JSON 배열 변환(jq 필수)
 COMMANDS_JSON=$(jq -Rn --argjson arr "$(printf '%s\n' "${CMDS[@]}" | jq -R . | jq -s .)" '$arr')
 echo "[DEBUG] COMMANDS_JSON=${COMMANDS_JSON}"
 

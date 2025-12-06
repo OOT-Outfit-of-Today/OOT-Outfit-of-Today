@@ -101,21 +101,50 @@ CMDS=(
     -e REDIS_PASSWORD=\${REDIS_PASSWORD} \\
     ${FULL_URI}"
 
-  "sleep 10"
-  "echo '✓ Container started'"
+  # 동적 컨테이너 시작 대기 및 실패 감지
   "echo ''"
-  "echo 'Container Status:'"
-  "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo '⚠ Container not found'"
+  "echo 'Waiting for container to start...'"
+  "for i in {1..30}; do
+    if docker ps --filter name=${CONTAINER_NAME} --filter status=running --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}\$'; then
+      echo \"✓ Container is running(attempt \$i/30)\"
+      break
+    fi
+    if [ \$i -eq 30 ]; then
+      echo '========================================' >&2
+      echo '✗ ERROR: Container failed to start' >&2
+      echo '========================================' >&2
+      echo '' >&2
+      echo 'Container Status:' >&2
+      docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
+      echo '' >&2
+      echo 'Container Logs(last 50 lines):' >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
+      echo '' >&2
+      echo '========================================' >&2
+      exit 1
+    fi
+    echo \"Waiting for container... (attempt \$i/30)\"
+    sleep 1
+  done"
+
+  "echo ''"
+  "echo '========================================'"
+  "echo '  Deployment Status'"
+  "echo '========================================'"
+  "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
   "echo ''"
   "echo 'Memory Status:'"
   "free -h"
+  "echo ''"
+  "echo 'Recent Logs(last 10 lines):'"
+  "docker logs ${CONTAINER_NAME} --tail 10"
   "echo ''"
   "echo '========================================'"
   "echo '  ✓ Deployment Completed Successfully'"
   "echo '========================================'"
 )
 
-# Bash 배열 → JSON 배열 변환 (jq 필수)
+# Bash 배열 → JSON 배열 변환(jq 필수)
 COMMANDS_JSON=$(jq -Rn --argjson arr "$(printf '%s\n' "${CMDS[@]}" | jq -R . | jq -s .)" '$arr')
 echo "[DEBUG] COMMANDS_JSON=${COMMANDS_JSON}"
 

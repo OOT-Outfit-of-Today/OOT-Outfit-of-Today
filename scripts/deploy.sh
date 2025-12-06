@@ -107,7 +107,7 @@ CMDS=(
   "for i in {1..30}; do
     CONTAINER_STATUS=\$(docker inspect -f '{{.State.Status}}' ${CONTAINER_NAME} 2>/dev/null || echo 'not_found')
     if [ \"\$CONTAINER_STATUS\" = \"running\" ]; then
-      echo \"✓ Container is running (attempt \$i/30)\"
+      echo \"✓ Container is running(attempt \$i/30)\"
       break
     fi
     if [ \$i -eq 30 ]; then
@@ -119,13 +119,13 @@ CMDS=(
       echo '' >&2
       docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
       echo '' >&2
-      echo 'Container Logs (last 50 lines):' >&2
+      echo 'Container Logs(last 50 lines):' >&2
       docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
       echo '' >&2
       echo '========================================' >&2
       exit 1
     fi
-    echo \"Waiting for container... (attempt \$i/30, status: \$CONTAINER_STATUS)\"
+    echo \"Waiting for container...(attempt \$i/30, status: \$CONTAINER_STATUS)\"
     sleep 1
   done"
 
@@ -135,7 +135,7 @@ CMDS=(
   "for i in {1..60}; do
     HEALTH_STATUS=\$(curl -f -s http://localhost:${APP_PORT}/api/actuator/health 2>/dev/null | grep -o '\"status\":\"UP\"' || echo '')
     if [ -n \"\$HEALTH_STATUS\" ]; then
-      echo \"✓ Application is healthy (attempt \$i/60)\"
+      echo \"✓ Application is healthy(attempt \$i/60)\"
       echo \"Health response: \$(curl -s http://localhost:${APP_PORT}/api/actuator/health 2>/dev/null)\"
       break
     fi
@@ -150,13 +150,13 @@ CMDS=(
       echo 'Container Status:' >&2
       docker ps --filter name=${CONTAINER_NAME} >&2
       echo '' >&2
-      echo 'Container Logs (last 50 lines):' >&2
+      echo 'Container Logs(last 50 lines):' >&2
       docker logs ${CONTAINER_NAME} --tail 50 >&2
       echo '' >&2
       echo '========================================' >&2
       exit 1
     fi
-    echo \"Waiting for application health... (attempt \$i/60)\"
+    echo \"Waiting for application health...(attempt \$i/60)\"
     sleep 1
   done"
 
@@ -215,19 +215,33 @@ for i in {1..30}; do
       echo "  SSM Command Failed: ${STATUS}"
       echo "========================================"
       echo ""
-      echo "Fetching error logs from EC2..."
+      echo "Attempting to fetch error logs from EC2..."
       echo ""
 
-      # 실패 원인 파악을 위한 로그 출력
+      # 실패 원인 파악을 위한 로그 출력(에러도 캡처)
       SSM_RESULT=$(aws ssm get-command-invocation \
         --command-id "${CMD_ID}" \
         --instance-id "${EC2_INSTANCE_ID}" \
         --query '{stdOut: StandardOutputContent, stdErr: StandardErrorContent}' \
         --output json \
-        --region "${AWS_REGION}" 2>/dev/null)
+        --region "${AWS_REGION}" 2>&1)
 
-      if [ $? -ne 0 ] || [ -z "$SSM_RESULT" ]; then
-        echo "Unable to fetch logs from SSM"
+      # AWS CLI 명령 자체의 성공/실패 확인
+      if [ $? -ne 0 ]; then
+        echo "Failed to fetch logs from SSM(command may have expired or been deleted)"
+        echo "AWS CLI Error:"
+        echo "${SSM_RESULT}"
+        echo ""
+        echo "This is likely because the command execution happened too long ago."
+        echo "For current failures, logs will be displayed above."
+        exit 1
+      fi
+
+      # JSON 파싱 시도
+      if [ -z "$SSM_RESULT" ] || ! echo "${SSM_RESULT}" | jq -e . >/dev/null 2>&1; then
+        echo "Unable to parse logs from SSM"
+        echo "Raw response:"
+        echo "${SSM_RESULT}"
         exit 1
       fi
 

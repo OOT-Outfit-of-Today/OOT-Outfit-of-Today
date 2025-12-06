@@ -17,8 +17,6 @@ import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -58,20 +56,11 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
             ClosetRequest request
     ) {
 
-        Closet updatedCloset = closetRepository.findClosetByIdAndIsDeletedFalse(closetId).orElseThrow(
+        Closet updatedCloset = closetRepository.findClosetByIdAndIsDeletedFalse(userId, closetId).orElseThrow(
                 () -> {
                     log.warn("옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
                 });
-
-        if (!Objects.equals(updatedCloset.getUser().getId(), userId)) {
-            log.warn("옷장 접근 권한 없음 - 옷장ID: {}, 요청사용자: {}, 소유자: {}",
-                    closetId,
-                    userId,
-                    updatedCloset.getUserId()
-            );
-            throw new ClosetException(ClosetErrorCode.CLOSET_FORBIDDEN);
-        }
 
         Image newImage = null;
         if (request.imageId() != null) {
@@ -92,24 +81,17 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
     @Override
     public ClosetDeleteResponse deleteCloset(Long userId, Long closetId) {
 
-        Closet closet = closetRepository.findClosetByIdAndIsDeletedFalse(closetId).orElseThrow(
+        Closet closet = closetRepository.findClosetByIdAndIsDeletedFalse(userId, closetId).orElseThrow(
                 () -> {
                     log.warn("삭제할 옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);
                 });
 
-        if (!Objects.equals(closet.getUser().getId(), userId)) {
-            log.warn("옷장 삭제 권한 없음 - 옷장ID: {}, 요청사용자: {}, 소유자: {}",
-                    closetId,
-                    userId,
-                    closet.getUserId()
-            );
-            throw new ClosetException(ClosetErrorCode.CLOSET_FORBIDDEN);
-        }
-
         closet.softDelete();
 
-        if (closet.getClosetImage() != null) {closet.getClosetImage().softDelete();}
+        if (closet.getClosetImage() != null) {
+            closet.getClosetImage().softDelete();
+        }
 
         return ClosetDeleteResponse.of(closet.getId(), closet.getDeletedAt());
     }

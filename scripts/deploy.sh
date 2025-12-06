@@ -217,22 +217,24 @@ for i in {1..30}; do
       echo ""
 
       # 실패 원인 파악을 위한 로그 출력
-      echo "--- Standard Output ---"
-      aws ssm get-command-invocation \
+      SSM_RESULT=$(aws ssm get-command-invocation \
         --command-id "${CMD_ID}" \
         --instance-id "${EC2_INSTANCE_ID}" \
-        --query 'StandardOutputContent' \
-        --output text \
-        --region "${AWS_REGION}" || echo "Unable to fetch standard output"
+        --query '{stdOut: StandardOutputContent, stdErr: StandardErrorContent}' \
+        --output json \
+        --region "${AWS_REGION}" 2>/dev/null)
+
+      if [ $? -ne 0 ] || [ -z "$SSM_RESULT" ]; then
+        echo "Unable to fetch logs from SSM"
+        exit 1
+      fi
+
+      echo "--- Standard Output ---"
+      echo "${SSM_RESULT}" | jq -r '.stdOut // "No output available"'
 
       echo ""
       echo "--- Standard Error ---"
-      aws ssm get-command-invocation \
-        --command-id "${CMD_ID}" \
-        --instance-id "${EC2_INSTANCE_ID}" \
-        --query 'StandardErrorContent' \
-        --output text \
-        --region "${AWS_REGION}" || echo "Unable to fetch standard error"
+      echo "${SSM_RESULT}" | jq -r '.stdErr // "No errors available"'
 
       echo ""
       echo "========================================"

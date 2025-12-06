@@ -17,12 +17,13 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long>, Clothes
             FROM Clothes c
             LEFT JOIN FETCH c.images ci
             LEFT JOIN FETCH ci.image i
-            WHERE c.id = :id
+            WHERE c.user.id = : userId
+              AND c.id = :clothesId
               AND c.isDeleted = false
               AND (ci.isDeleted = false OR ci.isDeleted IS NULL)
               AND (i.isDeleted = false OR i.isDeleted IS NULL)
             """)
-    Optional<Clothes> findByIdAndIsDeletedFalse(@Param("id") Long id);
+    Optional<Clothes> findClothesByIdAndUserIdAndIsDeletedFalse(@Param("userId") Long userId, @Param("clothesId") Long clothesId);
 
     @Modifying
     @Query("""

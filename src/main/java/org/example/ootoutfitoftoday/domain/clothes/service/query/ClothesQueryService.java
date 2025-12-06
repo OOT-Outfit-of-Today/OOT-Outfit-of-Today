@@ -24,9 +24,7 @@ public interface ClothesQueryService {
             int size
     );
 
-    ClothesResponse getClothesById(Long userId, Long id);
-
-    Clothes findClothesById(Long id);
+    ClothesResponse getClothesById(Long userId, Long clothesId);
 
     int countClothesByIsDeletedFalse();
 
@@ -47,4 +45,7 @@ public interface ClothesQueryService {
     List<ClothesWearCount> leastWornClothes(Long userId);
 
     List<NotWornOverPeriod> notWornOverPeriod(Long userId);
+
+    // 옷장 - 옷 연결할 옷 조회
+    Clothes findClothesByIdAndUserIdAndIsDeletedFalse(Long userId, Long clothesId);
 }

@@ -101,12 +101,13 @@ CMDS=(
     -e REDIS_PASSWORD=\${REDIS_PASSWORD} \\
     ${FULL_URI}"
 
-  # 동적 컨테이너 시작 대기 및 실패 감지
+  # 동적 컨테이너 시작 대기 및 실패 감지(docker inspect로 정확한 상태 확인)
   "echo ''"
   "echo 'Waiting for container to start...'"
   "for i in {1..30}; do
-    if docker ps --filter name=${CONTAINER_NAME} --filter status=running --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}\$'; then
-      echo \"✓ Container is running(attempt \$i/30)\"
+    CONTAINER_STATUS=\$(docker inspect -f '{{.State.Status}}' ${CONTAINER_NAME} 2>/dev/null || echo 'not_found')
+    if [ \"\$CONTAINER_STATUS\" = \"running\" ]; then
+      echo \"✓ Container is running (attempt \$i/30)\"
       break
     fi
     if [ \$i -eq 30 ]; then
@@ -114,16 +115,17 @@ CMDS=(
       echo '✗ ERROR: Container failed to start' >&2
       echo '========================================' >&2
       echo '' >&2
-      echo 'Container Status:' >&2
+      echo \"Container Status: \$CONTAINER_STATUS\" >&2
+      echo '' >&2
       docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
       echo '' >&2
-      echo 'Container Logs(last 50 lines):' >&2
+      echo 'Container Logs (last 50 lines):' >&2
       docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
       echo '' >&2
       echo '========================================' >&2
       exit 1
     fi
-    echo \"Waiting for container... (attempt \$i/30)\"
+    echo \"Waiting for container... (attempt \$i/30, status: \$CONTAINER_STATUS)\"
     sleep 1
   done"
 

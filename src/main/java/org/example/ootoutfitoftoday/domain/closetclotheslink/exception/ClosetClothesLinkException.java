@@ -7,8 +7,4 @@ public class ClosetClothesLinkException extends GlobalException {
     public ClosetClothesLinkException(ClosetClothesLinkErrorCode errorCode) {
         super(errorCode);
     }
-
-    public ClosetClothesLinkException(ClosetClothesLinkErrorCode errorCode, ClosetClothesLinkSuccessCode successCode) {
-        super(errorCode, successCode);
-    }
 }

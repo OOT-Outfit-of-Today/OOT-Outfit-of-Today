@@ -56,7 +56,7 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
                 direction
         );
 
-        Page<Closet> closets = closetRepository.findAllMyClosetsIsDeletedFalse(userId, pageable);
+        Page<Closet> closets = closetRepository.findAllMyClosetsAndIsDeletedFalse(userId, pageable);
 
         return closets.map(ClosetGetResponse::from);
     }
@@ -81,20 +81,20 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
 
         if (userId != null) {
             // 특정 유저의 공개된 옷장
-            closets = closetRepository.findAllPublicClosetsByUser_IdIsDeletedFalse(userId, pageable);
+            closets = closetRepository.findAllPublicClosetsByUserIdAndIsDeletedFalse(userId, pageable);
         } else {
             // 전체 공개된 옷장
-            closets = closetRepository.findAllPublicClosetsIsDeletedFalse(pageable);
+            closets = closetRepository.findAllPublicClosetsAndIsDeletedFalse(pageable);
         }
 
         return closets.map(ClosetGetResponse::from);
     }
 
-    // 해당 옷장 조회
+    // 내 옷장 상세 조회
     @Override
     public ClosetGetResponse getMyCloset(Long userId, Long closetId) {
 
-        Closet closet = closetRepository.findMyClosetIsDeletedFalse(userId, closetId).orElseThrow(
+        Closet closet = closetRepository.findMyClosetAndIsDeletedFalse(userId, closetId).orElseThrow(
                 () -> new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND)
         );
 
@@ -105,17 +105,18 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
     @Override
     public ClosetGetResponse getPublicCloset(Long closetId) {
 
-        Closet closet = closetRepository.findPublicClosetIsDeletedFalse(closetId).orElseThrow(
+        Closet closet = closetRepository.findPublicClosetAndIsDeletedFalse(closetId).orElseThrow(
                 () -> new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND)
         );
 
         return ClosetGetResponse.from(closet);
     }
 
+    // 내 옷장 상세 조회(옷장-옷, 로그인 유저의 옷장인지 검증하는 메서드)
     @Override
-    public Closet findClosetById(Long closetId) {
+    public Closet findClosetByIdAndUserIdAndIsDeletedFalse(Long userId, Long closetId) {
 
-        return closetRepository.findById(closetId).orElseThrow(
+        return closetRepository.findMyClosetAndIsDeletedFalse(userId, closetId).orElseThrow(
                 () -> {
                     log.warn("옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
                     return new ClosetException(ClosetErrorCode.CLOSET_NOT_FOUND);

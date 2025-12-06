@@ -35,14 +35,10 @@ public class WearRecordControllerImpl implements WearRecordController {
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody WearRecordCreateRequest request
     ) {
-        log.info("착용 기록 등록 요청 시작 - 사용자 ID: {}, 옷 ID: {}", authUser.getUserId(), request.clothesId());
-
         WearRecordCreateResponse response = wearRecordCommandService.createWearRecord(
                 authUser.getUserId(),
                 request
         );
-
-        log.info("착용 기록 등록 완료 - 착용 기록 ID: {}", response.wearRecordId());
 
         return Response.success(response, WearRecordSuccessCode.WEAR_RECORD_CREATED);
     }
@@ -56,9 +52,6 @@ public class WearRecordControllerImpl implements WearRecordController {
             @RequestParam(defaultValue = "wornAt") String sort,
             @RequestParam(defaultValue = "DESC") String direction
     ) {
-        log.info("내 착용 기록 리스트 조회 요청 - 사용자 ID: {}, 페이지: {}, 사이즈: {}, 정렬: {} {}",
-                authUser.getUserId(), page, size, sort, direction);
-
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
 
         Pageable pageable = PageRequest.of(
@@ -71,9 +64,6 @@ public class WearRecordControllerImpl implements WearRecordController {
                 authUser.getUserId(),
                 pageable
         );
-
-        log.info("내 착용 기록 리스트 조회 완료 - 총 {}건 중 {}건 반환",
-                responsePage.getTotalElements(), responsePage.getNumberOfElements());
 
         return PageResponse.success(responsePage, WearRecordSuccessCode.WEAR_RECORDS_GET_OK);
     }

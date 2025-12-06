@@ -18,7 +18,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
             WHERE c.user.id = :userId
               AND c.isDeleted = false
             """)
-    Page<Closet> findAllMyClosetsIsDeletedFalse(@Param("userId") Long userId, Pageable pageable);
+    Page<Closet> findAllMyClosetsAndIsDeletedFalse(@Param("userId") Long userId, Pageable pageable);
 
     // 해당 유저의 공개된 옷장
     @Query("""
@@ -29,7 +29,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
               AND c.user.isDeleted = false
               AND c.isPublic = true
             """)
-    Page<Closet> findAllPublicClosetsByUser_IdIsDeletedFalse(@Param("userId") Long userId, Pageable pageable);
+    Page<Closet> findAllPublicClosetsByUserIdAndIsDeletedFalse(@Param("userId") Long userId, Pageable pageable);
 
     // 공개된 옷장 전체 조회
     @Query("""
@@ -39,9 +39,9 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
               AND c.user.isDeleted = false
               AND c.isPublic = true
             """)
-    Page<Closet> findAllPublicClosetsIsDeletedFalse(Pageable pageable);
+    Page<Closet> findAllPublicClosetsAndIsDeletedFalse(Pageable pageable);
 
-    // 내 옷장 단건 조회
+    // 내 옷장 상세 조회
     @Query("""
             SELECT c
             FROM Closet c
@@ -49,9 +49,9 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
               AND c.isDeleted = false
               AND c.id = :closetId
             """)
-    Optional<Closet> findMyClosetIsDeletedFalse(@Param("userId") Long userId, @Param("closetId") Long closetId);
+    Optional<Closet> findMyClosetAndIsDeletedFalse(@Param("userId") Long userId, @Param("closetId") Long closetId);
 
-    // 공개된 옷장 단건 조회
+    // 공개 옷장 상세 조회
     @Query("""
             SELECT c
             FROM Closet c
@@ -60,7 +60,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
               AND c.isPublic = true
               AND c.id = :closetId
             """)
-    Optional<Closet> findPublicClosetIsDeletedFalse(@Param("closetId") Long closetId);
+    Optional<Closet> findPublicClosetAndIsDeletedFalse(@Param("closetId") Long closetId);
 
     // 수정 혹은 삭제할 옷장 조회
     @Query("""
@@ -68,6 +68,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
             FROM Closet c
             WHERE c.isDeleted = false
               AND c.id = :closetId
+              AND c.user.id = :userId
             """)
-    Optional<Closet> findClosetByIdIsDeletedFalse(@Param("closetId") Long closetId);
+    Optional<Closet> findClosetByIdAndIsDeletedFalse(@Param("userId") Long userId, @Param("closetId") Long closetId);
 }

@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -65,24 +64,14 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     @Override
     public ClothesResponse updateClothes(
             Long userId,
-            Long id,
+            Long clothesId,
             ClothesRequest clothesRequest
     ) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        Clothes clothes = clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
                 () -> {
-                    log.warn("updateClothes - 옷 없음. clothesId={}", id);
-
+                    log.warn("deleteClothes - 옷 없음. clothesId={}", clothesId);
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 });
-
-        if (!Objects.equals(userId, clothes.getUser().getId())) {
-            log.warn("updateClothes - 다른 유저의 의류 접근 시도. userId={}, clothesOwnerId={}, clothesId={}",
-                    userId,
-                    clothes.getUser().getId(),
-                    id
-            );
-            throw new ClothesException(ClothesErrorCode.CLOTHES_FORBIDDEN);
-        }
 
         Category category = categoryQueryService.findById(clothesRequest.getCategoryId());
 
@@ -103,26 +92,16 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     }
 
     @Override
-    public void deleteClothes(Long userId, Long id) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+    public void deleteClothes(Long userId, Long clothesId) {
+        Clothes clothes = clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
                 () -> {
-                    log.warn("deleteClothes - 옷 없음. clothesId={}", id);
-
+                    log.warn("deleteClothes - 옷 없음. clothesId={}", clothesId);
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 });
 
-        if (!Objects.equals(userId, clothes.getUser().getId())) {
-            log.warn("deleteClothes - 다른 유저의 의류 삭제 시도. userId={}, clothesOwnerId={}, clothesId={}",
-                    userId,
-                    clothes.getUser().getId(),
-                    id
-            );
-            throw new ClothesException(ClothesErrorCode.CLOTHES_FORBIDDEN);
-        }
-
         clothes.softDelete();
 
-        clothesImageCommandService.softDeleteAllByClothesId(id);
+        clothesImageCommandService.softDeleteAllByClothesId(clothesId);
     }
 
     @Override
@@ -131,14 +110,12 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
         clothesRepository.clearCategoryFromClothes(categoryIds);
     }
 
+    // todo: 현재 구조상 "유저의 옷인지 검증한 데이터"를 가지고 조회하기에 id로 조회가 가능하게 구현했음. 하지만 추후에 작업할 때 이점 참고해서 리팩토링 진행할 것!
     @Override
     public void updateLastWornAt(Long clothesId, LocalDateTime wornAt) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(clothesId).orElseThrow(
-                () -> {
-                    log.warn("updateLastWornAt - 옷 없음. clothesId={}", clothesId);
-
-                    return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
-                });
+        Clothes clothes = clothesRepository.findById(clothesId).orElseThrow(
+                () -> new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND)
+        );
 
         clothes.updateLastWornAt(wornAt);
     }
@@ -149,21 +126,11 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
             Long clothesId,
             ClothesImageUnlinkRequest clothesImageUnlinkRequest
     ) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(clothesId).orElseThrow(
+        clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
                 () -> {
                     log.warn("removeClothesImages - 옷 없음. clothesId={}", clothesId);
-
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 });
-
-        if (!Objects.equals(userId, clothes.getUser().getId())) {
-            log.warn("removeClothesImages - 타 유저 이미지 삭제 시도. userId={}, clothesOwnerId={}, clothesId={}",
-                    userId,
-                    clothes.getUser().getId(),
-                    clothesId
-            );
-            throw new ClothesException(ClothesErrorCode.CLOTHES_FORBIDDEN);
-        }
 
         clothesImageCommandService.removeClothesImages(clothesId, clothesImageUnlinkRequest.getImageIds());
     }

@@ -46,16 +46,16 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     }
 
     @Override
-    public CategoryResponse updateCategory(Long id, CategoryRequest categoryRequest) {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+    public CategoryResponse updateCategory(Long categoryId, CategoryRequest categoryRequest) {
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(categoryId).orElseThrow(
                 () -> {
-                    log.warn("updateCategory - 수정할 카테고리 존재하지 않음. categoryId={}", id);
+                    log.warn("updateCategory - 수정할 카테고리 존재하지 않음. categoryId={}", categoryId);
 
                     return new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND);
                 }
         );
 
-        Category parent = validateCategory(id, categoryRequest.getParentId());
+        Category parent = validateCategory(categoryId, categoryRequest.getParentId());
 
         category.update(categoryRequest.getName(), parent);
 
@@ -105,18 +105,18 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     }
 
     @Override
-    public void deleteCategory(Long id) {
-        categoryRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> {
-                    log.warn("deleteCategory - 삭제할 카테고리 존재하지 않음. categoryId={}", id);
+    public void deleteCategory(Long categoryId) {
+        categoryRepository.findByIdAndIsDeletedFalse(categoryId).orElseThrow(() -> {
+                    log.warn("deleteCategory - 삭제할 카테고리 존재하지 않음. categoryId={}", categoryId);
 
                     return new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND);
                 }
         );
 
         List<Long> result = new ArrayList<>();
-        result.add(id);
+        result.add(categoryId);
 
-        List<Long> currentCategory = List.of(id);
+        List<Long> currentCategory = List.of(categoryId);
 
         while (!currentCategory.isEmpty()) {
             List<Long> childCategory = categoryRepository.findIdsByParentIds(currentCategory);
@@ -129,8 +129,8 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
             currentCategory = childCategory;
         }
 
-        if (!result.contains(id)) {
-            result.add(id);
+        if (!result.contains(categoryId)) {
+            result.add(categoryId);
         }
 
         if (!result.isEmpty()) {

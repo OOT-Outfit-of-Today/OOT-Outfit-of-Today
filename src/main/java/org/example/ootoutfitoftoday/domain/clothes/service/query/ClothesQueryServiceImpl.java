@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -63,37 +62,16 @@ public class ClothesQueryServiceImpl implements ClothesQueryService {
     }
 
     @Override
-    public ClothesResponse getClothesById(Long userId, Long id) {
-        Clothes clothes = clothesRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+    public ClothesResponse getClothesById(Long userId, Long clothesId) {
+        Clothes clothes = clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
                 () -> {
-                    log.warn("getClothesById - 옷 없음. id={}", id);
+                    log.warn("getClothesById - 옷 없음. id={}", clothesId);
 
                     return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
                 }
         );
-
-        if (!Objects.equals(userId, clothes.getUser().getId())) {
-            log.warn("getClothesById - 권한 없는 접근! userId={}, clothesOwnerId={}, clothesId={}",
-                    userId,
-                    clothes.getUser().getId(),
-                    id
-            );
-            throw new ClothesException(ClothesErrorCode.CLOTHES_FORBIDDEN);
-        }
 
         return ClothesResponse.from(clothes);
-    }
-
-    @Override
-    public Clothes findClothesById(Long id) {
-
-        return clothesRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
-                () -> {
-                    log.warn("findClothesById - 옷 없음. id={}", id);
-
-                    return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
-                }
-        );
     }
 
     @Override
@@ -165,5 +143,13 @@ public class ClothesQueryServiceImpl implements ClothesQueryService {
                 .toList();
 
         return result;
+    }
+
+    @Override
+    public Clothes findClothesByIdAndUserIdAndIsDeletedFalse(Long userId, Long clothesId) {
+
+        return clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
+                () -> new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND)
+        );
     }
 }

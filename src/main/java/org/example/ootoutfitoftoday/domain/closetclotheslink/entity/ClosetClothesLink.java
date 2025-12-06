@@ -27,7 +27,7 @@ public class ClosetClothesLink extends BaseEntity {
     @JoinColumn(name = "clothes_id", nullable = false)
     private Clothes clothes;
 
-    @Builder(access = AccessLevel.PROTECTED)
+    @Builder(access = AccessLevel.PRIVATE)
     private ClosetClothesLink(
             Closet closet,
             Clothes clothes

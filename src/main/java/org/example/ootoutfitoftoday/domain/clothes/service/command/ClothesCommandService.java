@@ -13,11 +13,11 @@ public interface ClothesCommandService {
 
     ClothesResponse updateClothes(
             Long userId,
-            Long id,
+            Long clothesId,
             ClothesRequest clothesRequest
     );
 
-    void deleteClothes(Long userId, Long id);
+    void deleteClothes(Long userId, Long clothesId);
 
     void clearCategoryFromClothes(List<Long> categoryIds);
 

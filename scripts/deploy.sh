@@ -237,8 +237,8 @@ for i in {1..30}; do
       fi
 
       # JSON 파싱 시도
-      if [ -z "$SSM_RESULT" ] || ! echo "${SSM_RESULT}" | jq -e . >/dev/null 2>&1; then
-        echo "Unable to parse logs from SSM"
+      if ! echo "${SSM_RESULT}" | jq -e . >/dev/null 2>&1; then
+        echo "Unable to parse SSM response"
         echo "Raw response:"
         echo "${SSM_RESULT}"
         exit 1

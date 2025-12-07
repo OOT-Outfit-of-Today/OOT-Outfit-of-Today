@@ -14,7 +14,7 @@ import java.time.Duration;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "cache.ttl")
-public class CacheTtlProperties {
+public final class CacheTtlProperties {
 
     // 사용자 정보 캐시 TTL
     // 기본값: 10분

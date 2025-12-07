@@ -13,7 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "redisson")
-public class RedissonProperties {
+public final class RedissonProperties {
 
     // 유휴 연결 타임아웃 (밀리초)
     // 연결이 이 시간 동안 사용되지 않으면 종료

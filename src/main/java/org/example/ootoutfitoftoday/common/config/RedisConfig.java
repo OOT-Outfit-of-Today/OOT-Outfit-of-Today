@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ootcommon.dashboard.constant.DashboardAdminCacheNames;
 import com.ootcommon.dashboard.constant.DashboardUserCacheNames;
+import lombok.RequiredArgsConstructor;
+import org.example.ootoutfitoftoday.common.constant.CacheNames;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -29,9 +31,12 @@ import java.time.Duration;
  * 커스터마이징:
  * - CacheManager: Redis 전용 ObjectMapper + 캐시별 TTL 설정
  */
-@Configuration
 @EnableCaching
+@Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
+
+    private final CacheTtlProperties cacheTtlProperties;
 
     /**
      * 전역 ObjectMapper(JSON 직렬화 공통 설정)
@@ -94,25 +99,26 @@ public class RedisConfig {
             builder.cacheDefaults(defaultConfig);
 
             // 캐시별 커스텀 TTL 설정(개별 설정 안 한 캐시는 기본 TTL 사용)
+            // 모두 상수 + Properties 조합
             builder
-                    .withCacheConfiguration("userCache",
-                            defaultConfig.entryTtl(Duration.ofMinutes(10)))
-                    .withCacheConfiguration("userExistsCache",
-                            defaultConfig.entryTtl(Duration.ofMinutes(1)))
-                    .withCacheConfiguration("salePostListCache",
-                            defaultConfig.entryTtl(Duration.ofMinutes(10)))
+                    .withCacheConfiguration(CacheNames.USER,
+                            defaultConfig.entryTtl(cacheTtlProperties.getUser()))
+                    .withCacheConfiguration(CacheNames.USER_EXISTS,
+                            defaultConfig.entryTtl(cacheTtlProperties.getUserExists()))
+                    .withCacheConfiguration(CacheNames.SALE_POST_LIST,
+                            defaultConfig.entryTtl(cacheTtlProperties.getSalePostList()))
                     .withCacheConfiguration(DashboardAdminCacheNames.USER,
-                            defaultConfig.entryTtl(Duration.ofMinutes(3)))
+                            defaultConfig.entryTtl(cacheTtlProperties.getDashboardAdmin()))
                     .withCacheConfiguration(DashboardAdminCacheNames.CLOTHES,
-                            defaultConfig.entryTtl(Duration.ofMinutes(3)))
+                            defaultConfig.entryTtl(cacheTtlProperties.getDashboardAdmin()))
                     .withCacheConfiguration(DashboardAdminCacheNames.SALE_POST,
-                            defaultConfig.entryTtl(Duration.ofMinutes(3)))
+                            defaultConfig.entryTtl(cacheTtlProperties.getDashboardAdmin()))
                     .withCacheConfiguration(DashboardAdminCacheNames.CATEGORY,
-                            defaultConfig.entryTtl(Duration.ofMinutes(3)))
+                            defaultConfig.entryTtl(cacheTtlProperties.getDashboardAdmin()))
                     .withCacheConfiguration(DashboardUserCacheNames.SUMMARY,
-                            defaultConfig.entryTtl(Duration.ofHours(25)))
+                            defaultConfig.entryTtl(cacheTtlProperties.getDashboardUserSummary()))
                     .withCacheConfiguration(DashboardUserCacheNames.WEAR_STATISTICS,
-                            defaultConfig.entryTtl(Duration.ofHours(25)));
+                            defaultConfig.entryTtl(cacheTtlProperties.getDashboardUserWearStatistics()));
         };
     }
 }

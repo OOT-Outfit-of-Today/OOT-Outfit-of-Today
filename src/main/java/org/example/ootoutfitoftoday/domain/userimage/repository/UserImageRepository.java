@@ -1,6 +1,6 @@
-package org.example.ootoutfitoftoday.domain.salepost.userimage.repository;
+package org.example.ootoutfitoftoday.domain.userimage.repository;
 
-import org.example.ootoutfitoftoday.domain.salepost.userimage.entity.UserImage;
+import org.example.ootoutfitoftoday.domain.userimage.entity.UserImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,12 +1,12 @@
-package org.example.ootoutfitoftoday.domain.salepost.userimage.service.command;
+package org.example.ootoutfitoftoday.domain.userimage.service.command;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
-import org.example.ootoutfitoftoday.domain.salepost.userimage.entity.UserImage;
-import org.example.ootoutfitoftoday.domain.salepost.userimage.exception.UserImageErrorCode;
-import org.example.ootoutfitoftoday.domain.salepost.userimage.exception.UserImageException;
-import org.example.ootoutfitoftoday.domain.salepost.userimage.repository.UserImageRepository;
+import org.example.ootoutfitoftoday.domain.userimage.entity.UserImage;
+import org.example.ootoutfitoftoday.domain.userimage.exception.UserImageErrorCode;
+import org.example.ootoutfitoftoday.domain.userimage.exception.UserImageException;
+import org.example.ootoutfitoftoday.domain.userimage.repository.UserImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -33,7 +33,7 @@ public interface WearRecordRepository extends JpaRepository<WearRecord, Long>, W
 
     // 기준일에 이미 등록을 했다면 예외처리
     @Query("""
-            SELECT wr
+            SELECT CASE WHEN COUNT(wr) > 0 THEN TRUE ELSE FALSE END
             FROM WearRecord wr
             WHERE wr.user.id = :userId
               AND wr.clothes.id = :clothesId

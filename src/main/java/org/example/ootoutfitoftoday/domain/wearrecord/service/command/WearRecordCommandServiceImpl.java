@@ -37,14 +37,14 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
 
         Clothes clothes = clothesQueryService.findClothesByIdAndUserIdAndIsDeletedFalse(userId, request.clothesId());
 
-        // 입력 받은 시각이 있다면 그 시각으로 없다면 api를 접근한 시각으로 등록
+        // 입력 받은 날짜가 있다면 그 날짜로, 없다면 API 호출 시점의 날짜로 등록
         LocalDate wornDate = request.wornDate() == null ? LocalDate.now() : request.wornDate();
+
+        // 미래 혹은 한달 이전 검증 로직
+        validateWornDate(wornDate);
 
         // LocalDate를 LocalDateTime으로 변환
         LocalDateTime wornAt = wornDate.atStartOfDay();
-
-        // 미래 혹은 한달 이전 검증 로직
-        validateWornAt(wornAt);
 
         LocalDateTime startOfDay = wornDate.atStartOfDay(); // 입력된 날의 00시 00분 00초
         LocalDateTime endOfDay = wornDate.plusDays(1).atStartOfDay(); // 입력된 날의 다음날 00시 00분 00초
@@ -70,15 +70,15 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
     }
 
     // 미래 혹은 한달 이전 검증 로직
-    private void validateWornAt(LocalDateTime wornAt) {
-        LocalDateTime now = LocalDateTime.now();
+    private void validateWornDate(LocalDate wornDate) {
+        LocalDate now = LocalDate.now();
 
         // 미래는 예외를 던짐
-        if (wornAt.isAfter(now)) {
+        if (wornDate.isAfter(now)) {
             throw new WearRecordException(WearRecordErrorCode.WORN_AT_IN_FUTURE);
         }
 
-        if (wornAt.isBefore(now.minusMonths(1))) {
+        if (wornDate.isBefore(now.minusDays(30))) {
             throw new WearRecordException(WearRecordErrorCode.WORN_AT_OUT_OF_RANGE);
         }
     }

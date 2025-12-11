@@ -110,14 +110,19 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
         clothesRepository.clearCategoryFromClothes(categoryIds);
     }
 
-    // todo: 현재 구조상 "유저의 옷인지 검증한 데이터"를 가지고 조회하기에 id로 조회가 가능하게 구현했음. 하지만 추후에 작업할 때 이점 참고해서 리팩토링 진행할 것!
     @Override
     public void updateLastWornAt(Long clothesId, LocalDateTime wornAt) {
+        // 메서드가 실행되기 전에 유저의 옷인지 앞에서 검증했음. -> id 값만으로 옷을 간단하게 조회
         Clothes clothes = clothesRepository.findById(clothesId).orElseThrow(
                 () -> new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND)
         );
 
-        clothes.updateLastWornAt(wornAt);
+        LocalDateTime lastWornAt = clothes.getLastWornAt();
+
+        // 오늘 등록하거나 저장된 등록일보다 최근이라면?
+        if (lastWornAt == null || wornAt.isAfter(lastWornAt)) {
+            clothes.updateLastWornAt(wornAt);
+        }
     }
 
     @Override

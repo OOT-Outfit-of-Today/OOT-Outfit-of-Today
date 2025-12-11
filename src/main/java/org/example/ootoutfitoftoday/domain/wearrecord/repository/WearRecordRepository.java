@@ -34,7 +34,7 @@ public interface WearRecordRepository extends JpaRepository<WearRecord, Long>, W
             """)
     boolean existsByUserIdAndClothesIdAndWornAtBetween(
             @Param("userId") Long userId,
-            @Param("clothesId") Long clothsId,
+            @Param("clothesId") Long clothesId,
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay
     );

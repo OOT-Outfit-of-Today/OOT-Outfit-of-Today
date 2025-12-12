@@ -2,7 +2,7 @@ package org.example.ootoutfitoftoday.domain.salepost.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.example.ootoutfitoftoday.domain.salepost.entity.SalePostImage;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 
 @Getter
 @Builder

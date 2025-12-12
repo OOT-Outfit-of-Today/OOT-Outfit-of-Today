@@ -12,6 +12,7 @@ import org.example.ootoutfitoftoday.domain.image.entity.Image;
 import org.example.ootoutfitoftoday.domain.recommendation.entity.Recommendation;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Where;

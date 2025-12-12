@@ -1,6 +1,6 @@
-package org.example.ootoutfitoftoday.domain.salepost.repository;
+package org.example.ootoutfitoftoday.domain.salepostimage.repository;
 
-import org.example.ootoutfitoftoday.domain.salepost.entity.SalePostImage;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

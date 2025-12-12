@@ -1,4 +1,4 @@
-package org.example.ootoutfitoftoday.domain.salepost.entity;
+package org.example.ootoutfitoftoday.domain.salepostimage.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.ootoutfitoftoday.common.entity.BaseEntity;
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
+import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
 

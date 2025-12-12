@@ -15,10 +15,10 @@ import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostUpdateRe
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostDetailResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
-import org.example.ootoutfitoftoday.domain.salepost.entity.SalePostImage;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
-import org.example.ootoutfitoftoday.domain.salepost.repository.SalePostImageRepository;
+import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImageRepository;
 import org.example.ootoutfitoftoday.domain.salepost.repository.SalePostRepository;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;

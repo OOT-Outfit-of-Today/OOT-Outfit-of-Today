@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface SalePostImageRepository extends JpaRepository<SalePostImage, Long> {
 
+    // 활성 이미지 조회
     // 명시적으로 isDeleted = false 조건 추가
     // 이유: @Where/@SQLRestriction 없이 명시적으로 처리
     //      삭제되지 않은 이미지만 조회

@@ -36,6 +36,13 @@ public class Image extends BaseEntity {
     @Column(nullable = false, length = 20)
     private ImageType type;
 
+    // 추가(선택사항): 파일 해시 필드
+    // 설명: 같은 파일 업로드 시 중복 방지
+    // 이유: 투명한 이미지 중복 제거(Phase 4에서 활용)
+    //      SHA-256 해시로 동일 파일 감지
+    @Column(length = 64, unique = true)
+    private String fileHash;
+
     @Builder(access = AccessLevel.PROTECTED)
     public Image(
             String url,
@@ -43,7 +50,8 @@ public class Image extends BaseEntity {
             String s3Key,
             String contentType,
             Long size,
-            ImageType type
+            ImageType type,
+            String fileHash
     ) {
         this.url = url;
         this.fileName = fileName;
@@ -51,6 +59,7 @@ public class Image extends BaseEntity {
         this.contentType = contentType;
         this.size = size;
         this.type = type;
+        this.fileHash = fileHash;
     }
 
     public static Image create(
@@ -59,7 +68,8 @@ public class Image extends BaseEntity {
             String s3Key,
             String contentType,
             Long size,
-            ImageType type
+            ImageType type,
+            String fileHash
     ) {
         return Image.builder()
                 .url(url)
@@ -68,6 +78,20 @@ public class Image extends BaseEntity {
                 .contentType(contentType)
                 .size(size)
                 .type(type)
+                .fileHash(fileHash)
                 .build();
+    }
+
+    // 추가: 기존 create 메서드 오버로딩(하위 호환성)
+    // 설명: 기존 코드와의 호환성을 위해 fileHash 없는 버전 유지
+    public static Image create(
+            String url,
+            String fileName,
+            String s3Key,
+            String contentType,
+            Long size,
+            ImageType type
+    ) {
+        return create(url, fileName, s3Key, contentType, size, type, null);
     }
 }

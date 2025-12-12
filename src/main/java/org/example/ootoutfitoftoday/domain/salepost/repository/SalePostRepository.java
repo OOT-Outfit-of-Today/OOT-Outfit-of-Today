@@ -22,11 +22,13 @@ public interface SalePostRepository extends JpaRepository<SalePost, Long> {
 
     Optional<SalePost> findByIdAndIsDeletedFalse(Long salePostId);
 
+    // 수정: LEFT JOIN FETCH sp.images 제거
+    // 이유: SalePost에 images 필드가 없음(단방향으로 전환)
+    //      이미지가 필요하면 SalePostImageRepository에서 별도 조회
     @Query("""
             SELECT sp FROM SalePost sp
             JOIN FETCH sp.user u
             JOIN FETCH sp.category c
-            LEFT JOIN FETCH sp.images i
             WHERE sp.id = :salePostId
             AND sp.isDeleted = false
             """)

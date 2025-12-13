@@ -6,10 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
-import org.example.ootoutfitoftoday.domain.clothesImage.dto.reponse.ClothesImageResponse;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -22,13 +18,8 @@ public class ClothesResponse {
     private final ClothesSize clothesSize;
     private final ClothesColor clothesColor;
     private final String description;
-    private final List<ClothesImageResponse> clothesImages;
 
     public static ClothesResponse from(Clothes clothes) {
-
-        List<ClothesImageResponse> imageResponses = clothes.getImages().stream()
-                .map(ClothesImageResponse::from)
-                .collect(Collectors.toList());
 
         return ClothesResponse.builder()
                 .id(clothes.getId())
@@ -41,7 +32,6 @@ public class ClothesResponse {
                 .clothesSize(clothes.getClothesSize())
                 .clothesColor(clothes.getClothesColor())
                 .description(clothes.getDescription())
-                .clothesImages(imageResponses)
                 .build();
     }
 }

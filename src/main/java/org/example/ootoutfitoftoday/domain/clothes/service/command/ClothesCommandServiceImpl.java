@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -47,16 +46,10 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
                 user,
                 clothesRequest.getClothesSize(),
                 clothesRequest.getClothesColor(),
-                clothesRequest.getDescription(),
-                new ArrayList<>()
+                clothesRequest.getDescription()
         );
 
         Clothes savedClothes = clothesRepository.save(clothes);
-
-        if (clothesRequest.getImages() != null && !clothesRequest.getImages().isEmpty()) {
-
-            clothesImageCommandService.saveClothesImages(savedClothes, clothesRequest.getImages());
-        }
 
         return ClothesResponse.from(savedClothes);
     }
@@ -79,14 +72,8 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
                 category,
                 clothesRequest.getClothesSize(),
                 clothesRequest.getClothesColor(),
-                clothesRequest.getDescription(),
-                new ArrayList<>()
+                clothesRequest.getDescription()
         );
-
-        if (clothesRequest.getImages() != null && !clothesRequest.getImages().isEmpty()) {
-
-            clothesImageCommandService.updateClothesImages(clothes, clothesRequest.getImages());
-        }
 
         return ClothesResponse.from(clothes);
     }

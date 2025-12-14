@@ -8,7 +8,7 @@ public interface ClothesImageCommandService {
 
     void saveClothesImages(Clothes clothes, List<Long> imageIds);
 
-    void updateClothesImages(Clothes clothes, List<Long> newImageIds);
+    void changeMainImage(Long clothesId, Long clothesImageId);
 
     void removeClothesImages(Long clothesId, List<Long> imageIds);
 

@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@NoArgsConstructor(force = true)
-@AllArgsConstructor
 public class SalePostListResponse {
 
     private final Long salePostId;

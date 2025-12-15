@@ -71,7 +71,7 @@ public interface SalePostController {
 
     @Operation(
             summary = "판매글 수정",
-            description = "기존 판매글을 수정합니다.",
+            description = "기존 판매글을 수정합니다.(이미지 제외)",
             security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
                     @ApiResponse(responseCode = "200", description = "수정 성공"),

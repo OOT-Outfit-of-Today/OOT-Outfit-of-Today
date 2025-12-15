@@ -81,7 +81,7 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @PutMapping("/{salePostId}")
+    @PatchMapping("/{salePostId}")
     public ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
             @PathVariable Long salePostId,
             @AuthenticationPrincipal AuthUser authUser,

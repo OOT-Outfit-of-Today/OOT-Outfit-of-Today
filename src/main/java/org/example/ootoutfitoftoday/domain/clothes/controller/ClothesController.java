@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
-import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesImageUnlinkRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
 import org.springframework.http.ResponseEntity;
@@ -89,17 +88,5 @@ public interface ClothesController {
     ResponseEntity<Response<Void>> deleteClothes(
             AuthUser authUser,
             Long clothesId
-    );
-
-    @Operation(
-            summary = "해당 옷에 등록된 이미지 제거",
-            description = "회원이 자신의 옷에 등록된 이미지를 제거합니다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "삭제 성공")
-            })
-    ResponseEntity<Response<Void>> removeClothesImages(
-            AuthUser authUser,
-            Long clothesId,
-            ClothesImageUnlinkRequest clothesImageUnlinkRequest
     );
 }

@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
-import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesImageUnlinkRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesSuccessCode;
@@ -92,21 +91,5 @@ public class ClothesControllerImpl implements ClothesController {
         clothesCommandService.deleteClothes(authUser.getUserId(), clothesId);
 
         return Response.success(null, ClothesSuccessCode.CLOTHES_DELETE);
-    }
-
-    @Override
-    @PostMapping("/{clothesId}/images/remove")
-    public ResponseEntity<Response<Void>> removeClothesImages(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long clothesId,
-            @RequestBody ClothesImageUnlinkRequest clothesImageUnlinkRequest
-    ) {
-        clothesCommandService.removeClothesImages(
-                authUser.getUserId(),
-                clothesId,
-                clothesImageUnlinkRequest
-        );
-
-        return Response.success(null, ClothesSuccessCode.CLOTHES_IMAGE_REMOVE);
     }
 }

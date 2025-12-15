@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@AllArgsConstructor    // TODO: Native Query 매핑용, Native Query 수정 후 제거 고려
 public class SalePostListResponse {
 
     private final Long salePostId;

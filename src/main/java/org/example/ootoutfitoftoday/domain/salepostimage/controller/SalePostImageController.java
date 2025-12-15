@@ -51,8 +51,6 @@ public class SalePostImageController {
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody @Valid SalePostImageRequest request
     ) {
-        log.info("Replacing images for salePost {} - count: {}", salePostId, request.getImageIds().size());
-
         List<SalePostImageResponse> response = salePostImageCommandService.replaceImages(
                 salePostId,
                 authUser.getUserId(),

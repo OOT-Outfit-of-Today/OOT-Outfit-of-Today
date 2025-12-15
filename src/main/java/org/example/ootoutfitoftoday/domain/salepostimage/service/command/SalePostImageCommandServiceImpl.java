@@ -257,6 +257,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
 
     // 권한 검증 헬퍼 메서드
     private SalePost validateOwnership(Long salePostId, Long userId) {
+
         SalePost salePost = salePostQueryService.findSalePostById(salePostId);
 
         if (!salePost.isOwnedBy(userId)) {

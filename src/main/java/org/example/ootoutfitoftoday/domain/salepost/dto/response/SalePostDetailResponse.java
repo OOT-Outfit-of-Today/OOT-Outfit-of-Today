@@ -6,6 +6,8 @@ import lombok.Getter;
 import org.example.ootoutfitoftoday.common.util.Location;
 import org.example.ootoutfitoftoday.common.util.PointFormatAndParse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
+import org.example.ootoutfitoftoday.domain.salepostimage.dto.response.SalePostImageResponse;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,10 +29,11 @@ public class SalePostDetailResponse {
     private final String sellerNickname;
     private final String sellerImageUrl;
     private final String categoryName;
-    private final List<SalePostImageResponse> images;
+    private final List<SalePostImageResponse> images;    // null 가능
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
+    // 수정: SalePost만으로 생성(이미지 없이)
     public static SalePostDetailResponse from(SalePost salePost) {
         Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
 
@@ -47,7 +50,33 @@ public class SalePostDetailResponse {
                 .sellerNickname(salePost.getUser().getNickname())
                 .sellerImageUrl(salePost.getUser().getImageUrl())
                 .categoryName(salePost.getCategory().getName())
-                .images(salePost.getImages().stream()
+                .images(null)
+                .createdAt(salePost.getCreatedAt())
+                .updatedAt(salePost.getUpdatedAt())
+                .build();
+    }
+
+    // 추가: SalePost + SalePostImage 리스트로 생성
+    public static SalePostDetailResponse fromWithImages(
+            SalePost salePost,
+            List<SalePostImage> salePostImages
+    ) {
+        Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
+
+        return SalePostDetailResponse.builder()
+                .salePostId(salePost.getId())
+                .title(salePost.getTitle())
+                .content(salePost.getContent())
+                .price(salePost.getPrice())
+                .status(salePost.getStatus())
+                .tradeAddress(salePost.getTradeAddress())
+                .tradeLatitude(location.latitude())
+                .tradeLongitude(location.longitude())
+                .sellerId(salePost.getUser().getId())
+                .sellerNickname(salePost.getUser().getNickname())
+                .sellerImageUrl(salePost.getUser().getImageUrl())
+                .categoryName(salePost.getCategory().getName())
+                .images(salePostImages.stream()
                         .map(SalePostImageResponse::from)
                         .toList())
                 .createdAt(salePost.getCreatedAt())

@@ -124,7 +124,7 @@ public class SalePostControllerImpl implements SalePostController {
 
     @Override
     @GetMapping("/my")
-    public ResponseEntity<Response<Slice<SalePostSummaryResponse>>> getMySalePosts(
+    public ResponseEntity<Response<Slice<SalePostListResponse>>> getMySalePosts(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) SaleStatus status,
             @RequestParam(defaultValue = "0") int page,
@@ -134,7 +134,7 @@ public class SalePostControllerImpl implements SalePostController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
-        Slice<SalePostSummaryResponse> response = salePostQueryService.findMySalePosts(
+        Slice<SalePostListResponse> response = salePostQueryService.findMySalePosts(
                 authUser.getUserId(),
                 status,
                 pageable
@@ -145,7 +145,7 @@ public class SalePostControllerImpl implements SalePostController {
 
     @Override
     @GetMapping("/public")
-    public ResponseEntity<Response<Slice<SalePostPublicListResponse>>> getNotAuthSalePosts(
+    public ResponseEntity<Response<Slice<SalePostListResponse>>> getNotAuthSalePosts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) SaleStatus status,
             @RequestParam(required = false) String keyword,
@@ -156,7 +156,7 @@ public class SalePostControllerImpl implements SalePostController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
-        Slice<SalePostPublicListResponse> salePosts = salePostQueryService.getNotAuthSalePostList(
+        Slice<SalePostListResponse> salePosts = salePostQueryService.getNotAuthSalePostList(
                 categoryId,
                 status,
                 keyword,

@@ -131,7 +131,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "404", description = "요청 리소스를 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<Slice<SalePostSummaryResponse>>> getMySalePosts(
+    ResponseEntity<Response<Slice<SalePostListResponse>>> getMySalePosts(
             AuthUser authUser,
             @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
             int page,
@@ -147,7 +147,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "200", description = "조회 성공")
             }
     )
-    ResponseEntity<Response<Slice<SalePostPublicListResponse>>> getNotAuthSalePosts(
+    ResponseEntity<Response<Slice<SalePostListResponse>>> getNotAuthSalePosts(
             @Parameter(description = "카테고리 ID") Long categoryId,
             @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
             @Parameter(description = "검색어 (제목/내용 검색)") String keyword,

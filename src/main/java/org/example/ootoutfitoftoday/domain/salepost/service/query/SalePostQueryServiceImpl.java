@@ -129,7 +129,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
     }
 
     @Override
-    public Slice<SalePostSummaryResponse> findMySalePosts(
+    public Slice<SalePostListResponse> findMySalePosts(
             Long userId,
             SaleStatus status,
             Pageable pageable
@@ -186,7 +186,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
                 results;
 
         // Object[] 매핑(thumbnailUrl 포함)
-        List<SalePostSummaryResponse> responseContent = content.stream()
+        List<SalePostListResponse> responseContent = content.stream()
                 .map(this::mapToSalePostSummaryResponse)
                 .toList();
 
@@ -195,13 +195,13 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
     // 추가: Object[] -> SalePostSummaryResponse 매핑
     // 설명: Native Query 결과를 Response DTO로 변환
-    private SalePostSummaryResponse mapToSalePostSummaryResponse(Object[] row) {
+    private SalePostListResponse mapToSalePostSummaryResponse(Object[] row) {
         String tradeLocationStr = (String) row[6];
         Location location = PointFormatAndParse.parse(tradeLocationStr);
 
         String thumbnailUrl = row.length > 14 ? (String) row[14] : null;    // 썸네일
 
-        return SalePostSummaryResponse.builder()
+        return SalePostListResponse.builder()
                 .salePostId(((Number) row[0]).longValue())
                 .title((String) row[1])
                 .price((BigDecimal) row[3])
@@ -221,7 +221,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
     }
 
     @Override
-    public Slice<SalePostPublicListResponse> getNotAuthSalePostList(
+    public Slice<SalePostListResponse> getNotAuthSalePostList(
             Long categoryId,
             SaleStatus status,
             String keyword,
@@ -288,18 +288,18 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
                 results.subList(0, pageable.getPageSize()) :
                 results;
 
-        List<SalePostPublicListResponse> responseContent = content.stream()
+        List<SalePostListResponse> responseContent = content.stream()
                 .map(this::mapToSalePostPublicListResponse)
                 .toList();
 
         return new SliceImpl<>(responseContent, pageable, hasNext);
     }
 
-    private SalePostPublicListResponse mapToSalePostPublicListResponse(Object[] row) {
+    private SalePostListResponse mapToSalePostPublicListResponse(Object[] row) {
         String tradeLocationStr = (String) row[5];
         Location location = PointFormatAndParse.parse(tradeLocationStr);
 
-        return SalePostPublicListResponse.builder()
+        return SalePostListResponse.builder()
                 .salePostId(((Number) row[0]).longValue())
                 .title((String) row[1])
                 .price((BigDecimal) row[2])

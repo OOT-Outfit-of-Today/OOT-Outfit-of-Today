@@ -29,7 +29,7 @@ public interface SalePostImageRepository extends JpaRepository<SalePostImage, Lo
     @Query("""
             SELECT spi
             FROM SalePostImage spi
-            JOIN FETCH spi.image i
+            JOIN FETCH spi.image
             WHERE spi.salePost.id = :salePostId
             AND spi.isDeleted = false
             ORDER BY spi.displayOrder ASC
@@ -48,11 +48,12 @@ public interface SalePostImageRepository extends JpaRepository<SalePostImage, Lo
     long countByImageId(@Param("imageId") Long imageId);
 
     // 추가: 메인 이미지 조회
-    // 이유: 썸네일 표시용
+    // 설명: 판매글의 썸네일로 사용할 메인 이미지 조회
+    //      목록 조회 시 사용(Native Query 대체용)
     @Query("""
             SELECT spi
             FROM SalePostImage spi
-            JOIN FETCH spi.image i
+            JOIN FETCH spi.image
             WHERE spi.salePost.id = :salePostId
             AND spi.isMain = true
             AND spi.isDeleted = false

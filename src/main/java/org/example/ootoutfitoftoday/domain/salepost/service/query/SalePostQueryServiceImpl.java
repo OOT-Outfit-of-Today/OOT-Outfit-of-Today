@@ -17,6 +17,8 @@ import org.example.ootoutfitoftoday.domain.salepost.repository.SalePostRepositor
 import org.example.ootoutfitoftoday.domain.salepost.service.cache.SalePostCacheService;
 import org.example.ootoutfitoftoday.domain.salepost.util.NativeQuerySortUtil;
 import org.example.ootoutfitoftoday.domain.salepost.util.SliceContent;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
+import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImageRepository;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +42,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
     private final SalePostCacheService salePostCacheService;
     private final UserQueryService userQueryService;
     private final EntityManager entityManager;
+    private final SalePostImageRepository salePostImageRepository;
 
     private static SliceContent sliceAndQueryResult(Query query, Pageable pageable) {
         int offset = pageable.getPageNumber() * pageable.getPageSize();
@@ -71,7 +74,11 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
         SalePost salePost = findSalePostById(salePostId);
 
-        return SalePostDetailResponse.from(salePost);
+        // 이미지 별도 조회
+        List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
+
+        // 이미지 포함하여 Response 생성
+        return SalePostDetailResponse.fromWithImages(salePost, salePostImages);
     }
 
     @Override
@@ -127,6 +134,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
             SaleStatus status,
             Pageable pageable
     ) {
+        // Native Query 수정(이미지 서브쿼리 추가)
         String baseSql = """
                 SELECT
                     s.id,
@@ -142,7 +150,14 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
                     s.created_at,
                     s.updated_at,
                     s.is_deleted,
-                    s.deleted_at
+                    s.deleted_at,
+                    (SELECT i.url
+                     FROM sale_post_images spi
+                     JOIN images i ON spi.image_id = i.id
+                     WHERE spi.sale_post_id = s.id
+                     AND spi.is_main = TRUE
+                     AND spi.is_deleted = FALSE
+                     LIMIT 1) AS thumbnail_url
                 FROM sale_posts s
                 WHERE s.is_deleted = FALSE
                 AND s.user_id = :userId
@@ -151,16 +166,52 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
         String finalSql = NativeQuerySortUtil.buildOrderClause(baseSql, pageable);
 
-        Query query = entityManager.createNativeQuery(finalSql, SalePost.class);
+        Query query = entityManager.createNativeQuery(finalSql);
 
         query.setParameter("userId", userId);
         query.setParameter("status", status != null ? status.name() : null);
 
-        SliceContent sliceContent = sliceAndQueryResult(query, pageable);
+        int offset = pageable.getPageNumber() * pageable.getPageSize();
+        int limit = pageable.getPageSize() + 1;
 
-        List<SalePostSummaryResponse> responseContent = sliceContent.content().stream().map(SalePostSummaryResponse::from).toList();
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
 
-        return new SliceImpl<>(responseContent, pageable, sliceContent.hasNext());
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        boolean hasNext = results.size() > pageable.getPageSize();
+        List<Object[]> content = hasNext ?
+                results.subList(0, pageable.getPageSize()) :
+                results;
+
+        // Object[] 매핑(thumbnailUrl 포함)
+        List<SalePostSummaryResponse> responseContent = content.stream()
+                .map(this::mapToSalePostSummaryResponse)
+                .toList();
+
+        return new SliceImpl<>(responseContent, pageable, hasNext);
+    }
+
+    // 추가: Object[] -> SalePostSummaryResponse 매핑
+    // 설명: Native Query 결과를 Response DTO로 변환
+    private SalePostSummaryResponse mapToSalePostSummaryResponse(Object[] row) {
+        String tradeLocationStr = (String) row[6];
+        Location location = PointFormatAndParse.parse(tradeLocationStr);
+
+        String thumbnailUrl = row.length > 14 ? (String) row[14] : null;    // 썸네일
+
+        return SalePostSummaryResponse.builder()
+                .salePostId(((Number) row[0]).longValue())
+                .title((String) row[1])
+                .price((BigDecimal) row[3])
+                .status(SaleStatus.valueOf((String) row[4]))
+                .tradeAddress((String) row[5])
+                .tradeLatitude(location.latitude())
+                .tradeLongitude(location.longitude())
+                .thumbnailUrl(thumbnailUrl)    // 외부에서 받은 값
+                .createdAt(((java.sql.Timestamp) row[10]).toLocalDateTime())
+                .build();
     }
 
     @Override
@@ -176,6 +227,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
             String keyword,
             Pageable pageable
     ) {
+        // Native Query 수정(이미지 서브쿼리)
         String baseSql = """
                 SELECT
                     s.id,
@@ -184,8 +236,9 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
                     s.status,
                     s.trade_address,
                     ST_AsText(s.trade_location) AS trade_location,
-                    (SELECT spi.image_url
+                    (SELECT i.url
                      FROM sale_post_images spi
+                     JOIN images i ON spi.image_id = i.id
                      WHERE spi.sale_post_id = s.id
                      AND spi.is_main = TRUE
                      AND spi.is_deleted = FALSE
@@ -249,12 +302,12 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
         return SalePostPublicListResponse.builder()
                 .salePostId(((Number) row[0]).longValue())
                 .title((String) row[1])
-                .price((java.math.BigDecimal) row[2])
+                .price((BigDecimal) row[2])
                 .status(SaleStatus.valueOf((String) row[3]))
                 .tradeAddress((String) row[4])
                 .tradeLatitude(location.latitude())
                 .tradeLongitude(location.longitude())
-                .thumbnailUrl((String) row[6])
+                .thumbnailUrl((String) row[6])    // 서브쿼리에서 조회한 URL
                 .sellerNickname((String) row[7])
                 .categoryName((String) row[8])
                 .createdAt(((java.sql.Timestamp) row[9]).toLocalDateTime())

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Slf4j
-@Tag(name = "판매글 이미지 관리", description = "판매글 이미지 추가/수정/삭제 API (하이브리드 방식)")
+@Tag(name = "판매글 이미지 관리", description = "판매글 이미지 추가/수정/삭제 API")
 @RestController
 @RequestMapping("/v1/sale-posts/{salePostId}/images")
 @RequiredArgsConstructor

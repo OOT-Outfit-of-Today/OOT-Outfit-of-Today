@@ -40,8 +40,6 @@ public class SalePostCacheServiceImpl implements SalePostCacheService {
             String keyword,
             Pageable pageable
     ) {
-        log.info("SalePostCacheService.getCachedSalePostList : latitude={}, longitude={}", latitude, longitude);
-
         // Native Query 수정(이미지 서브쿼리)
         String baseSql = """
                 SELECT

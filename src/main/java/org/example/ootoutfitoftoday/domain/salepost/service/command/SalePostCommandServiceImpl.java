@@ -51,6 +51,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     @Override
     @CacheEvict(value = "salePostListCache", allEntries = true)
     public SalePostCreateResponse createSalePost(Long userId, SalePostCreateRequest request) {
+
         User user = userQueryService.findByIdAndIsDeletedFalse(userId);
 
         Category category = categoryQueryService.findById(request.getCategoryId());
@@ -82,7 +83,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
                 salePost.getTradeLocation(),
                 salePost.getUser().getId(),
                 salePost.getCategory().getId(),
-                null,    // 일반 판매글 생성 시 recommendationId는 null (추천과 무관)
+                null,    // 일반 판매글 생성 시 recommendationId는 null(추천과 무관)
                 false
         );
 
@@ -155,8 +156,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         // SalePostImage 생성
         List<SalePostImage> salePostImages = createSalePostImages(salePostId, imageIds);
 
-        SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+        SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
+                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         return SalePostCreateResponse.fromWithImages(savedSalePost, salePostImages);
     }
@@ -209,8 +210,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
             SalePostUpdateRequest request
     ) {
         // 권한 및 상태 검증
-        SalePost salePost = salePostRepository.findByIdWithDetailsAndNotDeleted(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+        SalePost salePost = salePostRepository.findByIdWithDetailsAndNotDeleted(salePostId).orElseThrow(
+                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         if (!salePost.isOwnedBy(userId)) {
             log.warn("권한 없는 접근 - salePostId: {}, userId: {}", salePostId, userId);
@@ -227,8 +228,6 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
         String tradeLocation = PointFormatAndParse.format(request.getTradeLatitude(), request.getTradeLongitude());
 
-        log.info("tradeLocation: {}", tradeLocation);
-
         // SalePost 정보만 업데이트(이미지 제외)
         salePostRepository.updateAsNativeQuery(
                 salePostId,
@@ -243,8 +242,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         entityManager.clear();
 
         // 이미지와 함께 조회하여 반환
-        SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+        SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
+                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
 
@@ -256,8 +255,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     @Override
     @CacheEvict(value = "salePostListCache", allEntries = true)
     public void deleteSalePost(Long salePostId, Long userId) {
-        SalePost salePost = salePostRepository.findByIdAndIsDeletedFalse(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+
+        SalePost salePost = salePostRepository.findByIdAndIsDeletedFalse(salePostId).orElseThrow(
+                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         if (!salePost.isOwnedBy(userId)) {
             log.warn("권한 없는 삭제 시도 - salePostId: {}, userId: {}", salePostId, userId);
@@ -288,8 +288,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
             Long userId,
             SaleStatus newStatus
     ) {
-        SalePost salePost = salePostRepository.findByIdWithDetailsAndNotDeleted(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+        SalePost salePost = salePostRepository.findByIdWithDetailsAndNotDeleted(salePostId).orElseThrow(
+                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         if (!salePost.isOwnedBy(userId)) {
             log.warn("권한 없는 상태 변경 시도 - salePostId: {}, userId: {}, 요청 상태: {}", salePostId, userId, newStatus);
@@ -301,8 +301,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         salePostRepository.flush();
         entityManager.clear();
 
-        SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+        SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
+                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         // 이미지와 함께 반환
         List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);

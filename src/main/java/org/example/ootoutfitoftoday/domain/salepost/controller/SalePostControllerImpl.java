@@ -46,8 +46,9 @@ public class SalePostControllerImpl implements SalePostController {
 
     @Override
     @GetMapping("/{salePostId}")
-    public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(@PathVariable Long salePostId) {
-
+    public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(
+            @PathVariable Long salePostId
+    ) {
         SalePostDetailResponse response = salePostQueryService.getSalePostDetail(salePostId);
 
         return Response.success(response, SalePostSuccessCode.SALE_POST_RETRIEVED);
@@ -66,8 +67,6 @@ public class SalePostControllerImpl implements SalePostController {
             @AuthenticationPrincipal AuthUser authUser
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
-
-        log.info("[GET] /v1/sale-posts: categoryId={}, status={}, keyword={}, pageable={}", categoryId, status, keyword, pageable);
 
         Slice<SalePostListResponse> salePosts = salePostQueryService.getSalePostList(
                 authUser.getUserId(),

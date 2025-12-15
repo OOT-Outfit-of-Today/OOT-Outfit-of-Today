@@ -108,7 +108,7 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @PatchMapping("/{salePostId}/status")
+    @PatchMapping("/{salePostId}/status")    // TODO: http 메서드에 맞춰, Request DTO/Service 수정
     public ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
             @PathVariable Long salePostId,
             @AuthenticationPrincipal AuthUser authUser,

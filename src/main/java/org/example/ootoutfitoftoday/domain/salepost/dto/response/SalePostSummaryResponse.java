@@ -21,10 +21,13 @@ public class SalePostSummaryResponse {
     private final String tradeAddress;
     private final BigDecimal tradeLatitude;
     private final BigDecimal tradeLongitude;
-    private final String thumbnailUrl;
+    private final String thumbnailUrl;    // 외부에서 전달받음
     private final LocalDateTime createdAt;
 
-    public static SalePostSummaryResponse from(SalePost salePost) {
+    // 수정: thumbnailUrl을 파라미터로 받음
+    // 설명: 단방향으로 수정됨(SalePost.images 제거)
+    //      -> Service에서 별도 조회한 thumbnailUrl 전달받음
+    public static SalePostSummaryResponse from(SalePost salePost, String thumbnailUrl) {
         Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
 
         return SalePostSummaryResponse.builder()
@@ -35,16 +38,8 @@ public class SalePostSummaryResponse {
                 .tradeAddress(salePost.getTradeAddress())
                 .tradeLatitude(location.latitude())
                 .tradeLongitude(location.longitude())
-                .thumbnailUrl(getThumbnailUrl(salePost))
+                .thumbnailUrl(thumbnailUrl)    // 외부에서 받은 값 사용
                 .createdAt(salePost.getCreatedAt())
                 .build();
-    }
-
-    private static String getThumbnailUrl(SalePost salePost) {
-        if (salePost.getImages() == null || salePost.getImages().isEmpty()) {
-            return null;
-        }
-
-        return salePost.getImages().get(0).getImageUrl();
     }
 }

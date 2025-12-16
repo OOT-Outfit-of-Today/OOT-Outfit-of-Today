@@ -9,6 +9,7 @@ import org.example.ootoutfitoftoday.common.exception.GlobalException;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -129,6 +130,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(CommonErrorCode.MISSING_REQUEST_PARAMETER.getHttpStatus())
                 .body(Response.error(detailMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER));
+    }
+
+    // [HTTP 메서드 불일치] 지원하지 않는 HTTP 메서드로 요청할 때
+    // 담당: POST인데 GET으로 요청, GET인데 POST로 요청 등
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Response<String>> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex
+    ) {
+        log.warn("지원하지 않는 HTTP 메서드 - 요청 메서드: {}, 지원 메서드: {}",
+                ex.getMethod(),
+                ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "없음");
+
+        String detailMessage = String.format(
+                "%s 메서드는 지원하지 않습니다. 지원하는 메서드: %s",
+                ex.getMethod(),
+                ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "없음"
+        );
+
+        return ResponseEntity
+                .status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())
+                .body(Response.error(detailMessage, CommonErrorCode.METHOD_NOT_ALLOWED));
     }
 
     // 내부 헬퍼 메서드: ErrorCode를 Response로 변환

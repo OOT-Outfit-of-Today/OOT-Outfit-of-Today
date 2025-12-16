@@ -10,10 +10,7 @@ public class SalePostImageResponse {
 
     // SalePostImage의 ID(중간 테이블 ID)
     private final Long salePostImageId;
-    // 실제 Image의 ID
-    private final Long imageId;
     private final String imageUrl;
-    private final String fileName;
     private final Integer displayOrder;
     private final Boolean isMain;
 
@@ -22,9 +19,7 @@ public class SalePostImageResponse {
     public static SalePostImageResponse from(SalePostImage salePostImage) {
         return SalePostImageResponse.builder()
                 .salePostImageId(salePostImage.getId())
-                .imageId(salePostImage.getImage().getId())    // Image ID 추가
                 .imageUrl(salePostImage.getImageUrl())        // 편의 메서드 사용
-                .fileName(salePostImage.getFileName())        // 편의 메서드 사용
                 .displayOrder(salePostImage.getDisplayOrder())
                 .isMain(salePostImage.getIsMain())
                 .build();

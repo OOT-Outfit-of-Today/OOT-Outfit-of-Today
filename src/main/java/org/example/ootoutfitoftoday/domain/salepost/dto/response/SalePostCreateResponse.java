@@ -27,7 +27,7 @@ public class SalePostCreateResponse {
     private final BigDecimal tradeLongitude;
     private final Long userId;
     private final Long categoryId;
-    private final List<SalePostImageResponse> images;    // null 가능
+    private final List<SalePostImageResponse> images;
     private final LocalDateTime createdAt;
 
     // 수정: SalePost만으로 생성(이미지 없이)
@@ -46,7 +46,7 @@ public class SalePostCreateResponse {
                 .tradeLongitude(location.longitude())
                 .userId(salePost.getUser().getId())
                 .categoryId(salePost.getCategory().getId())
-                .images(null)    // 이미지 없음
+                .images(List.of())    // 이미지 없음. 빈 리스트 출력
                 .createdAt(salePost.getCreatedAt())
                 .build();
     }
@@ -66,6 +66,8 @@ public class SalePostCreateResponse {
                 .tradeAddress(salePost.getTradeAddress())
                 .tradeLatitude(location.latitude())
                 .tradeLongitude(location.longitude())
+                .userId(salePost.getUser().getId())
+                .categoryId(salePost.getCategory().getId())
                 .images(salePostImages.stream()
                         .map(SalePostImageResponse::from)
                         .toList())

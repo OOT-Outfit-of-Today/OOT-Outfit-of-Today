@@ -10,6 +10,7 @@ import org.example.ootoutfitoftoday.common.response.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -108,6 +109,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
                 .body(Response.error(detailMessage, CommonErrorCode.INVALID_INPUT_VALUE));
+    }
+
+    // [필수 요청 파라미터 누락] @RequestParam(required=true) 파라미터가 없을 때
+    // 담당: 쿼리 파라미터 누락
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Response<String>> handleMissingParameter(
+            MissingServletRequestParameterException ex
+    ) {
+        log.warn("필수 파라미터 누락 - 파라미터: {}, 타입: {}",
+                ex.getParameterName(),
+                ex.getParameterType());
+
+        String detailMessage = String.format(
+                "필수 파라미터 '%s'가 누락되었습니다",
+                ex.getParameterName()
+        );
+
+        return ResponseEntity
+                .status(CommonErrorCode.MISSING_REQUEST_PARAMETER.getHttpStatus())
+                .body(Response.error(detailMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER));
     }
 
     // 내부 헬퍼 메서드: ErrorCode를 Response로 변환

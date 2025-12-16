@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // 진짜 예상하지 못한 서버 오류만 여기서 처리(마지막 안전망)
+    // DB 연결 실패, NullPointerException 등 개발자가 놓친 버그들
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
         log.error("알 수 없는 서버 오류 발생", ex);
@@ -26,6 +28,8 @@ public class GlobalExceptionHandler {
                 .body(Response.error(null, CommonErrorCode.UNEXPECTED_SERVER_ERROR));
     }
 
+    // 비즈니스 로직(Service)에서 의도적으로 던진 예외 처리
+    // 예: 존재하지 않는 리소스, 권한 없음, 중복 데이터, 비즈니스 규칙 위반
     @ExceptionHandler(GlobalException.class)
     public ResponseEntity<Response<Void>> handleGlobalException(GlobalException ex) {
         log.warn("비즈니스 오류 발생: {}", ex.getMessage());
@@ -33,18 +37,21 @@ public class GlobalExceptionHandler {
         return handleExceptionInternal(ex.getErrorCode());
     }
 
+    // JSON 파싱 실패 처리
+    // 잘못된 JSON 형식이나 타입 불일치 등을 400으로 처리
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Response<String>> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException e
-    ) {
+    public ResponseEntity<Response<String>> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
         log.warn("JSON 파싱 실패: {}", e.getMessage());
 
         String detailMessage = "요청 데이터 형식이 올바르지 않습니다";
 
+        // 원인 분석해서 더 구체적인 메시지 제공
         Throwable cause = e.getCause();
         if (cause instanceof JsonParseException) {
+            // JSON 자체가 잘못된 경우
             detailMessage = "JSON 형식이 올바르지 않습니다";
         } else if (cause instanceof InvalidFormatException) {
+            // 타입 변환 실패
             InvalidFormatException ife = (InvalidFormatException) cause;
             String fieldName = ife.getPath().isEmpty()
                     ? "알 수 없는 필드"
@@ -57,6 +64,8 @@ public class GlobalExceptionHandler {
                 .body(Response.error(detailMessage, CommonErrorCode.INVALID_REQUEST_BODY));
     }
 
+    // Bean Validation 실패 처리(@NotNull 등)
+    // 필드가 없거나, 범위를 벗어나거나, 형식이 맞지 않을 때
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Response<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         log.warn("Validation 오류 발생: {}", ex.getMessage());
@@ -68,6 +77,7 @@ public class GlobalExceptionHandler {
                 .body(Response.error(errorMessage, CommonErrorCode.VALIDATION_ERROR));
     }
 
+    // 내부 헬퍼 메서드: ErrorCode를 Response로 변환
     private ResponseEntity<Response<Void>> handleExceptionInternal(ErrorCode errorCode) {
 
         return ResponseEntity

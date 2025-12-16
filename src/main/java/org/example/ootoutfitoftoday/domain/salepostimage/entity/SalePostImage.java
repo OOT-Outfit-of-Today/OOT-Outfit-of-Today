@@ -110,16 +110,4 @@ public class SalePostImage extends BaseEntity {
     public String getImageUrl() {
         return image != null ? image.getUrl() : null;
     }
-
-    public String getFileName() {
-        return image != null ? image.getFileName() : null;
-    }
-
-    public Long getImageSize() {
-        return image != null ? image.getSize() : null;
-    }
-
-    public String getContentType() {
-        return image != null ? image.getContentType() : null;
-    }
 }

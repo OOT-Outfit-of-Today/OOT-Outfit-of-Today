@@ -57,6 +57,10 @@ public class SalePostCreateResponse {
     ) {
         Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
 
+        List<SalePostImageResponse> imageResponses = salePostImages.stream()
+                .map(SalePostImageResponse::from)
+                .toList();
+
         return SalePostCreateResponse.builder()
                 .salePostId(salePost.getId())
                 .title(salePost.getTitle())
@@ -68,9 +72,7 @@ public class SalePostCreateResponse {
                 .tradeLongitude(location.longitude())
                 .userId(salePost.getUser().getId())
                 .categoryId(salePost.getCategory().getId())
-                .images(salePostImages.stream()
-                        .map(SalePostImageResponse::from)
-                        .toList())
+                .images(imageResponses)
                 .createdAt(salePost.getCreatedAt())
                 .build();
     }

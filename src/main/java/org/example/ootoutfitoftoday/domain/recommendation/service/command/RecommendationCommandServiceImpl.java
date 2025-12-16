@@ -164,7 +164,7 @@ public class RecommendationCommandServiceImpl implements RecommendationCommandSe
             log.info("기존 판매글 존재 - 추천ID: {}, 판매글ID: {}",
                     recommendationId, existingSalePost.get().getId());
 
-            return SalePostCreateResponse.from(existingSalePost.get());
+            return SalePostCreateResponse.fromWithoutImages(existingSalePost.get());
         }
 
         log.debug("신규 판매글 생성 - 추천ID: {}, 옷ID: {}",

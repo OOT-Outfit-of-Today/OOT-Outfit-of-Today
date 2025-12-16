@@ -96,7 +96,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        return SalePostCreateResponse.fromWithImages(savedSalePost, salePostImages);
+        return SalePostCreateResponse.from(savedSalePost, salePostImages);
     }
 
     // Recommendation에서 판매글 생성
@@ -159,7 +159,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        return SalePostCreateResponse.fromWithImages(savedSalePost, salePostImages);
+        return SalePostCreateResponse.from(savedSalePost, salePostImages);
     }
 
     // 추가: SalePostImage 생성 헬퍼 메서드
@@ -247,7 +247,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
         List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
 
-        return SalePostDetailResponse.fromWithImages(updatedSalePost, salePostImages);
+        return SalePostDetailResponse.from(updatedSalePost, salePostImages);
     }
 
     // 수정: SalePost + 연관된 SalePostImage 모두 soft delete
@@ -307,6 +307,6 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         // 이미지와 함께 반환
         List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
 
-        return SalePostDetailResponse.fromWithImages(updatedSalePost, salePostImages);
+        return SalePostDetailResponse.from(updatedSalePost, salePostImages);
     }
 }

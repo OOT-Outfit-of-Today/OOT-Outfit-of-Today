@@ -14,7 +14,21 @@ public interface ClosetClothesLinkRepository extends JpaRepository<ClosetClothes
     // 옷장에 등록된 옷인지 아닌지 검증하는 쿼리 메서드
     Optional<ClosetClothesLink> findByClosetIdAndClothesId(Long closetId, Long clothesId);
 
-    Page<ClosetClothesLink> findAllByClosetId(Long closetId, Pageable pageable);
+    @Query(
+            value = """
+                    SELECT l
+                    FROM ClosetClothesLink l
+                    JOIN FETCH l.clothes c
+                    LEFT JOIN FETCH c.category
+                    WHERE l.closet.id = :closetId
+                    """,
+            countQuery = """
+                    SELECT count(l)
+                    FROM ClosetClothesLink l
+                    WHERE l.closet.id = :closetId
+                    """
+    )
+    Page<ClosetClothesLink> findAllByClosetId(@Param("closetId") Long closetId, Pageable pageable);
 
     Optional<ClosetClothesLink> findByClosetIdAndClothesIdAndIsDeletedFalse(Long closetId, Long clothesId);
 }

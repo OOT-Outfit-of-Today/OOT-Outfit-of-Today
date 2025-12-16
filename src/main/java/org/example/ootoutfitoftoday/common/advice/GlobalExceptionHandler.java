@@ -13,6 +13,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -66,11 +69,18 @@ public class GlobalExceptionHandler {
 
     // Bean Validation 실패 처리(@NotNull 등)
     // 필드가 없거나, 범위를 벗어나거나, 형식이 맞지 않을 때
+    // 여러 필드 에러를 한 번에 -> Map<String, String>
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Response<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        log.warn("Validation 오류 발생: {}", ex.getMessage());
+    public ResponseEntity<Response<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
-        String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        Map<String, String> errorMessage = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errorMessage.put(error.getField(), error.getDefaultMessage());
+            log.warn("Validation 오류 발생 - 필드: {}, 입력값: {}, 메시지: {}",
+                    error.getField(),
+                    error.getRejectedValue(),
+                    error.getDefaultMessage());
+        });
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())

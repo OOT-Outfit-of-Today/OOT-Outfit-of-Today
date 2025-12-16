@@ -59,9 +59,7 @@ public class GlobalExceptionHandler {
         } else if (cause instanceof InvalidFormatException) {
             // 타입 변환 실패
             InvalidFormatException ife = (InvalidFormatException) cause;
-            String fieldName = ife.getPath().isEmpty()
-                    ? "알 수 없는 필드"
-                    : ife.getPath().get(0).getFieldName();
+            String fieldName = ife.getPath().isEmpty() ? "알 수 없는 필드" : ife.getPath().get(0).getFieldName();
             detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다", fieldName);
         }
 

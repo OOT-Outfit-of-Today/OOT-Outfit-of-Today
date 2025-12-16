@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GlobalException.class)
     public ResponseEntity<Response<Void>> handleGlobalException(GlobalException ex) {
-        log.error("비즈니스 오류 발생", ex);
+        log.warn("비즈니스 오류 발생: {}", ex.getMessage());
 
         return handleExceptionInternal(ex.getErrorCode());
     }
@@ -59,6 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Response<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        log.warn("Validation 오류 발생: {}", ex.getMessage());
 
         String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
 

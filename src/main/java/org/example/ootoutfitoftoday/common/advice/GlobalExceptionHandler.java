@@ -23,8 +23,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // [최종 안정망] 진짜 예상하지 못한 서버 오류
-    // 담당: DB 연결 실패, NullPointerException 등 개발자가 놓친 버그들
+    // [최종 안전망] 진짜 예상하지 못한 서버 오류
+    // 담당: DB 연결 실패, NullPointerException, 개발자가 놓친 모든 버그
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
         log.error("알 수 없는 서버 오류 발생", ex);
@@ -46,26 +46,50 @@ public class GlobalExceptionHandler {
     // [JSON 파싱 실패] Controller 진입 전 JSON → DTO 변환 실패
     // 담당: JSON 문법 오류, 타입 불일치, 잘못된 형식
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Response<String>> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        log.warn("JSON 파싱 실패: {}", e.getMessage());
-
-        String detailMessage = "요청 데이터 형식이 올바르지 않습니다";
+    public ResponseEntity<Response<Map<String, String>>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        Map<String, String> errorMessage = new HashMap<>();
 
         // 원인 분석해서 더 구체적인 메시지 제공
-        Throwable cause = e.getCause();
-        if (cause instanceof JsonParseException) {
+        Throwable cause = ex.getCause();
+        if (cause instanceof JsonParseException jpe) {
             // JSON 자체가 잘못된 경우
-            detailMessage = "JSON 형식이 올바르지 않습니다";
-        } else if (cause instanceof InvalidFormatException) {
+
+            String location = jpe.getLocation() != null
+                    ? String.format("라인 %d, 컬럼 %d",
+                    jpe.getLocation().getLineNr(),
+                    jpe.getLocation().getColumnNr())
+                    : "알 수 없는 위치";
+            log.warn("JSON 파싱 실패 - JSON 문법 오류: 위치 {}, 메시지: {}",
+                    location, jpe.getOriginalMessage());
+
+            String detailMessage = "JSON 형식이 올바르지 않습니다";
+            errorMessage.put("JSON", detailMessage);
+
+        } else if (cause instanceof InvalidFormatException ife) {
             // 타입 변환 실패
-            InvalidFormatException ife = (InvalidFormatException) cause;
-            String fieldName = ife.getPath().isEmpty() ? "알 수 없는 필드" : ife.getPath().get(0).getFieldName();
-            detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다", fieldName);
+            String fieldName = ife.getPath().isEmpty()
+                    ? "알 수 없는 필드"
+                    : ife.getPath().get(0).getFieldName();
+
+            log.warn("JSON 파싱 실패 - 필드: {}, 입력값: {}, 대상 타입: {}",
+                    fieldName,
+                    ife.getValue(),
+                    ife.getTargetType().getSimpleName());
+
+            String detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다", fieldName);
+            errorMessage.put(fieldName, detailMessage);
+
+        } else {
+            // 기타 파싱 오류
+            log.warn("JSON 파싱 실패 - 기타 오류: {}", ex.getMessage());
+
+            String detailMessage = "요청 데이터 형식이 올바르지 않습니다";
+            errorMessage.put("body", detailMessage);
         }
 
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_REQUEST_BODY.getHttpStatus())
-                .body(Response.error(detailMessage, CommonErrorCode.INVALID_REQUEST_BODY));
+                .body(Response.error(errorMessage, CommonErrorCode.INVALID_REQUEST_BODY));
     }
 
     // [Bean Validation 실패] @Valid 검증 실패
@@ -92,59 +116,47 @@ public class GlobalExceptionHandler {
     // [경로 변수 타입 오류] URL 경로의 파라미터 타입이 맞지 않을 때
     // 담당: PathVariable의 타입 변환 실패
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Response<String>> handleTypeMismatch(
-            MethodArgumentTypeMismatchException ex
-    ) {
+    public ResponseEntity<Response<Map<String, String>>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         log.warn("경로 변수 타입 오류 - 파라미터: {}, 입력값: {}, 필요한 타입: {}",
                 ex.getName(),
                 ex.getValue(),
                 ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "알 수 없음");
 
-        String detailMessage = String.format(
-                "%s 파라미터의 값이 올바르지 않습니다. 올바른 형식: %s",
-                ex.getName(),
-                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "알 수 없음");
+        Map<String, String> errorMessage = new HashMap<>();
+        String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다", ex.getName());
+        errorMessage.put(ex.getName(), detailMessage);
 
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
-                .body(Response.error(detailMessage, CommonErrorCode.INVALID_INPUT_VALUE));
+                .body(Response.error(errorMessage, CommonErrorCode.INVALID_INPUT_VALUE));
     }
 
     // [필수 요청 파라미터 누락] @RequestParam(required=true) 파라미터가 없을 때
     // 담당: 쿼리 파라미터 누락
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<Response<String>> handleMissingParameter(
-            MissingServletRequestParameterException ex
-    ) {
+    public ResponseEntity<Response<Map<String, String>>> handleMissingParameter(MissingServletRequestParameterException ex) {
         log.warn("필수 파라미터 누락 - 파라미터: {}, 타입: {}",
                 ex.getParameterName(),
                 ex.getParameterType());
 
-        String detailMessage = String.format(
-                "필수 파라미터 '%s'가 누락되었습니다",
-                ex.getParameterName()
-        );
+        Map<String, String> errorMessage = new HashMap<>();
+        String detailMessage = String.format("%s 파라미터는 필수입니다", ex.getParameterName());
+        errorMessage.put(ex.getParameterName(), detailMessage);
 
         return ResponseEntity
                 .status(CommonErrorCode.MISSING_REQUEST_PARAMETER.getHttpStatus())
-                .body(Response.error(detailMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER));
+                .body(Response.error(errorMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER));
     }
 
     // [HTTP 메서드 불일치] 지원하지 않는 HTTP 메서드로 요청할 때
     // 담당: POST인데 GET으로 요청, GET인데 POST로 요청 등
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Response<String>> handleMethodNotSupported(
-            HttpRequestMethodNotSupportedException ex
-    ) {
+    public ResponseEntity<Response<String>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
         log.warn("지원하지 않는 HTTP 메서드 - 요청 메서드: {}, 지원 메서드: {}",
                 ex.getMethod(),
                 ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "없음");
 
-        String detailMessage = String.format(
-                "%s 메서드는 지원하지 않습니다. 지원하는 메서드: %s",
-                ex.getMethod(),
-                ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "없음"
-        );
+        String detailMessage = String.format("%s 메서드는 지원하지 않습니다", ex.getMethod());
 
         return ResponseEntity
                 .status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())

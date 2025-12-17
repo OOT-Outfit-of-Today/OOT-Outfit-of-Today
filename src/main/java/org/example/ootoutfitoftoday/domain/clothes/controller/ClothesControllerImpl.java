@@ -8,7 +8,9 @@ import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesDetailResponse;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesSummaryResponse;
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesSuccessCode;
 import org.example.ootoutfitoftoday.domain.clothes.service.command.ClothesCommandService;
 import org.example.ootoutfitoftoday.domain.clothes.service.query.ClothesQueryService;
@@ -38,7 +40,7 @@ public class ClothesControllerImpl implements ClothesController {
 
     @Override
     @GetMapping
-    public ResponseEntity<SliceResponse<ClothesResponse>> getClothes(
+    public ResponseEntity<SliceResponse<ClothesSummaryResponse>> getClothes(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) ClothesColor clothesColor,
@@ -46,7 +48,7 @@ public class ClothesControllerImpl implements ClothesController {
             @RequestParam(required = false) Long lastClothesId,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Slice<ClothesResponse> clothes = clothesQueryService.getClothes(
+        Slice<ClothesSummaryResponse> clothes = clothesQueryService.getClothes(
                 authUser.getUserId(),
                 categoryId,
                 clothesColor,
@@ -60,13 +62,13 @@ public class ClothesControllerImpl implements ClothesController {
 
     @Override
     @GetMapping("/{clothesId}")
-    public ResponseEntity<Response<ClothesResponse>> getClothesById(
+    public ResponseEntity<Response<ClothesDetailResponse>> getClothesById(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clothesId
     ) {
-        ClothesResponse clothesResponse = clothesQueryService.getClothesById(authUser.getUserId(), clothesId);
+        ClothesDetailResponse clothesDetailResponse = clothesQueryService.getClothesById(authUser.getUserId(), clothesId);
 
-        return Response.success(clothesResponse, ClothesSuccessCode.CLOTHES_OK);
+        return Response.success(clothesDetailResponse, ClothesSuccessCode.CLOTHES_OK);
     }
 
 

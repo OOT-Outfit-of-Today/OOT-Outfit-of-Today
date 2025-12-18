@@ -1,16 +1,16 @@
 package org.example.ootoutfitoftoday.domain.clothesImage.service.command;
 
-import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
-
-import java.util.List;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.request.ClothesImageRequest;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageChangeMainResponse;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageLinkResponse;
 
 public interface ClothesImageCommandService {
 
-    void saveClothesImages(Clothes clothes, List<Long> imageIds);
+    ClothesImageLinkResponse saveClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest);
 
-    void changeMainImage(Long clothesId, Long clothesImageId);
+    ClothesImageChangeMainResponse changeMainImage(Long userId, Long clothesId, Long clothesImageId);
 
-    void removeClothesImages(Long clothesId, List<Long> imageIds);
+    void removeClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest);
 
     int softDeleteAllByClothesId(Long id);
 }

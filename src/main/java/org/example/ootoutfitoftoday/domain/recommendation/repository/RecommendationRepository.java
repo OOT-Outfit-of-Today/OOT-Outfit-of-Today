@@ -21,8 +21,6 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
     @Query("SELECT DISTINCT r FROM Recommendation r " +
             "JOIN FETCH r.user u " +
             "JOIN FETCH r.clothes c " +
-            "LEFT JOIN FETCH c.images ci " +
-            "LEFT JOIN FETCH ci.image i " +
             "WHERE r.id IN :ids")
     List<Recommendation> findRecommendationsWithDetailsByIds(
             @Param("ids") List<Long> ids

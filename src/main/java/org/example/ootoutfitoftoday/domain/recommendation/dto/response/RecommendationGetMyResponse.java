@@ -5,6 +5,7 @@ import com.ootcommon.recommendation.type.RecommendationType;
 import lombok.AccessLevel;
 import lombok.Builder;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageResponse;
 import org.example.ootoutfitoftoday.domain.recommendation.entity.Recommendation;
 
 import java.time.LocalDateTime;
@@ -15,34 +16,28 @@ public record RecommendationGetMyResponse(
         Long userId,
         Long clothesId,
         String clothesName,
-        String clothesImageUrl,
+        ClothesImageResponse clothesImage,
         RecommendationType type,
         String reason,
         RecommendationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static RecommendationGetMyResponse from(Recommendation recommendation) {
+    public static RecommendationGetMyResponse from(
+            Recommendation recommendation,
+            ClothesImageResponse clothesImage
+    ) {
         Clothes clothes = recommendation.getClothes();
 
         String name = clothes.getDescription();
-
-        String imageUrl = null;
-
-        if (clothes.getImages() != null && !clothes.getImages().isEmpty()) {
-            imageUrl = clothes.getImages().stream()
-                    .filter(image -> Boolean.TRUE.equals(image.getIsMain()))
-                    .findFirst()
-                    .map(mainImage -> mainImage.getImage().getUrl())
-                    .orElse(clothes.getImages().get(0).getImage().getUrl());
-        }
+        // 단방향 구조로 인해 이미지 DTO는 외부에서 조회한 값을 사용한다.
 
         return RecommendationGetMyResponse.builder()
                 .recommendationId(recommendation.getId())
                 .userId(recommendation.getUser().getId())
                 .clothesId(clothes.getId())
                 .clothesName(name)
-                .clothesImageUrl(imageUrl)
+                .clothesImage(clothesImage)
                 .type(recommendation.getType())
                 .reason(recommendation.getReason())
                 .status(recommendation.getStatus())

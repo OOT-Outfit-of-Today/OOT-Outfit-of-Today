@@ -32,24 +32,24 @@ CMDS=(
   "echo '  Redis Deployment Started'"
   "echo '=============================================='"
 
-  "echo '[Step 1/5] Logging in to ECR...'"
+  "echo '[Step 1/6] Logging in to ECR...'"
   "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REG_URI}"
   "echo '✓ ECR login successful'"
 
   "echo ''"
-  "echo '[Step 2/5] Pulling new Redis image...'"
+  "echo '[Step 2/6] Pulling new Redis image...'"
   "docker pull ${FULL_URI}"
   "echo '✓ Redis image pulled successfully'"
 
   "echo ''"
-  "echo '[Step 3/5] Stopping and removing old Redis container...'"
+  "echo '[Step 3/6] Stopping and removing old Redis container...'"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
   "echo '✓ Old Redis container removed'"
 
   # Parameter Store에서 Redis 비밀번호 가져오기
   "echo ''"
-  "echo '[Step 4/5] Fetching Redis password from Parameter Store...'"
+  "echo '[Step 4/6] Fetching Redis password from Parameter Store...'"
   "REDIS_PASSWORD=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_PASSWORD \\
     --with-decryption \\
@@ -70,7 +70,7 @@ CMDS=(
   # - Redis 프로세스 maxmemory(512mb) + 오버헤드 고려하여 600mb로 설정
   # - Swap 방지를 위해 memory-swap도 동일하게 설정
   "echo ''"
-  "echo '[Step 5/5] Starting new Redis container...'"
+  "echo '[Step 5/6] Starting new Redis container...'"
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=on-failure:5 \\
@@ -85,21 +85,73 @@ CMDS=(
       --maxmemory-policy allkeys-lru \\
       --appendonly yes"
 
-  "echo '✓ Redis container started'"
-
-  # 컨테이너 상태 확인
+  # 동적 컨테이너 시작 대기 및 실패 감지(docker inspect로 정확한 상태 확인)
   "echo ''"
-  "echo 'Verifying container status...'"
-  "sleep 3"
-  "docker ps | grep ${CONTAINER_NAME}"
-  "echo '✓ Container is running'"
+  "echo 'Waiting for Redis container to start...'"
+  "for i in {1..30}; do
+    CONTAINER_STATUS=\$(docker inspect -f '{{.State.Status}}' ${CONTAINER_NAME} 2>/dev/null || echo 'not_found')
+    if [ \"\$CONTAINER_STATUS\" = \"running\" ]; then
+      echo \"✓ Redis container is running (attempt \$i/30)\"
+      break
+    fi
+    if [ \$i -eq 30 ]; then
+      echo '==============================================' >&2
+      echo '✗ ERROR: Redis container failed to start' >&2
+      echo '==============================================' >&2
+      echo '' >&2
+      echo \"Container Status: \$CONTAINER_STATUS\" >&2
+      echo '' >&2
+      docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
+      echo '' >&2
+      echo 'Container Logs (last 50 lines):' >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
+      echo '' >&2
+      echo '==============================================' >&2
+      exit 1
+    fi
+    echo \"Waiting for Redis container... (attempt \$i/30, status: \$CONTAINER_STATUS)\"
+    sleep 1
+  done"
 
-  # Redis 연결 테스트
+  # Redis 헬스체크
   "echo ''"
-  "echo 'Testing Redis connection...'"
-  "docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" ping || { echo 'Error: Redis health check failed' >&2; exit 1; }"
-  "echo '✓ Redis connection test passed'"
+  "echo '[Step 6/6] Checking Redis health...'"
+  "for i in {1..30}; do
+    REDIS_RESPONSE=\$(docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" ping 2>/dev/null || echo 'FAILED')
+    if [ \"\$REDIS_RESPONSE\" = \"PONG\" ]; then
+      echo \"✓ Redis is healthy (attempt \$i/30)\"
+      break
+    fi
+    if [ \$i -eq 30 ]; then
+      echo '==============================================' >&2
+      echo '✗ ERROR: Redis health check failed' >&2
+      echo '==============================================' >&2
+      echo '' >&2
+      echo 'Container Status:' >&2
+      docker ps --filter name=${CONTAINER_NAME} >&2
+      echo '' >&2
+      echo 'Container Logs (last 50 lines):' >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2
+      echo '' >&2
+      echo '==============================================' >&2
+      exit 1
+    fi
+    echo \"Waiting for Redis health... (attempt \$i/30)\"
+    sleep 1
+  done"
 
+  "echo ''"
+  "echo '=============================================='"
+  "echo '  Redis Deployment Status'"
+  "echo '=============================================='"
+  "echo 'Container Status:'"
+  "docker ps --filter name=${CONTAINER_NAME} --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+  "echo ''"
+  "echo 'Redis Info:'"
+  "docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" info server | grep -E '(redis_version|uptime_in_seconds|used_memory_human)' || echo 'Unable to fetch Redis info'"
+  "echo ''"
+  "echo 'Memory Status:'"
+  "free -h"
   "echo ''"
   "echo '=============================================='"
   "echo '  ✓ Redis Deployment Completed Successfully'"

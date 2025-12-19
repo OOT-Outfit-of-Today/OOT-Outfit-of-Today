@@ -63,7 +63,7 @@ spring:
       lettuce:
         pool:
           # 커넥션 획득 대기 타임아웃(-1ms: 무제한)
-          max-wait: -1ms
+          max-wait: 2s
 
   # ================================================================
   # Spring Cache 설정(Spring이 관리)

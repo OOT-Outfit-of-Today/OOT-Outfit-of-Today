@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum WearRecordErrorCode implements ErrorCode {
 
-    WEAR_RECORD_FORBIDDEN("WEAR_RECORD_FORBIDDEN", HttpStatus.FORBIDDEN, "착용 기록을 시도하려는 옷에 대한 권한이 없습니다.");
+    DUPLICATE_WEAR_RECORD_SAME_DAY("DUPLICATE_WEAR_RECORD_SAME_DAY", HttpStatus.CONFLICT, "해당 날짜에 이미 이 옷의 착용 기록이 있습니다."),
+    WORN_AT_IN_FUTURE("WORN_AT_IN_FUTURE", HttpStatus.BAD_REQUEST, "미래 시각으로는 착용 기록을 생성할 수 없습니다."),
+    WORN_AT_OUT_OF_RANGE("WORN_AT_OUT_OF_RANGE", HttpStatus.BAD_REQUEST, "착용 시각은 현재 기준 한 달 이내만 선택할 수 있습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

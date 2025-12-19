@@ -22,21 +22,28 @@ public class ClosetQueryServiceImpl implements ClosetQueryService {
 
     private final ClosetRepository closetRepository;
 
-    // 페이지네이션
+    // 페이지네이션 - 코드 리뷰 반영
     private Pageable createPageable(
             int page,
             int size,
             String sort,
             String direction
     ) {
-        Sort sortSpec = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sort).descending()
-                : Sort.by(sort).ascending();
+        // direction이 null 이거나 공백이라면? 기본 값은 오름차순, 그외는 direction 값을 반환
+        String defaultDirection = direction == null || direction.isBlank() ? "ASC" : direction;
+
+        Sort.Direction directionEnum;
+        try {
+            directionEnum = Sort.Direction.fromString(defaultDirection);
+        } catch (IllegalArgumentException e) {
+            log.warn("잘못된 입력값으로 인해 기본값인 오름차순으로 정렬합니다.", direction);
+            directionEnum = Sort.Direction.ASC;
+        }
 
         return PageRequest.of(
                 page,
                 size,
-                sortSpec
+                Sort.by(directionEnum, sort)
         );
     }
 

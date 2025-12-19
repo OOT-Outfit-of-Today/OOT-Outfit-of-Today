@@ -46,14 +46,14 @@ public class RedissonConfig {
                 .setConnectionPoolSize(redisProperties.getLettuce().getPool().getMaxActive())
                 .setConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
                 // Redisson 전용 설정
-                .setIdleConnectionTimeout(redissonProperties.getIdleConnectionTimeout())
+                .setIdleConnectionTimeout((int) redissonProperties.getIdleConnectionTimeout().toMillis())
                 // 타임아웃 설정
                 .setConnectTimeout((int) redisProperties.getTimeout().toMillis())
                 .setTimeout((int) redisProperties.getTimeout().toMillis())
                 // 재시도 설정
                 .setRetryAttempts(redissonProperties.getRetryAttempts())
                 // deprecated 되었으나, 신규의 setRetryInterval(Duration) 사용 불가
-                .setRetryInterval(redissonProperties.getRetryInterval());
+                .setRetryInterval((int) redissonProperties.getRetryInterval().toMillis());
 
         // 비밀번호 설정
         if (StringUtils.hasText(redisProperties.getPassword())) {

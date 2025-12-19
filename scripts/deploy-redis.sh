@@ -128,10 +128,10 @@ CMDS=(
       echo '==============================================' >&2
       echo '' >&2
       echo 'Container Status:' >&2
-      docker ps --filter name=${CONTAINER_NAME} >&2
+      docker ps -a --filter name=${CONTAINER_NAME} >&2 || true
       echo '' >&2
       echo 'Container Logs (last 50 lines):' >&2
-      docker logs ${CONTAINER_NAME} --tail 50 >&2
+      docker logs ${CONTAINER_NAME} --tail 50 >&2 || true
       echo '' >&2
       echo '==============================================' >&2
       exit 1

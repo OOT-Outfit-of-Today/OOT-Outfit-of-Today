@@ -9,12 +9,14 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 
 @Builder
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public record Response<T>(
         HttpStatus httpStatus,
         int statusValue,
         boolean success,
         String code,
         String message,
+        //@JsonInclude(JsonInclude.Include.NON_NULL)
         T data,
         LocalDateTime timestamp
 ) {

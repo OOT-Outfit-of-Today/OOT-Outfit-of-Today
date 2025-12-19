@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCust
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -43,14 +42,15 @@ public class RedisConfig {
      * - JavaTimeModule: LocalDateTime 등 Java 8 시간 타입 지원
      * - WRITE_DATES_AS_TIMESTAMPS 비활성화: ISO-8601 문자열 형식으로 날짜 직렬화
      */
-    @Bean
-    @Primary
-    public ObjectMapper globalObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return mapper;
-    }
+//    @Bean
+//    // @Primary
+//    // globalObjectMapper()
+//    public ObjectMapper cacheObjectMapper() {
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.registerModule(new JavaTimeModule());
+//        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+//        return mapper;
+//    }
 
     /**
      * Redis용 ObjectMapper(타입 정보 포함)

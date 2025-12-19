@@ -40,8 +40,8 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
         );
 
         if (request.imageId() != null) {
-            Image image = imageQueryService.findImageById(request.imageId());
-            closet.setClosetImage(image);
+            Image image = imageQueryService.findByIdAndIsDeletedFalse(request.imageId());
+            closet.changeImage(image);
         }
 
         Closet savedCloset = closetRepository.save(closet);
@@ -64,7 +64,7 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
 
         Image newImage = null;
         if (request.imageId() != null) {
-            newImage = imageQueryService.findImageById(request.imageId());
+            newImage = imageQueryService.findByIdAndIsDeletedFalse(request.imageId());
         }
 
         updatedCloset.update(
@@ -73,7 +73,7 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
                 request.isPublic()
         );
 
-        updatedCloset.setClosetImage(newImage);
+        updatedCloset.changeImage(newImage);
 
         return ClosetUpdateResponse.from(updatedCloset);
     }
@@ -88,10 +88,6 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
                 });
 
         closet.softDelete();
-
-        if (closet.getClosetImage() != null) {
-            closet.getClosetImage().softDelete();
-        }
 
         return ClosetDeleteResponse.of(closet.getId(), closet.getDeletedAt());
     }

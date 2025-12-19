@@ -1,6 +1,7 @@
 package org.example.ootoutfitoftoday.common.advice;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.common.exception.CommonErrorCode;
@@ -18,6 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -53,7 +55,6 @@ public class GlobalExceptionHandler {
         Throwable cause = ex.getCause();
         if (cause instanceof JsonParseException jpe) {
             // JSON 자체가 잘못된 경우
-
             String location = jpe.getLocation() != null
                     ? String.format("라인 %d, 컬럼 %d",
                     jpe.getLocation().getLineNr(),
@@ -62,28 +63,35 @@ public class GlobalExceptionHandler {
             log.warn("JSON 파싱 실패 - JSON 문법 오류: 위치 {}, 메시지: {}",
                     location, jpe.getOriginalMessage());
 
-            String detailMessage = "JSON 형식이 올바르지 않습니다";
-            errorMessage.put("JSON", detailMessage);
+            String detailMessage = "JSON 형식이 올바르지 않습니다.";
+            errorMessage.put("json", detailMessage);
 
         } else if (cause instanceof InvalidFormatException ife) {
             // 타입 변환 실패
-            String fieldName = ife.getPath().isEmpty()
-                    ? "알 수 없는 필드"
-                    : ife.getPath().get(0).getFieldName();
+            // 중첩된 객체(nested DTO)의 필드 경로를 모두 조합하되 점(.)으로 구분하여 표현
+            String fieldName = ife.getPath().stream()
+                    .map(JsonMappingException.Reference::getFieldName)
+                    .filter(name -> name != null && !name.isBlank())
+                    .collect(Collectors.joining("."));
+
+            // 필터링 후 빈 문자열이면 기본값 사용
+            if (fieldName.isEmpty()) {
+                fieldName = "알 수 없는 필드";
+            }
 
             log.warn("JSON 파싱 실패 - 필드: {}, 입력값: {}, 대상 타입: {}",
                     fieldName,
                     ife.getValue(),
                     ife.getTargetType().getSimpleName());
 
-            String detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다", fieldName);
+            String detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다.", fieldName);
             errorMessage.put(fieldName, detailMessage);
 
         } else {
             // 기타 파싱 오류
             log.warn("JSON 파싱 실패 - 기타 오류: {}", ex.getMessage());
 
-            String detailMessage = "요청 데이터 형식이 올바르지 않습니다";
+            String detailMessage = "요청 데이터 형식이 올바르지 않습니다.";
             errorMessage.put("body", detailMessage);
         }
 
@@ -99,14 +107,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
         Map<String, String> errorMessage = new HashMap<>();
+        // FieldError와 ObjectError(글로벌 에러) 모두 처리
+        // FieldError: 개별 필드 검증 실패(예: @NotNull, @Size)
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-                    errorMessage.put(error.getField(), error.getDefaultMessage());
-                    log.warn("Validation 오류 발생 - 필드: {}, 입력값: {}, 메시지: {}",
-                            error.getField(),
-                            error.getRejectedValue(),
-                            error.getDefaultMessage());
-                }
-        );
+            errorMessage.put(error.getField(), error.getDefaultMessage());
+            log.warn("Validation 실패(필드) - 필드: {}, 입력값: {}, 메시지: {}",
+                    error.getField(),
+                    error.getRejectedValue(),
+                    error.getDefaultMessage());
+        });
+
+        // ObjectError: 클래스 레벨 검증 실패(예: 두 필드 비교, 커스텀 검증)
+        // 특정 필드에 속하지 않는 글로벌 에러 처리
+        ex.getBindingResult().getGlobalErrors().forEach(error -> {
+            errorMessage.put(error.getObjectName(), error.getDefaultMessage());
+            log.warn("Validation 실패(글로벌) - 객체: {}, 메시지: {}",
+                    error.getObjectName(),
+                    error.getDefaultMessage());
+        });
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())
@@ -123,7 +141,7 @@ public class GlobalExceptionHandler {
                 ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "알 수 없음");
 
         Map<String, String> errorMessage = new HashMap<>();
-        String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다", ex.getName());
+        String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다.", ex.getName());
         errorMessage.put(ex.getName(), detailMessage);
 
         return ResponseEntity
@@ -140,7 +158,7 @@ public class GlobalExceptionHandler {
                 ex.getParameterType());
 
         Map<String, String> errorMessage = new HashMap<>();
-        String detailMessage = String.format("%s 파라미터는 필수입니다", ex.getParameterName());
+        String detailMessage = String.format("%s 파라미터는 필수입니다.", ex.getParameterName());
         errorMessage.put(ex.getParameterName(), detailMessage);
 
         return ResponseEntity
@@ -156,7 +174,7 @@ public class GlobalExceptionHandler {
                 ex.getMethod(),
                 ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "없음");
 
-        String detailMessage = String.format("%s 메서드는 지원하지 않습니다", ex.getMethod());
+        String detailMessage = String.format("%s 메서드는 지원하지 않습니다.", ex.getMethod());
 
         return ResponseEntity
                 .status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())

@@ -58,12 +58,12 @@ spring:
       # JPA Repository 자동 생성 비활성화(수동 설정 사용)
       repositories:
         enabled: false
-      # Redis 연결 타임아웃
-      timeout: 3000ms
+      # Redis 명령 실행 타임아웃
+      timeout: 3s
       lettuce:
         pool:
-          # 연결 대기 시간(-1: 무제한)
-          max-wait: -1ms
+          # 커넥션 획득 대기 타임아웃(-1ms: 무제한)
+          max-wait: 2s
 
   # ================================================================
   # Spring Cache 설정(Spring이 관리)
@@ -206,11 +206,11 @@ cache:
 # ================================================================
 redisson:
   # 유휴 연결 타임아웃(10초)
-  idle-connection-timeout: 10000
+  idle-connection-timeout: 10s
   # 재시도 횟수
   retry-attempts: 3
   # 재시도 간격(1.5초)
-  retry-interval: 1500
+  retry-interval: 1500ms
 
 # ================================================================
 # 서버 설정

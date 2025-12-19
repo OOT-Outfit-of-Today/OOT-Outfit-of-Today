@@ -79,11 +79,15 @@ CMDS=(
   "echo '✓ Redis configuration loaded'"
 
   # Spring Boot 실행(메모리 제한 추가)
+  # restart policy 변경: always -> on-failure:5
+  # - 구조적 메모리 릭 등으로 인한 무한 재시작 루프 방지
+  # - 최대 5번 재시작 시도 후 중단하여 명확한 장애 상태 유지
+  # - 일시적 장애는 자동 복구하되, 지속적 문제는 수동 개입 필요하도록 설정
   "echo ''"
   "echo '[Step 5/6] Starting new container with memory limits...'"
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
-    --restart=always \\
+    --restart=on-failure:5 \\
     --memory=650m \\
     --memory-swap=650m \\
     -p ${APP_PORT}:${APP_PORT} \\

@@ -1,6 +1,7 @@
 package org.example.ootoutfitoftoday.common.advice;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.common.exception.CommonErrorCode;
@@ -18,6 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -53,7 +55,6 @@ public class GlobalExceptionHandler {
         Throwable cause = ex.getCause();
         if (cause instanceof JsonParseException jpe) {
             // JSON 자체가 잘못된 경우
-
             String location = jpe.getLocation() != null
                     ? String.format("라인 %d, 컬럼 %d",
                     jpe.getLocation().getLineNr(),
@@ -67,9 +68,16 @@ public class GlobalExceptionHandler {
 
         } else if (cause instanceof InvalidFormatException ife) {
             // 타입 변환 실패
-            String fieldName = ife.getPath().isEmpty()
-                    ? "알 수 없는 필드"
-                    : ife.getPath().get(0).getFieldName();
+            // 중첩된 객체(nested DTO)의 필드 경로를 모두 조합하되 점(.)으로 구분하여 표현
+            String fieldName = ife.getPath().stream()
+                    .map(JsonMappingException.Reference::getFieldName)
+                    .filter(name -> name != null && !name.isBlank())
+                    .collect(Collectors.joining("."));
+
+            // 필터링 후 빈 문자열이면 기본값 사용
+            if (fieldName.isEmpty()) {
+                fieldName = "알 수 없는 필드";
+            }
 
             log.warn("JSON 파싱 실패 - 필드: {}, 입력값: {}, 대상 타입: {}",
                     fieldName,

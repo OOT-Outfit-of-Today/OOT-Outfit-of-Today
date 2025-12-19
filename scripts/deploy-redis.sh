@@ -50,9 +50,13 @@ CMDS=(
   "[ -n \"\$REDIS_PASSWORD\" ] || { echo 'Error: REDIS_PASSWORD is empty' >&2; exit 1; }"
 
   # Redis 컨테이너 실행
+  # restart policy 변경: always -> on-failure:5
+  # - Redis 메모리 릭 등으로 인한 무한 재시작 루프 방지
+  # - 최대 5번 재시작 시도 후 중단하여 명확한 장애 상태 유지
+  # - 일시적 장애는 자동 복구하되, 지속적 문제는 수동 개입 필요하도록 설정
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
-    --restart=always \\
+    --restart=on-failure:5 \\
     -p ${REDIS_PORT}:${REDIS_PORT} \\
     -v redis-data:/data \\
     ${FULL_URI} \\
@@ -67,7 +71,6 @@ CMDS=(
   "docker ps | grep ${CONTAINER_NAME}"
 
   # Redis 연결 테스트
-  # 수정된 코드
   "docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" ping || { echo 'Error: Redis health check failed' >&2; exit 1; }"
 )
 

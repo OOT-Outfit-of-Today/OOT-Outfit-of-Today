@@ -28,17 +28,28 @@ echo "[INFO] COMMENT=${COMMENT}"
 
 # ===== EC2에서 실행할 커맨드(배열로 안전하게 정의) =====
 CMDS=(
-  # ECR 로그인
+  "echo '=============================================='"
+  "echo '  Redis Deployment Started'"
+  "echo '=============================================='"
+
+  "echo '[Step 1/5] Logging in to ECR...'"
   "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REG_URI}"
+  "echo '✓ ECR login successful'"
 
-  # Redis 이미지 Pull
+  "echo ''"
+  "echo '[Step 2/5] Pulling new Redis image...'"
   "docker pull ${FULL_URI}"
+  "echo '✓ Redis image pulled successfully'"
 
-  # 기존 Redis 컨테이너 중지/삭제
+  "echo ''"
+  "echo '[Step 3/5] Stopping and removing old Redis container...'"
   "docker stop ${CONTAINER_NAME} || true"
   "docker rm   ${CONTAINER_NAME} || true"
+  "echo '✓ Old Redis container removed'"
 
   # Parameter Store에서 Redis 비밀번호 가져오기
+  "echo ''"
+  "echo '[Step 4/5] Fetching Redis password from Parameter Store...'"
   "REDIS_PASSWORD=\$(aws ssm get-parameter \\
     --name /config/${SPRING_PROFILE}/REDIS_PASSWORD \\
     --with-decryption \\
@@ -48,6 +59,7 @@ CMDS=(
 
   # Redis 비밀번호 검증
   "[ -n \"\$REDIS_PASSWORD\" ] || { echo 'Error: REDIS_PASSWORD is empty' >&2; exit 1; }"
+  "echo '✓ Redis password loaded'"
 
   # Redis 컨테이너 실행
   # restart policy 변경: always -> on-failure:5
@@ -57,6 +69,8 @@ CMDS=(
   # 메모리 제한 추가: 600m
   # - Redis 프로세스 maxmemory(512mb) + 오버헤드 고려하여 600mb로 설정
   # - Swap 방지를 위해 memory-swap도 동일하게 설정
+  "echo ''"
+  "echo '[Step 5/5] Starting new Redis container...'"
   "docker run -d \\
     --name ${CONTAINER_NAME} \\
     --restart=on-failure:5 \\
@@ -71,12 +85,25 @@ CMDS=(
       --maxmemory-policy allkeys-lru \\
       --appendonly yes"
 
+  "echo '✓ Redis container started'"
+
   # 컨테이너 상태 확인
+  "echo ''"
+  "echo 'Verifying container status...'"
   "sleep 3"
   "docker ps | grep ${CONTAINER_NAME}"
+  "echo '✓ Container is running'"
 
   # Redis 연결 테스트
+  "echo ''"
+  "echo 'Testing Redis connection...'"
   "docker exec ${CONTAINER_NAME} redis-cli -a \"\$REDIS_PASSWORD\" ping || { echo 'Error: Redis health check failed' >&2; exit 1; }"
+  "echo '✓ Redis connection test passed'"
+
+  "echo ''"
+  "echo '=============================================='"
+  "echo '  ✓ Redis Deployment Completed Successfully'"
+  "echo '=============================================='"
 )
 
 # Bash 배열 → JSON 배열 변환(jq 필수)

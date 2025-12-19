@@ -187,7 +187,51 @@ for i in {1..30}; do
 
   case "${STATUS}" in
     Success) exit 0 ;;
-    Failed|Cancelled|TimedOut) echo "[ERROR] SSM failed: ${STATUS}"; exit 1 ;;
+    Failed|Cancelled|TimedOut)
+      echo "=============================================="
+      echo "  SSM Command Failed: ${STATUS}"
+      echo "=============================================="
+      echo ""
+      echo "Attempting to fetch error logs from EC2..."
+      echo ""
+
+      # 실패 원인 파악을 위한 로그 출력(에러도 캡처)
+      SSM_RESULT=$(aws ssm get-command-invocation \
+        --command-id "${CMD_ID}" \
+        --instance-id "${REDIS_EC2_INSTANCE_ID}" \
+        --query '{stdOut: StandardOutputContent, stdErr: StandardErrorContent}' \
+        --output json \
+        --region "${AWS_REGION}" 2>&1)
+
+      # AWS CLI 명령 자체의 성공/실패 확인
+      if [ $? -ne 0 ]; then
+        echo "Failed to fetch detailed logs from EC2 instance"
+        echo "This can occur when the command has expired or been deleted"
+        echo ""
+        echo "AWS CLI Error:"
+        echo "${SSM_RESULT}"
+        exit 1
+      fi
+
+      # JSON 파싱 시도
+      if ! echo "${SSM_RESULT}" | jq -e . >/dev/null 2>&1; then
+        echo "Unable to parse SSM response"
+        echo "Raw response:"
+        echo "${SSM_RESULT}"
+        exit 1
+      fi
+
+      echo "--- Standard Output ---"
+      echo "${SSM_RESULT}" | jq -r '.stdOut // "No output available"'
+
+      echo ""
+      echo "--- Standard Error ---"
+      echo "${SSM_RESULT}" | jq -r '.stdErr // "No errors available"'
+
+      echo ""
+      echo "=============================================="
+      exit 1
+      ;;
   esac
 
   sleep 5

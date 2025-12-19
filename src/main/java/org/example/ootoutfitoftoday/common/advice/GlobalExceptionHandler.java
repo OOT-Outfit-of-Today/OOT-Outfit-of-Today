@@ -62,8 +62,8 @@ public class GlobalExceptionHandler {
             log.warn("JSON 파싱 실패 - JSON 문법 오류: 위치 {}, 메시지: {}",
                     location, jpe.getOriginalMessage());
 
-            String detailMessage = "JSON 형식이 올바르지 않습니다";
-            errorMessage.put("JSON", detailMessage);
+            String detailMessage = "JSON 형식이 올바르지 않습니다.";
+            errorMessage.put("json", detailMessage);
 
         } else if (cause instanceof InvalidFormatException ife) {
             // 타입 변환 실패
@@ -76,14 +76,14 @@ public class GlobalExceptionHandler {
                     ife.getValue(),
                     ife.getTargetType().getSimpleName());
 
-            String detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다", fieldName);
+            String detailMessage = String.format("%s 필드의 값 형식이 올바르지 않습니다.", fieldName);
             errorMessage.put(fieldName, detailMessage);
 
         } else {
             // 기타 파싱 오류
             log.warn("JSON 파싱 실패 - 기타 오류: {}", ex.getMessage());
 
-            String detailMessage = "요청 데이터 형식이 올바르지 않습니다";
+            String detailMessage = "요청 데이터 형식이 올바르지 않습니다.";
             errorMessage.put("body", detailMessage);
         }
 
@@ -123,7 +123,7 @@ public class GlobalExceptionHandler {
                 ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "알 수 없음");
 
         Map<String, String> errorMessage = new HashMap<>();
-        String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다", ex.getName());
+        String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다.", ex.getName());
         errorMessage.put(ex.getName(), detailMessage);
 
         return ResponseEntity
@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
                 ex.getParameterType());
 
         Map<String, String> errorMessage = new HashMap<>();
-        String detailMessage = String.format("%s 파라미터는 필수입니다", ex.getParameterName());
+        String detailMessage = String.format("%s 파라미터는 필수입니다.", ex.getParameterName());
         errorMessage.put(ex.getParameterName(), detailMessage);
 
         return ResponseEntity
@@ -156,7 +156,7 @@ public class GlobalExceptionHandler {
                 ex.getMethod(),
                 ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "없음");
 
-        String detailMessage = String.format("%s 메서드는 지원하지 않습니다", ex.getMethod());
+        String detailMessage = String.format("%s 메서드는 지원하지 않습니다.", ex.getMethod());
 
         return ResponseEntity
                 .status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())

@@ -107,14 +107,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
         Map<String, String> errorMessage = new HashMap<>();
+        // FieldError와 ObjectError(글로벌 에러) 모두 처리
+        // FieldError: 개별 필드 검증 실패(예: @NotNull, @Size)
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-                    errorMessage.put(error.getField(), error.getDefaultMessage());
-                    log.warn("Validation 오류 발생 - 필드: {}, 입력값: {}, 메시지: {}",
-                            error.getField(),
-                            error.getRejectedValue(),
-                            error.getDefaultMessage());
-                }
-        );
+            errorMessage.put(error.getField(), error.getDefaultMessage());
+            log.warn("Validation 실패(필드) - 필드: {}, 입력값: {}, 메시지: {}",
+                    error.getField(),
+                    error.getRejectedValue(),
+                    error.getDefaultMessage());
+        });
+
+        // ObjectError: 클래스 레벨 검증 실패(예: 두 필드 비교, 커스텀 검증)
+        // 특정 필드에 속하지 않는 글로벌 에러 처리
+        ex.getBindingResult().getGlobalErrors().forEach(error -> {
+            errorMessage.put(error.getObjectName(), error.getDefaultMessage());
+            log.warn("Validation 실패(글로벌) - 객체: {}, 메시지: {}",
+                    error.getObjectName(),
+                    error.getDefaultMessage());
+        });
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())

@@ -45,15 +45,16 @@ public class RedissonConfig {
                 // 커넥션 풀 설정
                 .setConnectionPoolSize(redisProperties.getLettuce().getPool().getMaxActive())
                 .setConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
-                // Redisson 전용 설정
-                .setIdleConnectionTimeout((int) redissonProperties.getIdleConnectionTimeout().toMillis())
+                // Redisson 전용 설정(Duration -> int 안전 변환)
+                // Math.toIntExact(): 오버플로우 발생 시 ArithmeticException 발생
+                .setIdleConnectionTimeout(Math.toIntExact(redissonProperties.getIdleConnectionTimeout().toMillis()))
                 // 타임아웃 설정
-                .setConnectTimeout((int) redisProperties.getTimeout().toMillis())
-                .setTimeout((int) redisProperties.getTimeout().toMillis())
-                // 재시도 설정
+                .setConnectTimeout(Math.toIntExact(redisProperties.getTimeout().toMillis()))
+                .setTimeout(Math.toIntExact(redisProperties.getTimeout().toMillis()))
+                // 재시도 설정(Duration -> int 안전 변환)
                 .setRetryAttempts(redissonProperties.getRetryAttempts())
                 // deprecated 되었으나, 신규의 setRetryInterval(Duration) 사용 불가
-                .setRetryInterval((int) redissonProperties.getRetryInterval().toMillis());
+                .setRetryInterval(Math.toIntExact(redissonProperties.getRetryInterval().toMillis()));
 
         // 비밀번호 설정
         if (StringUtils.hasText(redisProperties.getPassword())) {

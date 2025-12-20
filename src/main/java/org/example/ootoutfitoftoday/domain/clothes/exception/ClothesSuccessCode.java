@@ -18,5 +18,3 @@ public enum ClothesSuccessCode implements SuccessCode {
     private final HttpStatus httpStatus;
     private final String message;
 }
-
-

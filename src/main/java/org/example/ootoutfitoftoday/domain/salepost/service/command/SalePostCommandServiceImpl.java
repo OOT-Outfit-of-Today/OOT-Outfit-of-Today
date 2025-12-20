@@ -198,7 +198,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
             SalePostImage salePostImage = SalePostImage.create(
                     salePost,
                     validatedImages.get(i),
-                    i + 1,  // displayOrder
+                    i,    // displayOrder
                     isMain
             );
 

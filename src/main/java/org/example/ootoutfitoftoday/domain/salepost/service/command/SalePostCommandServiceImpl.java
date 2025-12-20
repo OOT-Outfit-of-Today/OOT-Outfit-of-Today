@@ -7,10 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.common.util.PointFormatAndParse;
 import org.example.ootoutfitoftoday.domain.category.entity.Category;
 import org.example.ootoutfitoftoday.domain.category.service.query.CategoryQueryService;
-import org.example.ootoutfitoftoday.domain.image.entity.Image;
-import org.example.ootoutfitoftoday.domain.image.exception.ImageErrorCode;
-import org.example.ootoutfitoftoday.domain.image.exception.ImageException;
-import org.example.ootoutfitoftoday.domain.image.service.query.ImageQueryService;
 import org.example.ootoutfitoftoday.domain.recommendation.entity.Recommendation;
 import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostCreateRequest;
 import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostUpdateRequest;
@@ -20,10 +16,9 @@ import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
-import org.example.ootoutfitoftoday.domain.salepostimage.exception.SalePostImageErrorCode;
-import org.example.ootoutfitoftoday.domain.salepostimage.exception.SalePostImageException;
 import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImageRepository;
 import org.example.ootoutfitoftoday.domain.salepost.repository.SalePostRepository;
+import org.example.ootoutfitoftoday.domain.salepostimage.service.command.SalePostImageCommandService;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,8 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -45,7 +38,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     private final CategoryQueryService categoryQueryService;
     private final SalePostRepository salePostRepository;
     private final EntityManager entityManager;
-    private final ImageQueryService imageQueryService;
+    private final SalePostImageCommandService salePostImageCommandService;
     private final SalePostImageRepository salePostImageRepository;
 
     // 수정: 판매글 생성(이미지 필수)
@@ -92,9 +85,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
         Long salePostId = salePostRepository.findLastInsertId();
 
-        // SalePostImage 생성(필수)
+        // SalePostImageService로 위임
         // 설명: @NotEmpty로 검증되었으므로 무조건 1개 이상 존재
-        List<SalePostImage> salePostImages = createSalePostImages(salePostId, request.getImageIds());
+        List<SalePostImage> salePostImages = salePostImageCommandService.createSalePostImages(salePostId, request.getImageIds());
 
         SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
@@ -157,56 +150,12 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         Long salePostId = salePostRepository.findLastInsertId();
 
         // SalePostImage 생성
-        List<SalePostImage> salePostImages = createSalePostImages(salePostId, imageIds);
+        List<SalePostImage> salePostImages = salePostImageCommandService.createSalePostImages(salePostId, imageIds);
 
         SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         return SalePostCreateResponse.from(savedSalePost, salePostImages);
-    }
-
-    // 추가: SalePostImage 생성 헬퍼 메서드
-    // 설명: SalePost 생성과 이미지 추가에서 재사용
-    //      이미지 검증, SalePostImage 생성, 저장을 한 번에 처리
-    private List<SalePostImage> createSalePostImages(Long salePostId, List<Long> imageIds) {
-
-        // 중복 검증
-        if (imageIds.size() != new HashSet<>(imageIds).size()) {
-            log.warn("판매글 이미지 중복 감지 - imageIds: {}", imageIds);
-            throw new SalePostImageException(SalePostImageErrorCode.DUPLICATE_SALE_POST_IMAGE);
-        }
-
-        // 이미지 검증 및 조회(범용 Image 엔티티)
-        List<Image> validatedImages = imageQueryService.findAllByIdInAndIsDeletedFalse(imageIds);
-
-        // 개수 검증(중복 체크)
-        if (validatedImages.size() != imageIds.size()) {
-            log.warn("이미지 검증 실패 - 요청: {}, 조회됨: {}", imageIds.size(), validatedImages.size());
-            throw new ImageException(ImageErrorCode.IMAGE_NOT_FOUND);
-        }
-
-        // SalePost 조회
-        SalePost salePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
-                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
-
-
-        // SalePostImage 생성(중간 테이블)
-        List<SalePostImage> salePostImages = new ArrayList<>();
-        for (int i = 0; i < validatedImages.size(); i++) {
-            boolean isMain = (i == 0);  // 첫 번째 이미지가 메인
-
-            SalePostImage salePostImage = SalePostImage.create(
-                    salePost,
-                    validatedImages.get(i),
-                    i,    // displayOrder
-                    isMain
-            );
-
-            salePostImages.add(salePostImage);
-        }
-
-        // 일괄 저장
-        return salePostImageRepository.saveAll(salePostImages);
     }
 
     // 수정: SalePost만 수정(이미지 제외)

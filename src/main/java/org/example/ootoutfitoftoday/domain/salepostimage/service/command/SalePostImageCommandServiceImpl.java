@@ -3,6 +3,8 @@ package org.example.ootoutfitoftoday.domain.salepostimage.service.command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
+import org.example.ootoutfitoftoday.domain.image.exception.ImageErrorCode;
+import org.example.ootoutfitoftoday.domain.image.exception.ImageException;
 import org.example.ootoutfitoftoday.domain.image.service.query.ImageQueryService;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
@@ -31,6 +33,49 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
     private final SalePostImageRepository salePostImageRepository;
     private final SalePostQueryService salePostQueryService;
     private final ImageQueryService imageQueryService;
+
+    // SalePostImage 생성
+    // 설명: SalePost 생성 시 사용
+    //      이미지 검증, SalePostImage 생성, 저장을 한 번에 처리
+    @Override
+    public List<SalePostImage> createSalePostImages(Long salePostId, List<Long> imageIds) {
+
+        // 중복 검증
+        if (imageIds.size() != new HashSet<>(imageIds).size()) {
+            log.warn("판매글 이미지 중복 감지 - imageIds: {}", imageIds);
+            throw new SalePostImageException(SalePostImageErrorCode.DUPLICATE_SALE_POST_IMAGE);
+        }
+
+        // 이미지 검증 및 조회(범용 Image 엔티티)
+        List<Image> validatedImages = imageQueryService.findAllByIdInAndIsDeletedFalse(imageIds);
+
+        // 개수 검증(중복 체크)
+        if (validatedImages.size() != imageIds.size()) {
+            log.warn("이미지 검증 실패 - 요청: {}, 조회됨: {}", imageIds.size(), validatedImages.size());
+            throw new ImageException(ImageErrorCode.IMAGE_NOT_FOUND);
+        }
+
+        // SalePost 조회
+        SalePost salePost = salePostQueryService.findSalePostById(salePostId);
+
+        // SalePostImage 생성(중간 테이블)
+        List<SalePostImage> salePostImages = new ArrayList<>();
+        for (int i = 0; i < validatedImages.size(); i++) {
+            boolean isMain = (i == 0);  // 첫 번째 이미지가 메인
+
+            SalePostImage salePostImage = SalePostImage.create(
+                    salePost,
+                    validatedImages.get(i),
+                    i,    // displayOrder
+                    isMain
+            );
+
+            salePostImages.add(salePostImage);
+        }
+
+        // 일괄 저장
+        return salePostImageRepository.saveAll(salePostImages);
+    }
 
     // 이미지 추가
     @Override

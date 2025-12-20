@@ -1,6 +1,5 @@
 package org.example.ootoutfitoftoday.domain.user.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.example.ootoutfitoftoday.domain.user.entity.User;
 
 import java.math.BigDecimal;
 
-@JsonInclude(JsonInclude.Include.ALWAYS)
 @Getter
 @Builder
 @RequiredArgsConstructor

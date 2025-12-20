@@ -71,7 +71,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
             SalePostImage salePostImage = SalePostImage.create(
                     salePost,
                     validatedImages.get(i),
-                    currentOrder + i + 1,
+                    currentOrder + i,
                     isMain
             );
             newSalePostImages.add(salePostImage);
@@ -123,7 +123,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
             SalePostImage salePostImage = SalePostImage.create(
                     salePost,
                     validatedImages.get(i),
-                    i + 1,
+                    i,    // displayOrder
                     i == 0
             );
             newSalePostImages.add(salePostImage);
@@ -259,7 +259,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
             SalePostImage newSalePostImage = SalePostImage.create(
                     salePost,
                     originalSalePostImage.getImage(),
-                    i + 1,
+                    i,    // displayOrder
                     originalSalePostImage.getIsMain()
             );
             newSalePostImages.add(newSalePostImage);

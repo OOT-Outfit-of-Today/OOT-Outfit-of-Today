@@ -4,6 +4,8 @@ import com.ootcommon.recommendation.status.RecommendationStatus;
 import com.ootcommon.recommendation.type.RecommendationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageResponse;
+import org.example.ootoutfitoftoday.domain.clothesImage.service.query.ClothesImageQueryService;
 import org.example.ootoutfitoftoday.domain.donation.dto.response.DonationCenterSearchResponse;
 import org.example.ootoutfitoftoday.domain.donation.service.query.DonationCenterQueryService;
 import org.example.ootoutfitoftoday.domain.recommendation.dto.response.RecommendationGetMyResponse;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +35,7 @@ public class RecommendationQueryServiceImpl implements RecommendationQueryServic
     private final RecommendationRepository recommendationRepository;
     private final UserQueryService userQueryService;
     private final DonationCenterQueryService donationCenterQueryService;
+    private final ClothesImageQueryService clothesImageQueryService;
 
     @Override
     public Page<RecommendationGetMyResponse> getMyRecommendations(
@@ -63,12 +67,31 @@ public class RecommendationQueryServiceImpl implements RecommendationQueryServic
 
         log.debug("2단계: 추천 상세 정보 로드 완료 - 로드 건수: {}, 사용자: {}", recommendations.size(), userId);
 
+        List<Long> clothesIds = recommendations.stream()
+                .map(recommendation -> recommendation.getClothes().getId())
+                .distinct()
+                .toList();
+
+        List<ClothesImageResponse> mainImages = clothesIds.isEmpty()
+                ? Collections.emptyList()
+                : clothesImageQueryService.findMainImageByClothesId(clothesIds);
+
+        Map<Long, ClothesImageResponse> mainImageByClothesId = mainImages.stream()
+                .collect(Collectors.toMap(
+                        ClothesImageResponse::getClothesId,
+                        image -> image,
+                        (existing, ignored) -> existing
+                ));
+
         Map<Long, Recommendation> recommendationMap = recommendations.stream()
                 .collect(Collectors.toMap(Recommendation::getId, r -> r));
 
         List<RecommendationGetMyResponse> content = ids.stream()
                 .map(recommendationMap::get)
-                .map(RecommendationGetMyResponse::from)
+                .map(recommendation -> RecommendationGetMyResponse.from(
+                        recommendation,
+                        mainImageByClothesId.get(recommendation.getClothes().getId())
+                ))
                 .toList();
 
         log.info("추천 목록 조회 완료 - 조회 건수: {}, 사용자: {}, 전체 건수: {}",

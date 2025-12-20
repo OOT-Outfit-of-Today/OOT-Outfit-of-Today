@@ -27,6 +27,7 @@ public class ClothesImage extends BaseEntity {
     @JoinColumn(name = "image_id", nullable = false)
     private Image image;
 
+    @Column(nullable = false) // null이 들어오면 안되기 때문이다.
     private Boolean isMain;
 
     @Builder(access = AccessLevel.PRIVATE)
@@ -51,10 +52,6 @@ public class ClothesImage extends BaseEntity {
                 .image(image)
                 .isMain(isMain)
                 .build();
-    }
-
-    public void addClothes(Clothes clothes) {
-        this.clothes = clothes;
     }
 
     public void updateMain(boolean isMain) {

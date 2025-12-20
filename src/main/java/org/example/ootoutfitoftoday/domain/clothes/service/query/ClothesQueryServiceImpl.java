@@ -9,11 +9,14 @@ import com.ootcommon.wearrecord.response.ClothesWearCount;
 import com.ootcommon.wearrecord.response.NotWornOverPeriod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesDetailResponse;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesSummaryResponse;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesErrorCode;
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesException;
 import org.example.ootoutfitoftoday.domain.clothes.repository.ClothesRepository;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageResponse;
+import org.example.ootoutfitoftoday.domain.clothesImage.service.query.ClothesImageQueryService;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,9 +35,10 @@ import java.util.stream.Collectors;
 public class ClothesQueryServiceImpl implements ClothesQueryService {
 
     private final ClothesRepository clothesRepository;
+    private final ClothesImageQueryService clothesImageQueryService;
 
     @Override
-    public Slice<ClothesResponse> getClothes(
+    public Slice<ClothesSummaryResponse> getClothes(
             Long userId,
             Long categoryId,
             ClothesColor clothesColor,
@@ -50,19 +55,35 @@ public class ClothesQueryServiceImpl implements ClothesQueryService {
                 size
         );
 
-        List<ClothesResponse> clothesResponses = clothesSlice.getContent().stream()
-                .map(ClothesResponse::from)
-                .collect(Collectors.toList());
+        List<Long> clothesIds = clothesSlice
+                .getContent()
+                .stream()
+                .map(Clothes::getId)
+                .toList();
 
-        return new SliceImpl<>(
-                clothesResponses,
-                clothesSlice.getPageable(),
-                clothesSlice.hasNext()
-        );
+        List<ClothesImageResponse> mainImages = clothesImageQueryService.findMainImageByClothesId(clothesIds);
+
+        Map<Long, ClothesImageResponse> mainImageMap = mainImages.stream()
+                .collect(Collectors.toMap(
+                        ClothesImageResponse::getClothesId,
+                        it -> it,
+                        (a, b) -> a
+                ));
+
+        List<ClothesSummaryResponse> response = clothesSlice
+                .getContent()
+                .stream()
+                .map(clothes -> ClothesSummaryResponse.from(
+                        clothes,
+                        mainImageMap.get(clothes.getId())
+                ))
+                .toList();
+
+        return new SliceImpl<>(response, clothesSlice.getPageable(), clothesSlice.hasNext());
     }
 
     @Override
-    public ClothesResponse getClothesById(Long userId, Long clothesId) {
+    public ClothesDetailResponse getClothesById(Long userId, Long clothesId) {
         Clothes clothes = clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
                 () -> {
                     log.warn("getClothesById - 옷 없음. id={}", clothesId);
@@ -71,7 +92,9 @@ public class ClothesQueryServiceImpl implements ClothesQueryService {
                 }
         );
 
-        return ClothesResponse.from(clothes);
+        List<ClothesImageResponse> images = clothesImageQueryService.findImagesByClothesId(clothesId);
+
+        return ClothesDetailResponse.from(clothes, images);
     }
 
     @Override

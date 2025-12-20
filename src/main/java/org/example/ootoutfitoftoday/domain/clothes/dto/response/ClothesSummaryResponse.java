@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageResponse;
 
+// 옷 전체 조회 반환 리스폰스
 @Getter
-@Builder
 @AllArgsConstructor
-public class ClothesResponse {
+@Builder
+public class ClothesSummaryResponse {
 
     private final Long id;
     private final Long categoryId;
@@ -18,10 +20,11 @@ public class ClothesResponse {
     private final ClothesSize clothesSize;
     private final ClothesColor clothesColor;
     private final String description;
+    private final ClothesImageResponse clothesImages;
 
-    public static ClothesResponse from(Clothes clothes) {
+    public static ClothesSummaryResponse from(Clothes clothes, ClothesImageResponse clothesImages) {
 
-        return ClothesResponse.builder()
+        return ClothesSummaryResponse.builder()
                 .id(clothes.getId())
                 .categoryId(
                         clothes.getCategory() != null
@@ -32,6 +35,7 @@ public class ClothesResponse {
                 .clothesSize(clothes.getClothesSize())
                 .clothesColor(clothes.getClothesColor())
                 .description(clothes.getDescription())
+                .clothesImages(clothesImages) // null이 들어오지 못하게 서비스에서 처리 필요함!
                 .build();
     }
 }

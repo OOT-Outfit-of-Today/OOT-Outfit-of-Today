@@ -18,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.domain.category.entity.QCategory;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
 import org.example.ootoutfitoftoday.domain.clothes.entity.QClothes;
-import org.example.ootoutfitoftoday.domain.clothesImage.entity.QClothesImage;
-import org.example.ootoutfitoftoday.domain.image.entity.QImage;
 import org.example.ootoutfitoftoday.domain.wearrecord.entity.QWearRecord;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -66,6 +64,7 @@ public class ClothesCustomRepositoryImpl implements ClothesCustomRepository {
         return lastId != null ? clothes.id.lt(lastId) : null;
     }
 
+    // 단방향으로 전환하면서 현 레포에서 이미지 코드를 제거
     @Override
     public Slice<Clothes> findAllByIsDeletedFalse(
             Long userId,
@@ -75,9 +74,6 @@ public class ClothesCustomRepositoryImpl implements ClothesCustomRepository {
             Long lastClothesId,
             int size
     ) {
-        QClothesImage clothesImage = QClothesImage.clothesImage;
-        QImage image = QImage.image;
-
         List<Long> clothesIds = jpaQueryFactory
                 .select(clothes.id)
                 .from(clothes)
@@ -104,13 +100,7 @@ public class ClothesCustomRepositoryImpl implements ClothesCustomRepository {
 
         List<Clothes> result = jpaQueryFactory
                 .selectFrom(clothes)
-                .distinct()
-                .leftJoin(clothes.images, clothesImage).fetchJoin()
-                .leftJoin(clothesImage.image, image).fetchJoin()
-                .where(
-                        clothes.id.in(clothesIds),
-                        clothesImage.isDeleted.isNull().or(clothesImage.isDeleted.eq(false))
-                )
+                .where(clothes.id.in(clothesIds))
                 .orderBy(clothes.createdAt.desc(), clothes.id.asc())
                 .fetch();
 

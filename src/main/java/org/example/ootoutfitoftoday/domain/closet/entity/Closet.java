@@ -7,10 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.ootoutfitoftoday.common.entity.BaseEntity;
 import org.example.ootoutfitoftoday.domain.closetclotheslink.entity.ClosetClothesLink;
-import org.example.ootoutfitoftoday.domain.closetimage.entity.ClosetImage;
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
-import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +37,9 @@ public class Closet extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "closet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ClosetImage closetImage;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", unique = true)
+    private Image image;
 
     @OneToMany(mappedBy = "closet")
     private List<ClosetClothesLink> closetClothesLinks = new ArrayList<>();
@@ -51,13 +50,13 @@ public class Closet extends BaseEntity {
             String name,
             String description,
             Boolean isPublic,
-            ClosetImage closetImage
+            Image image
     ) {
         this.user = user;
         this.name = name;
         this.description = description;
         this.isPublic = isPublic;
-        this.closetImage = closetImage;
+        this.image = image;
     }
 
     public static Closet create(
@@ -75,33 +74,8 @@ public class Closet extends BaseEntity {
                 .build();
     }
 
-    public static Closet createWithImage(
-            User user,
-            String name,
-            String description,
-            Boolean isPublic,
-            Image image
-    ) {
-        Closet closet = Closet.create(user, name, description, isPublic);
-        closet.setClosetImage(image);
-
-        return closet;
-    }
-
-    public void setClosetImage(Image image) {
-        if (image == null) {
-            if (this.closetImage != null) {
-                this.closetImage = null;
-            }
-
-            return;
-        }
-
-        if (this.closetImage == null) {
-            this.closetImage = ClosetImage.create(image, this);
-        } else {
-            this.closetImage.updateImage(image);
-        }
+    public void changeImage(Image image) {
+        this.image = image;
     }
 
     public void update(
@@ -121,8 +95,7 @@ public class Closet extends BaseEntity {
 
     public String getImageUrl() {
 
-        return Optional.ofNullable(this.closetImage)
-                .map(ClosetImage::getImage)
+        return Optional.ofNullable(this.image)
                 .map(Image::getUrl)
                 .orElse(null);
     }

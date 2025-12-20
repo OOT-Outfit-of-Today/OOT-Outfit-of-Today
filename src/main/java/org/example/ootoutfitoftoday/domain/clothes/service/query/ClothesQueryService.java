@@ -7,7 +7,8 @@ import com.ootcommon.clothes.response.ClothesColorCount;
 import com.ootcommon.clothes.response.ClothesSizeCount;
 import com.ootcommon.wearrecord.response.ClothesWearCount;
 import com.ootcommon.wearrecord.response.NotWornOverPeriod;
-import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesDetailResponse;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesSummaryResponse;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
 import org.springframework.data.domain.Slice;
 
@@ -15,7 +16,7 @@ import java.util.List;
 
 public interface ClothesQueryService {
 
-    Slice<ClothesResponse> getClothes(
+    Slice<ClothesSummaryResponse> getClothes(
             Long userId,
             Long categoryId,
             ClothesColor clothesColor,
@@ -24,7 +25,7 @@ public interface ClothesQueryService {
             int size
     );
 
-    ClothesResponse getClothesById(Long userId, Long clothesId);
+    ClothesDetailResponse getClothesById(Long userId, Long clothesId);
 
     int countClothesByIsDeletedFalse();
 

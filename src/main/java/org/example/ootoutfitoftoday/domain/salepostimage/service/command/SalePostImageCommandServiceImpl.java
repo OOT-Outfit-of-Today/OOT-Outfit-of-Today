@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +41,12 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
     ) {
         // 권한 검증
         SalePost salePost = validateOwnership(salePostId, userId);
+
+        // 중복 검증
+        if (imageIds.size() != new HashSet<>(imageIds).size()) {
+            log.warn("판매글 이미지 중복 감지 - imageIds: {}", imageIds);
+            throw new SalePostImageException(SalePostImageErrorCode.DUPLICATE_SALE_POST_IMAGE);
+        }
 
         // 이미지 검증 및 조회(범용 Image 엔티티)
         List<Image> validatedImages = imageQueryService.findAllByIdInAndIsDeletedFalse(imageIds);
@@ -87,6 +94,12 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
     ) {
         // 권한 검증
         SalePost salePost = validateOwnership(salePostId, userId);
+
+        // 중복 검증
+        if (imageIds.size() != new HashSet<>(imageIds).size()) {
+            log.warn("판매글 이미지 중복 감지 - imageIds: {}", imageIds);
+            throw new SalePostImageException(SalePostImageErrorCode.DUPLICATE_SALE_POST_IMAGE);
+        }
 
         // 이미지 검증 및 조회
         List<Image> validatedImages = imageQueryService.findAllByIdInAndIsDeletedFalse(imageIds);

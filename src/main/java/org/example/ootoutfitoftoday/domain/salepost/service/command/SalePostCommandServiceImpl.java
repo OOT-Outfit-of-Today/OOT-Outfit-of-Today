@@ -20,6 +20,8 @@ import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
+import org.example.ootoutfitoftoday.domain.salepostimage.exception.SalePostImageErrorCode;
+import org.example.ootoutfitoftoday.domain.salepostimage.exception.SalePostImageException;
 import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImageRepository;
 import org.example.ootoutfitoftoday.domain.salepost.repository.SalePostRepository;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
@@ -30,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -166,6 +169,12 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     // 설명: SalePost 생성과 이미지 추가에서 재사용
     //      이미지 검증, SalePostImage 생성, 저장을 한 번에 처리
     private List<SalePostImage> createSalePostImages(Long salePostId, List<Long> imageIds) {
+
+        // 중복 검증
+        if (imageIds.size() != new HashSet<>(imageIds).size()) {
+            log.warn("판매글 이미지 중복 감지 - imageIds: {}", imageIds);
+            throw new SalePostImageException(SalePostImageErrorCode.DUPLICATE_SALE_POST_IMAGE);
+        }
 
         // 이미지 검증 및 조회(범용 Image 엔티티)
         List<Image> validatedImages = imageQueryService.findAllByIdInAndIsDeletedFalse(imageIds);

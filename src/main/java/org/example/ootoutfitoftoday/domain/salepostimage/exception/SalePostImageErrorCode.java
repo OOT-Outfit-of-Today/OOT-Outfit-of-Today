@@ -16,7 +16,8 @@ public enum SalePostImageErrorCode implements ErrorCode {
     EMPTY_SALE_POST_IMAGES("EMPTY_SALE_POST_IMAGES", HttpStatus.BAD_REQUEST, "판매글 이미지는 최소 1개 이상 필요합니다"),
     SALE_POST_IMAGE_NOT_BELONG("SALE_POST_IMAGE_NOT_BELONG", HttpStatus.BAD_REQUEST, "해당 판매글의 이미지가 아닙니다"),
     ALREADY_MAIN_SALE_POST_IMAGE("ALREADY_MAIN_SALE_POST_IMAGE", HttpStatus.BAD_REQUEST, "이미 메인 이미지입니다"),
-    CANNOT_DELETE_LAST_SALE_POST_IMAGE("CANNOT_DELETE_LAST_SALE_POST_IMAGE", HttpStatus.BAD_REQUEST, "최소 1개의 이미지는 남아있어야 합니다");
+    CANNOT_DELETE_LAST_SALE_POST_IMAGE("CANNOT_DELETE_LAST_SALE_POST_IMAGE", HttpStatus.BAD_REQUEST, "최소 1개의 이미지는 남아있어야 합니다"),
+    DUPLICATE_SALE_POST_IMAGE("DUPLICATE_SALE_POST_IMAGE", HttpStatus.BAD_REQUEST, "판매글에 동일한 이미지를 중복으로 등록 할 수 없습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

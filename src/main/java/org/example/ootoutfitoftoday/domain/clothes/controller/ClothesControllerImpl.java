@@ -71,7 +71,6 @@ public class ClothesControllerImpl implements ClothesController {
         return Response.success(clothesDetailResponse, ClothesSuccessCode.CLOTHES_OK);
     }
 
-
     @Override
     @PutMapping("/{clothesId}")
     public ResponseEntity<Response<ClothesResponse>> updateClothes(

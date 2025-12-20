@@ -52,7 +52,7 @@ public class ClothesImageControllerImpl implements ClothesImageController {
 
     // 이미지 제거
     @DeleteMapping
-    public ResponseEntity<Response<Void>> deleteMainImage(
+    public ResponseEntity<Response<Void>> removeImages(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clothesId,
             @RequestBody ClothesImageRequest clothesImageRequest

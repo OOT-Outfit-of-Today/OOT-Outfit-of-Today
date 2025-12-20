@@ -37,7 +37,7 @@ public class ClothesDetailResponse {
                 .clothesSize(clothes.getClothesSize())
                 .clothesColor(clothes.getClothesColor())
                 .description(clothes.getDescription())
-                .clothesImages(clothesImages) // null이 들어오지 못하게 서비스에서 처리 필요함!
+                .clothesImages(clothesImages)
                 .build();
     }
 }

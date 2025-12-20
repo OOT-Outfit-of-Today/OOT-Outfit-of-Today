@@ -16,7 +16,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
             value = """
                     SELECT c
                     FROM Closet c
-                    LEFT JOIN FETCH c.image i
+                    LEFT JOIN FETCH c.image
                     WHERE c.user.id = :userId
                       AND c.isDeleted = false
                     """,
@@ -33,7 +33,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
             value = """
                     SELECT c
                     FROM Closet c
-                    LEFT JOIN FETCH c.image i
+                    LEFT JOIN FETCH c.image
                     WHERE c.user.id = :userId
                       AND c.isDeleted = false
                       AND c.user.isDeleted = false
@@ -54,7 +54,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
             value = """
                     SELECT c
                     FROM Closet c
-                    LEFT JOIN FETCH c.image i
+                    LEFT JOIN FETCH c.image
                     WHERE c.isDeleted = false
                       AND c.user.isDeleted = false
                       AND c.isPublic = true
@@ -72,7 +72,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
     @Query("""
             SELECT c
             FROM Closet c
-            LEFT JOIN FETCH c.image i
+            LEFT JOIN FETCH c.image
             WHERE c.user.id = :userId
               AND c.isDeleted = false
               AND c.id = :closetId
@@ -83,7 +83,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
     @Query("""
             SELECT c
             FROM Closet c
-            LEFT JOIN FETCH c.image i
+            LEFT JOIN FETCH c.image
             WHERE c.isDeleted = false
               AND c.user.isDeleted = false
               AND c.isPublic = true
@@ -95,7 +95,7 @@ public interface ClosetRepository extends JpaRepository<Closet, Long> {
     @Query("""
             SELECT c
             FROM Closet c
-            LEFT JOIN FETCH c.image i
+            LEFT JOIN FETCH c.image
             WHERE c.isDeleted = false
               AND c.id = :closetId
               AND c.user.id = :userId

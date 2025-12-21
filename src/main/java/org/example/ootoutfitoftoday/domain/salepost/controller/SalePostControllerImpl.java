@@ -123,7 +123,7 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @GetMapping("/my")
+    @GetMapping("/me")
     public ResponseEntity<Response<Slice<SalePostListResponse>>> getMySalePosts(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) SaleStatus status,

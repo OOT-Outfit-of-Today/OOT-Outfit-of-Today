@@ -2,6 +2,7 @@ package org.example.ootoutfitoftoday.domain.closet.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,6 +17,7 @@ public record ClosetRequest(
         @Size(max = 255, message = "옷장 설명은 255자를 초과할 수 없습니다.")
         String description,
 
+        @Positive(message = "imageId는 양수여야 합니다.")
         Long imageId,
 
         @NotNull(message = "공개 여부는 필수입니다.")

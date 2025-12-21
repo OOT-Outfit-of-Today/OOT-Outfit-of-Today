@@ -97,7 +97,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         List<Image> validatedImages = imageQueryService.findAllByIdInAndIsDeletedFalse(imageIds);
 
         // 기존 이미지 개수 확인(중간 테이블 SalePostImage)
-        List<SalePostImage> existingSalePostImages = salePostImageRepository.findBySalePostId(salePostId);
+        List<SalePostImage> existingSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
 
         // 비즈니스 검증: 최대 10개
         if (existingSalePostImages.size() + validatedImages.size() > 10) {
@@ -156,7 +156,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         }
 
         // 기존 이미지 모두 soft delete
-        List<SalePostImage> existingSalePostImages = salePostImageRepository.findBySalePostId(salePostId);
+        List<SalePostImage> existingSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
         for (SalePostImage existingSalePostImage : existingSalePostImages) {
             existingSalePostImage.softDelete();
         }
@@ -203,7 +203,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         }
 
         // 최소 1개 검증
-        List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostId(salePostId);
+        List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
         if (allSalePostImages.size() <= 1) {
             log.warn("마지막 이미지 삭제 불가 - salePostId: {}, 이미지 개수: {}", salePostId, allSalePostImages.size());
             throw new SalePostImageException(SalePostImageErrorCode.CANNOT_DELETE_LAST_SALE_POST_IMAGE);
@@ -216,7 +216,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         // 삭제한 이미지가 메인이었다면 다른 이미지를 메인으로 설정
         if (targetSalePostImage.getIsMain()) {
             // salePostId로 다시 조회
-            List<SalePostImage> remainingSalePostImages = salePostImageRepository.findBySalePostId(salePostId);
+            List<SalePostImage> remainingSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
             if (!remainingSalePostImages.isEmpty()) {
                 remainingSalePostImages.get(0).updateMain(true);
                 salePostImageRepository.save(remainingSalePostImages.get(0));
@@ -235,7 +235,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         validateOwnership(salePostId, userId);
 
         // 모든 이미지 조회
-        List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostId(salePostId);
+        List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
 
         // 선택한 이미지 찾기
         SalePostImage targetSalePostImage = allSalePostImages.stream()
@@ -272,7 +272,7 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         SalePost salePost = validateOwnership(salePostId, userId);
 
         // 모든 이미지 조회
-        List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostId(salePostId);
+        List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
 
         // ID로 매핑
         Map<Long, SalePostImage> salePostImageMap = allSalePostImages.stream()
@@ -313,7 +313,20 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
         salePostImageRepository.saveAll(newSalePostImages);
     }
 
-    // 권한 검증 헬퍼 메서드
+    // 일괄 soft delete
+    // 설명: SalePost 삭제 시 연관된 SalePostImage를 일괄 삭제
+    // 변경 이유: 삭제 로직을 CommandService에 집중
+    @Override
+    public void bulkSoftDelete(List<SalePostImage> salePostImages) {
+
+        for (SalePostImage salePostImage : salePostImages) {
+            salePostImage.softDelete();
+        }
+
+        salePostImageRepository.saveAll(salePostImages);
+    }
+
+    // 권한 검증 헬퍼 메서드 (기존과 동일)
     private SalePost validateOwnership(Long salePostId, Long userId) {
 
         SalePost salePost = salePostQueryService.findSalePostById(salePostId);

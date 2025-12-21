@@ -18,7 +18,7 @@ import org.example.ootoutfitoftoday.domain.salepost.service.cache.SalePostCacheS
 import org.example.ootoutfitoftoday.domain.salepost.util.NativeQuerySortUtil;
 import org.example.ootoutfitoftoday.domain.salepost.util.SliceContent;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
-import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImageRepository;
+import org.example.ootoutfitoftoday.domain.salepostimage.service.query.SalePostImageQueryService;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +42,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
     private final SalePostCacheService salePostCacheService;
     private final UserQueryService userQueryService;
     private final EntityManager entityManager;
-    private final SalePostImageRepository salePostImageRepository;
+    private final SalePostImageQueryService salePostImageQueryService;
 
     private static SliceContent sliceAndQueryResult(Query query, Pageable pageable) {
         int offset = pageable.getPageNumber() * pageable.getPageSize();
@@ -74,8 +74,9 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
         SalePost salePost = findSalePostById(salePostId);
 
-        // 이미지 별도 조회
-        List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
+        // QueryService로 변경(Image URL 필요)
+        // 설명: 상세 조회 시 이미지 URL이 필요하므로 WithImage 사용
+        List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithImage(salePostId);
 
         // 이미지 포함하여 Response 생성
         return SalePostDetailResponse.from(salePost, salePostImages);

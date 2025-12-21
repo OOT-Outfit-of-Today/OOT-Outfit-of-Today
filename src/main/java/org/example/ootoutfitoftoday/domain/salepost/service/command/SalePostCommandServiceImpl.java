@@ -16,9 +16,9 @@ import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
-import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImageRepository;
 import org.example.ootoutfitoftoday.domain.salepost.repository.SalePostRepository;
 import org.example.ootoutfitoftoday.domain.salepostimage.service.command.SalePostImageCommandService;
+import org.example.ootoutfitoftoday.domain.salepostimage.service.query.SalePostImageQueryService;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,7 +39,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     private final SalePostRepository salePostRepository;
     private final EntityManager entityManager;
     private final SalePostImageCommandService salePostImageCommandService;
-    private final SalePostImageRepository salePostImageRepository;
+    private final SalePostImageQueryService salePostImageQueryService;
 
     // 수정: 판매글 생성(이미지 필수)
     // 설명: imageIds는 @NotEmpty로 검증됨(1~10개)
@@ -203,7 +203,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
+        // QueryService로 변경(Image URL 필요)
+        List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithImage(salePostId);
 
         return SalePostDetailResponse.from(updatedSalePost, salePostImages);
     }
@@ -230,13 +231,13 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         // SalePost soft delete
         salePost.softDelete();
 
-        // 연관된 SalePostImage도 soft delete
-        // 설명: cascade 제거했으므로 명시적으로 처리
-        List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostId(salePostId);
-        for (SalePostImage salePostImage : salePostImages) {
-            salePostImage.softDelete();
-        }
-        salePostImageRepository.saveAll(salePostImages);
+        // QueryService로 조회(Image URL 불필요 - WithoutImage 사용)
+        // 설명: soft delete만 하므로 메타데이터만 필요, Image fetch join 불필요
+        List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithoutImage(salePostId);
+
+        // CommandService로 일괄 삭제 위임
+        // 변경 이유: 삭제 로직은 CommandService의 책임
+        salePostImageCommandService.bulkSoftDelete(salePostImages);
     }
 
     @Override
@@ -262,8 +263,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        // 이미지와 함께 반환
-        List<SalePostImage> salePostImages = salePostImageRepository.findBySalePostIdWithImage(salePostId);
+        // QueryService로 변경(Image URL 필요)
+        List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithImage(salePostId);
 
         return SalePostDetailResponse.from(updatedSalePost, salePostImages);
     }

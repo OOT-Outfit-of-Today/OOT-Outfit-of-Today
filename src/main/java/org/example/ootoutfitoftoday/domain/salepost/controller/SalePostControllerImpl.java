@@ -80,13 +80,13 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @PatchMapping("/{salePostId}")
-    public ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
+    @PutMapping("/{salePostId}")    // TODO: Patch 고려
+    public ResponseEntity<Response<SalePostUpdateResponse>> updateSalePost(
             @PathVariable Long salePostId,
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody SalePostUpdateRequest request
     ) {
-        SalePostDetailResponse response = salePostCommandService.updateSalePost(
+        SalePostUpdateResponse response = salePostCommandService.updateSalePost(
                 salePostId,
                 authUser.getUserId(),
                 request
@@ -107,13 +107,13 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @PatchMapping("/{salePostId}/status")    // TODO: http 메서드에 맞춰, Request DTO/Service 수정
-    public ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
+    @PatchMapping("/{salePostId}/status")
+    public ResponseEntity<Response<SalePostUpdateResponse>> updateSaleStatus(
             @PathVariable Long salePostId,
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody SaleStatusUpdateRequest request
     ) {
-        SalePostDetailResponse response = salePostCommandService.updateSaleStatus(
+        SalePostUpdateResponse response = salePostCommandService.updateSaleStatus(
                 salePostId,
                 authUser.getUserId(),
                 request.getStatus()

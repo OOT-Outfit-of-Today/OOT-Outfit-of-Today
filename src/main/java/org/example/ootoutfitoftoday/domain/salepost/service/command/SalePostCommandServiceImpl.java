@@ -13,6 +13,7 @@ import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostUpdateRe
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostUpdateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
+import org.example.ootoutfitoftoday.domain.salepost.service.query.SalePostQueryService;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
@@ -167,14 +168,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
             Long userId,
             SalePostUpdateRequest request
     ) {
-        // 권한 및 상태 검증
-        SalePost salePost = salePostRepository.findByIdWithDetailsAndNotDeleted(salePostId).orElseThrow(
-                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
-
-        if (!salePost.isOwnedBy(userId)) {
-            log.warn("권한 없는 접근 - salePostId: {}, userId: {}", salePostId, userId);
-            throw new SalePostException(SalePostErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        // 권한 검증 헬퍼 메서드로 변경
+        // 설명: 조회 + 권한 체크를 한 번에 처리
+        SalePost salePost = validateOwnership(salePostId, userId);
 
         if (salePost.getStatus() == SaleStatus.RESERVED ||
                 salePost.getStatus() == SaleStatus.TRADING ||
@@ -213,13 +209,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     @CacheEvict(value = "salePostListCache", allEntries = true)
     public void deleteSalePost(Long salePostId, Long userId) {
 
-        SalePost salePost = salePostRepository.findByIdAndIsDeletedFalse(salePostId).orElseThrow(
-                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
-
-        if (!salePost.isOwnedBy(userId)) {
-            log.warn("권한 없는 삭제 시도 - salePostId: {}, userId: {}", salePostId, userId);
-            throw new SalePostException(SalePostErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        // 권한 검증 헬퍼 메서드로 변경
+        // 설명: 조회 + 권한 체크를 한 번에 처리
+        SalePost salePost = validateOwnership(salePostId, userId);
 
         if (salePost.getStatus() == SaleStatus.RESERVED) {
             log.warn("예약된 판매글 삭제 불가 - salePostId: {}, status: {}", salePostId, salePost.getStatus());
@@ -245,13 +237,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
             Long userId,
             SaleStatus newStatus
     ) {
-        SalePost salePost = salePostRepository.findByIdWithDetailsAndNotDeleted(salePostId).orElseThrow(
-                () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
-
-        if (!salePost.isOwnedBy(userId)) {
-            log.warn("권한 없는 상태 변경 시도 - salePostId: {}, userId: {}, 요청 상태: {}", salePostId, userId, newStatus);
-            throw new SalePostException(SalePostErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        // 권한 검증 헬퍼 메서드로 변경
+        // 설명: 조회 + 권한 체크를 한 번에 처리
+        SalePost salePost = validateOwnership(salePostId, userId);
 
         salePost.updateStatus(newStatus);
 
@@ -262,5 +250,21 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
         return SalePostUpdateResponse.from(updatedSalePost);
+    }
+
+    // 권한 검증 헬퍼 메서드 추가
+    // 설명: SalePost 조회 + 소유권 확인을 한 번에 처리
+    // 목적: 중복 코드 제거 및 일관된 권한 검증 로직 제공
+    // 반환: 검증된 SalePost 엔티티
+    private SalePost validateOwnership(Long salePostId, Long userId) {
+        SalePost salePost = salePostRepository.findByIdAndIsDeletedFalse(salePostId)
+                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+
+        if (!salePost.isOwnedBy(userId)) {
+            log.warn("권한 없는 접근 - salePostId: {}, userId: {}", salePostId, userId);
+            throw new SalePostException(SalePostErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        return salePost;
     }
 }

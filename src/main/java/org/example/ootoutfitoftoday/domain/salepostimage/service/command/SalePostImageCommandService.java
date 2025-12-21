@@ -60,4 +60,9 @@ public interface SalePostImageCommandService {
             Long userId,
             List<Long> orderedImageIds
     );
+
+    // 일괄 soft delete
+    // 설명: SalePost 삭제 시 연관된 SalePostImage를 일괄 삭제
+    // 사용: SalePostCommandService.deleteSalePost()
+    void bulkSoftDelete(List<SalePostImage> salePostImages);
 }

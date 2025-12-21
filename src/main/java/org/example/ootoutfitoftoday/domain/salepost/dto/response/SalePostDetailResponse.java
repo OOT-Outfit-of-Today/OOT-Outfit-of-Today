@@ -29,7 +29,7 @@ public class SalePostDetailResponse {
     private final String sellerNickname;
     private final String sellerImageUrl;
     private final String categoryName;
-    private final List<SalePostImageResponse> images;    // null 가능
+    private final List<SalePostImageResponse> images;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -56,29 +56,6 @@ public class SalePostDetailResponse {
                 .images(salePostImages.stream()
                         .map(SalePostImageResponse::from)
                         .toList())
-                .createdAt(salePost.getCreatedAt())
-                .updatedAt(salePost.getUpdatedAt())
-                .build();
-    }
-
-    // 수정: SalePost만으로 생성(이미지 없이)
-    public static SalePostDetailResponse fromWithoutImages(SalePost salePost) {
-        Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
-
-        return SalePostDetailResponse.builder()
-                .salePostId(salePost.getId())
-                .title(salePost.getTitle())
-                .content(salePost.getContent())
-                .price(salePost.getPrice())
-                .status(salePost.getStatus())
-                .tradeAddress(salePost.getTradeAddress())
-                .tradeLatitude(location.latitude())
-                .tradeLongitude(location.longitude())
-                .sellerId(salePost.getUser().getId())
-                .sellerNickname(salePost.getUser().getNickname())
-                .sellerImageUrl(salePost.getUser().getImageUrl())
-                .categoryName(salePost.getCategory().getName())
-                .images(List.of())    // 이미지 없음. 빈 리스트 출력
                 .createdAt(salePost.getCreatedAt())
                 .updatedAt(salePost.getUpdatedAt())
                 .build();

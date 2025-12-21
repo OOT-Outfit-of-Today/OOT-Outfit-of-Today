@@ -184,6 +184,8 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
             throw new SalePostException(SalePostErrorCode.CANNOT_UPDATE_NON_SELLING_POST);
         }
 
+        categoryQueryService.findById(request.getCategoryId());
+
         String tradeLocation = PointFormatAndParse.format(request.getTradeLatitude(), request.getTradeLongitude());
 
         // SalePost 정보만 업데이트(이미지 제외)

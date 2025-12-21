@@ -13,7 +13,6 @@ import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostUpdateRe
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostUpdateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
-import org.example.ootoutfitoftoday.domain.salepost.service.query.SalePostQueryService;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
@@ -37,7 +36,6 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
     private final UserQueryService userQueryService;
     private final CategoryQueryService categoryQueryService;
-    private final SalePostQueryService salePostQueryService;
     private final SalePostRepository salePostRepository;
     private final EntityManager entityManager;
     private final SalePostImageCommandService salePostImageCommandService;

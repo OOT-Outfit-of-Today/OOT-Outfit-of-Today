@@ -57,25 +57,4 @@ public class SalePostCreateResponse {
                 .createdAt(salePost.getCreatedAt())
                 .build();
     }
-
-    // 수정: SalePost만으로 생성(이미지 없이)
-    // 설명: 판매글만 생성하고 이미지는 나중에 추가할 때 사용
-    public static SalePostCreateResponse fromWithoutImages(SalePost salePost) {
-        Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
-
-        return SalePostCreateResponse.builder()
-                .salePostId(salePost.getId())
-                .title(salePost.getTitle())
-                .content(salePost.getContent())
-                .price(salePost.getPrice())
-                .status(salePost.getStatus())
-                .tradeAddress(salePost.getTradeAddress())
-                .tradeLatitude(location.latitude())
-                .tradeLongitude(location.longitude())
-                .userId(salePost.getUser().getId())
-                .categoryId(salePost.getCategory().getId())
-                .images(List.of())    // 이미지 없음. 빈 리스트 출력
-                .createdAt(salePost.getCreatedAt())
-                .build();
-    }
 }

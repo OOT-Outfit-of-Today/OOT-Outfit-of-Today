@@ -37,6 +37,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
     private final UserQueryService userQueryService;
     private final CategoryQueryService categoryQueryService;
+    private final SalePostQueryService salePostQueryService;
     private final SalePostRepository salePostRepository;
     private final EntityManager entityManager;
     private final SalePostImageCommandService salePostImageCommandService;
@@ -172,13 +173,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         // 설명: 조회 + 권한 체크를 한 번에 처리
         SalePost salePost = validateOwnership(salePostId, userId);
 
-        if (salePost.getStatus() == SaleStatus.RESERVED ||
-                salePost.getStatus() == SaleStatus.TRADING ||
-                salePost.getStatus() == SaleStatus.COMPLETED
-        ) {
-            log.warn("판매글 수정 불가 - salePostId: {}, status: {}", salePostId, salePost.getStatus());
-            throw new SalePostException(SalePostErrorCode.CANNOT_UPDATE_NON_SELLING_POST);
-        }
+        // 상태 검증 헬퍼 메서드로 분리
+        // 설명: 수정 가능한 상태인지 확인
+        validateStatusForUpdate(salePost);
 
         categoryQueryService.findById(request.getCategoryId());
 
@@ -213,10 +210,9 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         // 설명: 조회 + 권한 체크를 한 번에 처리
         SalePost salePost = validateOwnership(salePostId, userId);
 
-        if (salePost.getStatus() == SaleStatus.RESERVED) {
-            log.warn("예약된 판매글 삭제 불가 - salePostId: {}, status: {}", salePostId, salePost.getStatus());
-            throw new SalePostException(SalePostErrorCode.CANNOT_DELETE_RESERVED_POST);
-        }
+        // 상태 검증 헬퍼 메서드로 분리
+        // 설명: 삭제 가능한 상태인지 확인
+        validateStatusForDelete(salePost);
 
         // SalePost soft delete
         salePost.softDelete();
@@ -266,5 +262,27 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         }
 
         return salePost;
+    }
+
+    // 수정 가능 상태 검증 헬퍼 메서드 추가
+    // 설명: 판매 중 상태(AVAILABLE)인지 확인
+    // 목적: 예약/거래중/완료 상태의 판매글은 수정 불가
+    private void validateStatusForUpdate(SalePost salePost) {
+        if (salePost.getStatus() == SaleStatus.RESERVED ||
+                salePost.getStatus() == SaleStatus.TRADING ||
+                salePost.getStatus() == SaleStatus.COMPLETED) {
+            log.warn("판매글 수정 불가 - salePostId: {}, status: {}", salePost.getId(), salePost.getStatus());
+            throw new SalePostException(SalePostErrorCode.CANNOT_UPDATE_NON_SELLING_POST);
+        }
+    }
+
+    // 삭제 가능 상태 검증 헬퍼 메서드 추가
+    // 설명: 예약 상태가 아닌지 확인
+    // 목적: 예약된 판매글은 삭제 불가
+    private void validateStatusForDelete(SalePost salePost) {
+        if (salePost.getStatus() == SaleStatus.RESERVED) {
+            log.warn("예약된 판매글 삭제 불가 - salePostId: {}, status: {}", salePost.getId(), salePost.getStatus());
+            throw new SalePostException(SalePostErrorCode.CANNOT_DELETE_RESERVED_POST);
+        }
     }
 }

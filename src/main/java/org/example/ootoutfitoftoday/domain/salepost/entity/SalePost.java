@@ -119,18 +119,6 @@ public class SalePost extends BaseEntity {
                 .tradeLocation(tradeLocation)
                 .build();
 
-        // 제거: 이미지 추가 로직 제거
-        // Service에서 별도로 SalePostImage.create() 호출
-        // for (int i = 0; i < images.size(); i++) {
-        //     boolean isMain = (i == 0);
-        //     SalePostImage salePostImage = SalePostImage.create(
-        //             images.get(i),
-        //             i + 1,
-        //             isMain
-        //     );
-        //     salePost.addImage(salePostImage);
-        // }
-
         return salePost;
     }
 
@@ -158,8 +146,6 @@ public class SalePost extends BaseEntity {
                 .recommendation(recommendation)
                 .build();
 
-        // 제거: 이미지 추가 로직
-
         return salePost;
     }
 
@@ -168,31 +154,6 @@ public class SalePost extends BaseEntity {
             throw new SalePostException(SalePostErrorCode.INVALID_PRICE);
         }
     }
-
-    // 제거: validateImages 메서드
-    // 설명: Service로 이동
-    // 이유: 이미지 검증은 Service의 책임
-    // private static void validateImages(List<Image> images) {
-    //     if (images == null || images.isEmpty()) {
-    //         throw new SalePostException(SalePostErrorCode.EMPTY_IMAGES);
-    //     }
-    //
-    //     Set<Long> uniqueIds = images.stream()
-    //             .map(Image::getId)
-    //             .collect(Collectors.toSet());
-    //
-    //     if (uniqueIds.size() != images.size()) {
-    //         throw new SalePostException(SalePostErrorCode.DUPLICATE_IMAGE);
-    //     }
-    // }
-
-    // 제거: addImage 메서드
-    // 설명: images 필드가 없으므로 불필요
-    // 이유: 단방향이므로 SalePost는 SalePostImage를 모름
-    // public void addImage(SalePostImage image) {
-    //     this.images.add(image);
-    //     image.setSalePost(this);
-    // }
 
     // 수정: update 메서드에서 images 파라미터 제거
     // 설명: 이미지 업데이트는 Service에서 별도로 처리
@@ -214,25 +175,7 @@ public class SalePost extends BaseEntity {
         this.tradeLocation = tradeLocation;
     }
 
-    // 제거: updateImages 메서드
-    // 설명: Service로 이동
-    // 이유: 이미지 업데이트는 Service의 책임
-    // public void updateImages(List<Image> images) {
-    //     validateImages(images);
-    //     this.images.clear();
-    //     for (int i = 0; i < images.size(); i++) {
-    //         boolean isMain = (i == 0);
-    //         SalePostImage salePostImage = SalePostImage.create(
-    //                 images.get(i),
-    //                 i + 1,
-    //                 isMain
-    //         );
-    //         this.addImage(salePostImage);
-    //     }
-    // }
-
     public boolean isOwnedBy(Long userId) {
-
         return this.user != null && Objects.equals(this.user.getId(), userId);
     }
 
@@ -241,7 +184,6 @@ public class SalePost extends BaseEntity {
     }
 
     public User getSeller() {
-
         return user;
     }
 }

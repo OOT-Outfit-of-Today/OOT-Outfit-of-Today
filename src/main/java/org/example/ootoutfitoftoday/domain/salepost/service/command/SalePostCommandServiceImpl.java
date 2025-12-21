@@ -11,7 +11,7 @@ import org.example.ootoutfitoftoday.domain.recommendation.entity.Recommendation;
 import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostCreateRequest;
 import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostUpdateRequest;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateResponse;
-import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostDetailResponse;
+import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostUpdateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
@@ -162,7 +162,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     // 설명: 이미지 수정은 SalePostImageCommandService로 분리
     @Override
     @CacheEvict(value = "salePostListCache", allEntries = true)
-    public SalePostDetailResponse updateSalePost(
+    public SalePostUpdateResponse updateSalePost(
             Long salePostId,
             Long userId,
             SalePostUpdateRequest request
@@ -199,14 +199,10 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
         entityManager.clear();
 
-        // 이미지와 함께 조회하여 반환
         SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        // QueryService로 변경(Image URL 필요)
-        List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithImage(salePostId);
-
-        return SalePostDetailResponse.from(updatedSalePost, salePostImages);
+        return SalePostUpdateResponse.from(updatedSalePost);
     }
 
     // 수정: SalePost + 연관된 SalePostImage 모두 soft delete
@@ -242,7 +238,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
     @Override
     @CacheEvict(value = "salePostListCache", allEntries = true)
-    public SalePostDetailResponse updateSaleStatus(
+    public SalePostUpdateResponse updateSaleStatus(
             Long salePostId,
             Long userId,
             SaleStatus newStatus
@@ -263,9 +259,6 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost updatedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        // QueryService로 변경(Image URL 필요)
-        List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithImage(salePostId);
-
-        return SalePostDetailResponse.from(updatedSalePost, salePostImages);
+        return SalePostUpdateResponse.from(updatedSalePost);
     }
 }

@@ -71,7 +71,11 @@ public interface SalePostController {
 
     @Operation(
             summary = "판매글 수정",
-            description = "기존 판매글을 수정합니다.(이미지 제외)",
+            description = """
+                    기존 판매글을 수정합니다.(이미지 제외)
+                    - 이미지를 제외한 수정된 판매글 정보만 반환
+                    - 이미지 수정은 별도 API 사용
+                    """,
             security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
                     @ApiResponse(responseCode = "200", description = "수정 성공"),
@@ -81,7 +85,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "404", description = "요청 리소스를 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
+    ResponseEntity<Response<SalePostUpdateResponse>> updateSalePost(
             Long salePostId,
             AuthUser authUser,
             SalePostUpdateRequest request
@@ -106,7 +110,10 @@ public interface SalePostController {
 
     @Operation(
             summary = "판매글 상태 변경",
-            description = "판매글의 판매 상태를 변경합니다.",
+            description = """
+                    판매글의 판매 상태를 변경합니다.(이미지 제외)
+                    - 이미지를 제외한 변경된 판매글 정보만 반환
+                    """,
             security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
                     @ApiResponse(responseCode = "200", description = "변경 성공"),
@@ -115,7 +122,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "404", description = "요청 리소스를 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
+    ResponseEntity<Response<SalePostUpdateResponse>> updateSaleStatus(
             Long salePostId,
             AuthUser authUser,
             SaleStatusUpdateRequest request

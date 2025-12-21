@@ -60,8 +60,8 @@ public interface SalePostController {
     )
     ResponseEntity<Response<Slice<SalePostListResponse>>> getSalePosts(
             @Parameter(description = "카테고리 ID") Long categoryId,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
-            @Parameter(description = "검색어 (제목/내용 검색)") String keyword,
+            @Parameter(description = "판매 상태(AVAILABLE, RESERVED, TRADING, COMPLETED, CANCELLED, DELETED)") SaleStatus status,
+            @Parameter(description = "검색어(제목/내용 검색)") String keyword,
             @Parameter(description = "해당 페이지") int page,
             @Parameter(description = "한 페이지 판매글 수") int size,
             @Parameter(description = "정렬 기준") String sort,
@@ -156,8 +156,8 @@ public interface SalePostController {
     )
     ResponseEntity<Response<Slice<SalePostListResponse>>> getNotAuthSalePosts(
             @Parameter(description = "카테고리 ID") Long categoryId,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
-            @Parameter(description = "검색어 (제목/내용 검색)") String keyword,
+            @Parameter(description = "판매 상태(AVAILABLE, RESERVED, TRADING, COMPLETED, CANCELLED, DELETED)") SaleStatus status,
+            @Parameter(description = "검색어(제목/내용 검색)") String keyword,
             int page,
             int size,
             String sort,

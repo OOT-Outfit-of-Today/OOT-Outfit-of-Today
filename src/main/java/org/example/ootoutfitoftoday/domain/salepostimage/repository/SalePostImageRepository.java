@@ -10,10 +10,16 @@ import java.util.Optional;
 
 public interface SalePostImageRepository extends JpaRepository<SalePostImage, Long> {
 
-    // 활성 이미지 조회
-    // 명시적으로 isDeleted = false 조건 추가
-    // 이유: @Where/@SQLRestriction 없이 명시적으로 처리
-    //      삭제되지 않은 이미지만 조회
+    /**
+     * SalePostImage 조회
+     * SalePostImage 엔티티는 조회함
+     * 연관된 Image 엔티티는 fetch join 하지 않음 (lazy loading)
+     * Image.url 등이 필요 없는 경우 사용 (메타데이터만 필요할 때)
+     * 사용 예: soft delete, 순서 변경, 개수 확인 등
+     * displayOrder 오름차순 정렬
+     * @param salePostId 판매글 ID
+     * @return SalePostImage 목록(Image는 lazy loading)
+    */
     @Query("""
             SELECT spi
             FROM SalePostImage spi
@@ -21,11 +27,18 @@ public interface SalePostImageRepository extends JpaRepository<SalePostImage, Lo
             AND spi.isDeleted = false
             ORDER BY spi.displayOrder ASC
             """)
-    List<SalePostImage> findBySalePostId(@Param("salePostId") Long salePostId);
+    List<SalePostImage> findBySalePostIdAndIsDeletedFalseWithoutImage(@Param("salePostId") Long salePostId);
 
-    // 추가: Image와 함께 조회(Fetch Join)
-    // 이유: N+1 문제 방지
-    //      SalePostImage 조회 시 Image도 함께 로딩
+    /**
+     * SalePostImage 조회 (Image fetch join)
+     * - SalePostImage와 연관된 Image를 한 번에 조회
+     * - fetch join으로 N+1 문제 방지
+     * - Image.url 등이 필요한 경우 사용
+     * - 사용 예: 상세 조회, 목록 조회, 응답 생성 등
+     * - displayOrder 오름차순 정렬
+     * @param salePostId 판매글 ID
+     * @return SalePostImage 목록(Image 포함)
+     */
     @Query("""
             SELECT spi
             FROM SalePostImage spi
@@ -34,7 +47,7 @@ public interface SalePostImageRepository extends JpaRepository<SalePostImage, Lo
             AND spi.isDeleted = false
             ORDER BY spi.displayOrder ASC
             """)
-    List<SalePostImage> findBySalePostIdWithImage(@Param("salePostId") Long salePostId);
+    List<SalePostImage> findBySalePostIdAndIsDeletedFalseWithImage(@Param("salePostId") Long salePostId);
 
     // 추가: 특정 Image를 사용하는 SalePostImage 개수 조회
     // 이유: Image 삭제 시 참조 확인용

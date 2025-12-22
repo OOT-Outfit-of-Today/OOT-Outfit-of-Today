@@ -33,6 +33,7 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long>, Clothes
 
     int countAllClothesByUserIdAndIsDeletedFalse(Long userId);
 
+    // todo: 임포트 문을 현재와 같이 적어야하는 것이 필수인지는 대시보드 작업하면서 다시 알아보기!
     @Query("""
             SELECT new com.ootcommon.category.response.CategoryStat(
                 c.category.name, count(c)

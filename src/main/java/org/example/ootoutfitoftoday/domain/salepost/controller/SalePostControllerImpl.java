@@ -46,9 +46,7 @@ public class SalePostControllerImpl implements SalePostController {
 
     @Override
     @GetMapping("/{salePostId}")
-    public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(
-            @PathVariable Long salePostId
-    ) {
+    public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(@PathVariable Long salePostId) {
         SalePostDetailResponse response = salePostQueryService.getSalePostDetail(salePostId);
 
         return Response.success(response, SalePostSuccessCode.SALE_POST_RETRIEVED);

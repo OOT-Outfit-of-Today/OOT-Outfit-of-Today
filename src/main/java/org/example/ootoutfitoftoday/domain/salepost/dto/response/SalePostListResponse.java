@@ -29,7 +29,7 @@ public class SalePostListResponse {
     // 수정: thumbnailUrl을 파라미터로 받음
     // 설명: 단방향으로 수정됨(SalePost.images 제거)
     //      -> Service에서 별도 조회한 thumbnailUrl 전달받음
-    public static SalePostListResponse from(SalePost salePost, String thumbnailUrl) {
+    public static SalePostListResponse of(SalePost salePost, String thumbnailUrl) {
         Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
 
         return SalePostListResponse.builder()

@@ -54,6 +54,7 @@ public class SalePostControllerImpl implements SalePostController {
         return Response.success(response, SalePostSuccessCode.SALE_POST_RETRIEVED);
     }
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Override
     @GetMapping
     public ResponseEntity<Response<Slice<SalePostListResponse>>> getSalePosts(
@@ -143,6 +144,7 @@ public class SalePostControllerImpl implements SalePostController {
         return Response.success(response, SalePostSuccessCode.SALE_POSTS_RETRIEVED);
     }
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Override
     @GetMapping("/public")
     public ResponseEntity<Response<Slice<SalePostListResponse>>> getNotAuthSalePosts(

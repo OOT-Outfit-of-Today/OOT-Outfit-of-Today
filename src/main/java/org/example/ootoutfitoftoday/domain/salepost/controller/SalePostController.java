@@ -49,6 +49,7 @@ public interface SalePostController {
             Long salePostId
     );
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Operation(
             summary = "판매글 전체 조회",
             description = "카테고리/상태/키워드로 필터링 된 전체 판매글을 조회합니다.",
@@ -147,6 +148,7 @@ public interface SalePostController {
             Sort.Direction direction
     );
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Operation(
             summary = "비회원 판매글 전체 조회",
             description = "카테고리/상태/키워드로 필터링 된 전체 판매글을 조회합니다.",

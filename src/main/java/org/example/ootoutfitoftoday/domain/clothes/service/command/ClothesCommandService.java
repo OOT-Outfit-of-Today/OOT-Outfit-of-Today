@@ -1,6 +1,5 @@
 package org.example.ootoutfitoftoday.domain.clothes.service.command;
 
-import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesImageUnlinkRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
 
@@ -22,10 +21,4 @@ public interface ClothesCommandService {
     void clearCategoryFromClothes(List<Long> categoryIds);
 
     void updateLastWornAt(Long clothesId, LocalDateTime wornAt);
-
-    void removeClothesImages(
-            Long userId,
-            Long clothesId,
-            ClothesImageUnlinkRequest clothesImageUnlinkRequest
-    );
 }

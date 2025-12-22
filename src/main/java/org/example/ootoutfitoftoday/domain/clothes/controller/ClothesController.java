@@ -10,9 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.common.response.SliceResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
-import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesImageUnlinkRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesDetailResponse;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
+import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesSummaryResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
@@ -41,7 +42,7 @@ public interface ClothesController {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             })
-    ResponseEntity<SliceResponse<ClothesResponse>> getClothes(
+    ResponseEntity<SliceResponse<ClothesSummaryResponse>> getClothes(
             @AuthenticationPrincipal AuthUser authUser,
             @Parameter(description = "카테고리 ID") Long categoryId,
             @Parameter(description = "옷 색상") ClothesColor clothesColor,
@@ -58,7 +59,7 @@ public interface ClothesController {
                     @ApiResponse(responseCode = "401", description = "인증 실패"),
                     @ApiResponse(responseCode = "404", description = "찾을 수 없음")
             })
-    ResponseEntity<Response<ClothesResponse>> getClothesById(
+    ResponseEntity<Response<ClothesDetailResponse>> getClothesById(
             AuthUser authUser,
             Long clothesId
     );
@@ -89,17 +90,5 @@ public interface ClothesController {
     ResponseEntity<Response<Void>> deleteClothes(
             AuthUser authUser,
             Long clothesId
-    );
-
-    @Operation(
-            summary = "해당 옷에 등록된 이미지 제거",
-            description = "회원이 자신의 옷에 등록된 이미지를 제거합니다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "삭제 성공")
-            })
-    ResponseEntity<Response<Void>> removeClothesImages(
-            AuthUser authUser,
-            Long clothesId,
-            ClothesImageUnlinkRequest clothesImageUnlinkRequest
     );
 }

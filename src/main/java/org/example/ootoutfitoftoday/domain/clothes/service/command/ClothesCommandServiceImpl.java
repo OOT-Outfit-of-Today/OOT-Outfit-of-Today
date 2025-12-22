@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.domain.category.entity.Category;
 import org.example.ootoutfitoftoday.domain.category.service.query.CategoryQueryServiceImpl;
-import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesImageUnlinkRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.request.ClothesRequest;
 import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesResponse;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -47,16 +45,10 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
                 user,
                 clothesRequest.getClothesSize(),
                 clothesRequest.getClothesColor(),
-                clothesRequest.getDescription(),
-                new ArrayList<>()
+                clothesRequest.getDescription()
         );
 
         Clothes savedClothes = clothesRepository.save(clothes);
-
-        if (clothesRequest.getImages() != null && !clothesRequest.getImages().isEmpty()) {
-
-            clothesImageCommandService.saveClothesImages(savedClothes, clothesRequest.getImages());
-        }
 
         return ClothesResponse.from(savedClothes);
     }
@@ -79,14 +71,8 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
                 category,
                 clothesRequest.getClothesSize(),
                 clothesRequest.getClothesColor(),
-                clothesRequest.getDescription(),
-                new ArrayList<>()
+                clothesRequest.getDescription()
         );
-
-        if (clothesRequest.getImages() != null && !clothesRequest.getImages().isEmpty()) {
-
-            clothesImageCommandService.updateClothesImages(clothes, clothesRequest.getImages());
-        }
 
         return ClothesResponse.from(clothes);
     }
@@ -123,20 +109,5 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
         if (lastWornAt == null || wornAt.isAfter(lastWornAt)) {
             clothes.updateLastWornAt(wornAt);
         }
-    }
-
-    @Override
-    public void removeClothesImages(
-            Long userId,
-            Long clothesId,
-            ClothesImageUnlinkRequest clothesImageUnlinkRequest
-    ) {
-        clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
-                () -> {
-                    log.warn("removeClothesImages - 옷 없음. clothesId={}", clothesId);
-                    return new ClothesException(ClothesErrorCode.CLOTHES_NOT_FOUND);
-                });
-
-        clothesImageCommandService.removeClothesImages(clothesId, clothesImageUnlinkRequest.getImageIds());
     }
 }

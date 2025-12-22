@@ -21,15 +21,6 @@ public interface ClothesImageRepository extends JpaRepository<ClothesImage, Long
     int softDeleteAllByClothesId(@Param("clothesId") Long clothesId);
 
     @Query("""
-            SELECT ci
-            FROM ClothesImage ci
-            JOIN FETCH ci.image
-            WHERE ci.clothes.id = :clothesId and ci.isDeleted = false
-            ORDER BY ci.updatedAt desc, ci.clothes.id asc
-            """)
-    List<ClothesImage> findByClothesId(Long clothesId);
-
-    @Query("""
             SELECT EXISTS (
                     SELECT ci.id
                     FROM ClothesImage ci
@@ -45,15 +36,6 @@ public interface ClothesImageRepository extends JpaRepository<ClothesImage, Long
             FROM ClothesImage ci
             WHERE ci.clothes.id = :clothesId
               AND ci.image.id IN :imageIds
-              AND ci.isDeleted = true
-            """)
-    List<ClothesImage> findDeletedByClothesIdAndImageIds(@Param("clothesId") Long clothesId, @Param("imageIds") List<Long> imageIds);
-
-    @Query("""
-            SELECT ci
-            FROM ClothesImage ci
-            WHERE ci.clothes.id = :clothesId
-              AND ci.image.id IN :imageIds
               AND ci.isDeleted = false
             """)
     List<ClothesImage> findByClothesIdAndImageIdsAndIsDeletedFalse(@Param("clothesId") Long clothesId, @Param("imageIds") List<Long> imageIds);
@@ -61,9 +43,21 @@ public interface ClothesImageRepository extends JpaRepository<ClothesImage, Long
     @Query("""
             SELECT ci
             FROM ClothesImage ci
+            JOIN FETCH ci.image
             WHERE ci.clothes.id = :clothesId
               AND ci.isDeleted = false
-            ORDER BY ci.createdAt asc , ci.clothes.id asc
+            ORDER BY ci.id asc, ci.createdAt asc
             """)
-    List<ClothesImage> findByClothesIdAndIsDeletedFalseOrderByCreatedAtAsc(@Param("clothesId") Long clothesId);
+    List<ClothesImage> findByClothesIdAndIsDeletedFalse(@Param("clothesId") Long clothesId);
+
+    // 메인 이미지만 반환하도록 구현
+    @Query("""
+            SELECT ci
+            FROM ClothesImage ci
+            JOIN FETCH ci.image
+            WHERE ci.clothes.id IN :clothesIds
+              AND ci.isMain = true
+              AND ci.isDeleted = false
+            """)
+    List<ClothesImage> findMainImagesByClothesIdsAndIsDeletedFalse(@Param("clothesIds") List<Long> clothesIds);
 }

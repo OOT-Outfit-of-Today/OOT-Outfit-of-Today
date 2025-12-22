@@ -6,11 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
+import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImageResponse;
 
+import java.util.List;
+
+// 옷 단건 조회 반환 리스폰스
 @Getter
-@Builder
 @AllArgsConstructor
-public class ClothesResponse {
+@Builder
+public class ClothesDetailResponse {
 
     private final Long id;
     private final Long categoryId;
@@ -18,10 +22,11 @@ public class ClothesResponse {
     private final ClothesSize clothesSize;
     private final ClothesColor clothesColor;
     private final String description;
+    private final List<ClothesImageResponse> clothesImages;
 
-    public static ClothesResponse from(Clothes clothes) {
+    public static ClothesDetailResponse from(Clothes clothes, List<ClothesImageResponse> clothesImages) {
 
-        return ClothesResponse.builder()
+        return ClothesDetailResponse.builder()
                 .id(clothes.getId())
                 .categoryId(
                         clothes.getCategory() != null
@@ -32,6 +37,7 @@ public class ClothesResponse {
                 .clothesSize(clothes.getClothesSize())
                 .clothesColor(clothes.getClothesColor())
                 .description(clothes.getDescription())
+                .clothesImages(clothesImages)
                 .build();
     }
 }

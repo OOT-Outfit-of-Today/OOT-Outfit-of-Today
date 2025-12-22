@@ -13,15 +13,11 @@ import java.util.Optional;
 public interface ClothesRepository extends JpaRepository<Clothes, Long>, ClothesCustomRepository {
 
     @Query("""
-            SELECT DISTINCT c
+            SELECT c
             FROM Clothes c
-            LEFT JOIN FETCH c.images ci
-            LEFT JOIN FETCH ci.image i
             WHERE c.user.id = :userId
               AND c.id = :clothesId
               AND c.isDeleted = false
-              AND (ci.isDeleted = false OR ci.isDeleted IS NULL)
-              AND (i.isDeleted = false OR i.isDeleted IS NULL)
             """)
     Optional<Clothes> findClothesByIdAndUserIdAndIsDeletedFalse(@Param("userId") Long userId, @Param("clothesId") Long clothesId);
 

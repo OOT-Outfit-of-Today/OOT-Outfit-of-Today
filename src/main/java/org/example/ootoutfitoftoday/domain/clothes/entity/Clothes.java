@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 import org.example.ootoutfitoftoday.common.entity.BaseEntity;
 import org.example.ootoutfitoftoday.domain.category.entity.Category;
 import org.example.ootoutfitoftoday.domain.closetclotheslink.entity.ClosetClothesLink;
-import org.example.ootoutfitoftoday.domain.clothesImage.entity.ClothesImage;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,11 +46,7 @@ public class Clothes extends BaseEntity {
     private String description;
 
     @Column(nullable = true)
-    private LocalDateTime lastWornAt;
-
-    @OneToMany(mappedBy = "clothes")
-    @Where(clause = "is_deleted = false")
-    private List<ClothesImage> images = new ArrayList<>();
+    private LocalDateTime lastWornAt; // todo: 필드명 다시 고려해보기!
 
     @OneToMany(mappedBy = "clothes")
     private List<ClosetClothesLink> closetClothesLinks = new ArrayList<>();
@@ -63,15 +57,13 @@ public class Clothes extends BaseEntity {
             User user,
             ClothesSize clothesSize,
             ClothesColor clothesColor,
-            String description,
-            List<ClothesImage> images
+            String description
     ) {
         this.category = category;
         this.user = user;
         this.clothesSize = clothesSize;
         this.clothesColor = clothesColor;
         this.description = description;
-        this.images = images;
     }
 
     public static Clothes create(
@@ -79,8 +71,7 @@ public class Clothes extends BaseEntity {
             User user,
             ClothesSize clothesSize,
             ClothesColor clothesColor,
-            String description,
-            List<ClothesImage> images
+            String description
     ) {
 
         return Clothes.builder()
@@ -89,7 +80,6 @@ public class Clothes extends BaseEntity {
                 .clothesSize(clothesSize)
                 .clothesColor(clothesColor)
                 .description(description)
-                .images(images)
                 .build();
     }
 
@@ -97,29 +87,12 @@ public class Clothes extends BaseEntity {
             Category category,
             ClothesSize clothesSize,
             ClothesColor clothesColor,
-            String description,
-            List<ClothesImage> images
+            String description
     ) {
         this.category = category;
         this.clothesSize = clothesSize;
         this.clothesColor = clothesColor;
         this.description = description;
-        this.images = images;
-    }
-
-    public void addImages(List<ClothesImage> images) {
-
-        for (ClothesImage existingImage : this.images) {
-            existingImage.addClothes(null);  // 관계 해제
-        }
-
-        this.images.clear();
-
-        for (ClothesImage image : images) {
-            image.addClothes(this);
-        }
-
-        this.images.addAll(images);
     }
 
     public void updateLastWornAt(LocalDateTime wornAt) {

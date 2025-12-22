@@ -12,43 +12,44 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class SalePostPublicListResponse {
+public class SalePostUpdateResponse {
 
     private final Long salePostId;
     private final String title;
+    private final String content;
     private final BigDecimal price;
     private final SaleStatus status;
     private final String tradeAddress;
     private final BigDecimal tradeLatitude;
     private final BigDecimal tradeLongitude;
-    private final String thumbnailUrl;
+    private final Long sellerId;
     private final String sellerNickname;
+    private final String sellerImageUrl;
     private final String categoryName;
     private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
-    public static SalePostPublicListResponse from(SalePost salePost) {
+    // 판매글 정보만으로 생성(이미지 제외)
+    // 설명: 수정/상태변경 후 판매글 정보만 반환
+    //      이미지는 변경되지 않았으므로 불필요
+    public static SalePostUpdateResponse from(SalePost salePost) {
         Location location = PointFormatAndParse.parse(salePost.getTradeLocation());
 
-        return SalePostPublicListResponse.builder()
+        return SalePostUpdateResponse.builder()
                 .salePostId(salePost.getId())
                 .title(salePost.getTitle())
+                .content(salePost.getContent())
                 .price(salePost.getPrice())
                 .status(salePost.getStatus())
                 .tradeAddress(salePost.getTradeAddress())
                 .tradeLatitude(location.latitude())
                 .tradeLongitude(location.longitude())
-                .thumbnailUrl(getThumbnailUrl(salePost))
+                .sellerId(salePost.getUser().getId())
                 .sellerNickname(salePost.getUser().getNickname())
+                .sellerImageUrl(salePost.getUser().getImageUrl())
                 .categoryName(salePost.getCategory().getName())
                 .createdAt(salePost.getCreatedAt())
+                .updatedAt(salePost.getUpdatedAt())
                 .build();
-    }
-
-    private static String getThumbnailUrl(SalePost salePost) {
-        if (salePost.getImages() == null || salePost.getImages().isEmpty()) {
-            return null;
-        }
-
-        return salePost.getImages().get(0).getImageUrl();
     }
 }

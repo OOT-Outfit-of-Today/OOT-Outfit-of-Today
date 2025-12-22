@@ -8,20 +8,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.ootoutfitoftoday.common.entity.BaseEntity;
 import org.example.ootoutfitoftoday.domain.category.entity.Category;
-import org.example.ootoutfitoftoday.domain.image.entity.Image;
 import org.example.ootoutfitoftoday.domain.recommendation.entity.Recommendation;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -60,11 +53,18 @@ public class SalePost extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @OneToMany(mappedBy = "salePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("displayOrder ASC")
-    @BatchSize(size = 100)
-    @Where(clause = "is_deleted = false")
-    private List<SalePostImage> images = new ArrayList<>();
+    // 제거: images 필드 제거(양방향 -> 단방향)
+    // 설명: SalePost는 SalePostImage를 알 필요 없음
+    // 이유:
+    // 1. 단방향 연관관계로 단순화
+    // 2. Cascade 제거하여 Soft Delete 완벽 제어
+    // 3. Service에서 명시적으로 관리(디버깅 쉬움)
+    // 4. 양방향 동기화 코드 불필요
+    // @OneToMany(mappedBy = "salePost", cascade = CascadeType.ALL, orphanRemoval = true)
+    // @OrderBy("displayOrder ASC")
+    // @BatchSize(size = 100)
+    // @Where(clause = "is_deleted = false")
+    // private List<SalePostImage> images = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recommendation_id")
@@ -93,6 +93,10 @@ public class SalePost extends BaseEntity {
         this.recommendation = recommendation;
     }
 
+    // 수정: create 메서드에서 images 파라미터 제거
+    // 설명: SalePost 생성과 이미지 추가를 분리
+    // 이유: Service에서 별도로 SalePostImage를 생성하도록 변경
+    //      엔티티는 자신의 생성에만 집중 (Single Responsibility)
     public static SalePost create(
             User user,
             Category category,
@@ -100,11 +104,9 @@ public class SalePost extends BaseEntity {
             String content,
             BigDecimal price,
             String tradeAddress,
-            String tradeLocation,
-            List<Image> images
+            String tradeLocation
     ) {
         validatePrice(price);
-        validateImages(images);
 
         SalePost salePost = SalePost.builder()
                 .user(user)
@@ -117,19 +119,10 @@ public class SalePost extends BaseEntity {
                 .tradeLocation(tradeLocation)
                 .build();
 
-        for (int i = 0; i < images.size(); i++) {
-            boolean isMain = (i == 0);
-            SalePostImage salePostImage = SalePostImage.create(
-                    images.get(i),
-                    i + 1,
-                    isMain
-            );
-            salePost.addImage(salePostImage);
-        }
-
         return salePost;
     }
 
+    // 수정: createFromRecommendation도 동일하게 수정
     public static SalePost createFromRecommendation(
             Recommendation recommendation,
             Category category,
@@ -137,11 +130,9 @@ public class SalePost extends BaseEntity {
             String content,
             BigDecimal price,
             String tradeAddress,
-            String tradeLocation,
-            List<Image> images
+            String tradeLocation
     ) {
         validatePrice(price);
-        validateImages(images);
 
         SalePost salePost = SalePost.builder()
                 .user(recommendation.getUser())
@@ -155,16 +146,6 @@ public class SalePost extends BaseEntity {
                 .recommendation(recommendation)
                 .build();
 
-        for (int i = 0; i < images.size(); i++) {
-            boolean isMain = (i == 0);
-            SalePostImage salePostImage = SalePostImage.create(
-                    images.get(i),
-                    i + 1,
-                    isMain
-            );
-            salePost.addImage(salePostImage);
-        }
-
         return salePost;
     }
 
@@ -174,36 +155,17 @@ public class SalePost extends BaseEntity {
         }
     }
 
-    private static void validateImages(List<Image> images) {
-        if (images == null || images.isEmpty()) {
-            throw new SalePostException(SalePostErrorCode.EMPTY_IMAGES);
-        }
-
-        Set<Long> uniqueIds = images.stream()
-                .map(Image::getId)
-                .collect(Collectors.toSet());
-
-        if (uniqueIds.size() != images.size()) {
-            throw new SalePostException(SalePostErrorCode.DUPLICATE_IMAGE);
-        }
-    }
-
-    public void addImage(SalePostImage image) {
-        this.images.add(image);
-        image.setSalePost(this);
-    }
-
+    // 수정: update 메서드에서 images 파라미터 제거
+    // 설명: 이미지 업데이트는 Service에서 별도로 처리
     public void update(
             Category category,
             String title,
             String content,
             BigDecimal price,
             String tradeAddress,
-            String tradeLocation,
-            List<Image> images
+            String tradeLocation
     ) {
         validatePrice(price);
-        validateImages(images);
 
         this.category = category;
         this.title = title;
@@ -211,29 +173,9 @@ public class SalePost extends BaseEntity {
         this.price = price;
         this.tradeAddress = tradeAddress;
         this.tradeLocation = tradeLocation;
-
-        updateImages(images);
-    }
-
-    public void updateImages(List<Image> images) {
-
-        validateImages(images);
-
-        this.images.clear();
-
-        for (int i = 0; i < images.size(); i++) {
-            boolean isMain = (i == 0);
-            SalePostImage salePostImage = SalePostImage.create(
-                    images.get(i),
-                    i + 1,
-                    isMain
-            );
-            this.addImage(salePostImage);
-        }
     }
 
     public boolean isOwnedBy(Long userId) {
-
         return this.user != null && Objects.equals(this.user.getId(), userId);
     }
 
@@ -242,7 +184,6 @@ public class SalePost extends BaseEntity {
     }
 
     public User getSeller() {
-
         return user;
     }
 }

@@ -49,6 +49,7 @@ public interface SalePostController {
             Long salePostId
     );
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Operation(
             summary = "판매글 전체 조회",
             description = "카테고리/상태/키워드로 필터링 된 전체 판매글을 조회합니다.",
@@ -60,8 +61,8 @@ public interface SalePostController {
     )
     ResponseEntity<Response<Slice<SalePostListResponse>>> getSalePosts(
             @Parameter(description = "카테고리 ID") Long categoryId,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
-            @Parameter(description = "검색어 (제목/내용 검색)") String keyword,
+            @Parameter(description = "판매 상태(AVAILABLE, RESERVED, TRADING, COMPLETED, CANCELLED, DELETED)") SaleStatus status,
+            @Parameter(description = "검색어(제목/내용 검색)") String keyword,
             @Parameter(description = "해당 페이지") int page,
             @Parameter(description = "한 페이지 판매글 수") int size,
             @Parameter(description = "정렬 기준") String sort,
@@ -71,7 +72,11 @@ public interface SalePostController {
 
     @Operation(
             summary = "판매글 수정",
-            description = "기존 판매글을 수정합니다.",
+            description = """
+                    기존 판매글을 수정합니다.(이미지 제외)
+                    - 이미지를 제외한 수정된 판매글 정보만 반환
+                    - 이미지 수정은 별도 API 사용
+                    """,
             security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
                     @ApiResponse(responseCode = "200", description = "수정 성공"),
@@ -81,7 +86,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "404", description = "요청 리소스를 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
+    ResponseEntity<Response<SalePostUpdateResponse>> updateSalePost(
             Long salePostId,
             AuthUser authUser,
             SalePostUpdateRequest request
@@ -106,7 +111,10 @@ public interface SalePostController {
 
     @Operation(
             summary = "판매글 상태 변경",
-            description = "판매글의 판매 상태를 변경합니다.",
+            description = """
+                    판매글의 판매 상태를 변경합니다.(이미지 제외)
+                    - 이미지를 제외한 변경된 판매글 정보만 반환
+                    """,
             security = {@SecurityRequirement(name = "bearerAuth")},
             responses = {
                     @ApiResponse(responseCode = "200", description = "변경 성공"),
@@ -115,7 +123,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "404", description = "요청 리소스를 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
+    ResponseEntity<Response<SalePostUpdateResponse>> updateSaleStatus(
             Long salePostId,
             AuthUser authUser,
             SaleStatusUpdateRequest request
@@ -131,7 +139,7 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "404", description = "요청 리소스를 찾을 수 없음")
             }
     )
-    ResponseEntity<Response<Slice<SalePostSummaryResponse>>> getMySalePosts(
+    ResponseEntity<Response<Slice<SalePostListResponse>>> getMySalePosts(
             AuthUser authUser,
             @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
             int page,
@@ -140,6 +148,7 @@ public interface SalePostController {
             Sort.Direction direction
     );
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Operation(
             summary = "비회원 판매글 전체 조회",
             description = "카테고리/상태/키워드로 필터링 된 전체 판매글을 조회합니다.",
@@ -147,10 +156,10 @@ public interface SalePostController {
                     @ApiResponse(responseCode = "200", description = "조회 성공")
             }
     )
-    ResponseEntity<Response<Slice<SalePostPublicListResponse>>> getNotAuthSalePosts(
+    ResponseEntity<Response<Slice<SalePostListResponse>>> getNotAuthSalePosts(
             @Parameter(description = "카테고리 ID") Long categoryId,
-            @Parameter(description = "판매 상태 (SELLING, RESERVED, SOLD_OUT)") SaleStatus status,
-            @Parameter(description = "검색어 (제목/내용 검색)") String keyword,
+            @Parameter(description = "판매 상태(AVAILABLE, RESERVED, TRADING, COMPLETED, CANCELLED, DELETED)") SaleStatus status,
+            @Parameter(description = "검색어(제목/내용 검색)") String keyword,
             int page,
             int size,
             String sort,

@@ -17,6 +17,8 @@ import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateR
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.example.ootoutfitoftoday.domain.salepost.service.command.SalePostCommandService;
 import org.example.ootoutfitoftoday.domain.salepost.service.query.SalePostQueryService;
+import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
+import org.example.ootoutfitoftoday.domain.salepostimage.service.query.SalePostImageQueryService;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class RecommendationCommandServiceImpl implements RecommendationCommandSe
     private final RecommendationQueryService recommendationQueryService;
     private final SalePostCommandService salePostCommandService;
     private final SalePostQueryService salePostQueryService;
+    private final SalePostImageQueryService salePostImageQueryService;
     private final ClothesQueryService clothesQueryService;
     private final UserQueryService userQueryService;
     private final Clock clock;
@@ -161,10 +164,18 @@ public class RecommendationCommandServiceImpl implements RecommendationCommandSe
         Optional<SalePost> existingSalePost = salePostQueryService.findByRecommendationId(recommendationId);
 
         if (existingSalePost.isPresent()) {
+            // 이미 판매글이 존재하면 기존 판매글 반환(중복 생성 방지)
+            // 수정: 기존 판매글 조회 시에도 이미지 포함하여 일관된 응답 제공
+            // 설명: API 응답의 일관성을 위해 신규 생성과 동일한 형태로 반환
+            //      Image URL이 필요하므로 WithImage 메서드 사용
+            SalePost salePost = existingSalePost.get();
+            List<SalePostImage> images = salePostImageQueryService.findBySalePostIdWithImage(salePost.getId());
+
             log.info("기존 판매글 존재 - 추천ID: {}, 판매글ID: {}",
                     recommendationId, existingSalePost.get().getId());
 
-            return SalePostCreateResponse.from(existingSalePost.get());
+            // 반환값 변경(이미지 포함)
+            return SalePostCreateResponse.of(salePost, images);
         }
 
         log.debug("신규 판매글 생성 - 추천ID: {}, 옷ID: {}",

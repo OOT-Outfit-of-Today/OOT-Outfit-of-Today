@@ -4,8 +4,6 @@ import com.ootcommon.salepost.enums.SaleStatus;
 import com.ootcommon.salepost.response.SaleStatusCount;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostDetailResponse;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostListResponse;
-import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostPublicListResponse;
-import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostSummaryResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -28,7 +26,7 @@ public interface SalePostQueryService {
             Pageable pageable
     );
 
-    Slice<SalePostPublicListResponse> getNotAuthSalePostList(
+    Slice<SalePostListResponse> getNotAuthSalePostList(
             Long categoryId,
             SaleStatus status,
             String keyword,
@@ -41,7 +39,7 @@ public interface SalePostQueryService {
 
     int countSalePostsRegisteredSince(LocalDateTime start, LocalDateTime end);
 
-    Slice<SalePostSummaryResponse> findMySalePosts(
+    Slice<SalePostListResponse> findMySalePosts(
             Long userId,
             SaleStatus status,
             Pageable pageable

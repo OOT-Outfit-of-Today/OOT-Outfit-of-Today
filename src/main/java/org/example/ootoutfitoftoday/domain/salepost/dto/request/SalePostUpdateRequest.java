@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -38,6 +37,7 @@ public class SalePostUpdateRequest {
     @DecimalMax(value = "131.9", message = "경도는 131.9 이하이어야 합니다.")
     private BigDecimal tradeLongitude;  // 경도
 
-    @NotEmpty(message = "이미지는 최소 1개 이상 필요합니다.")
-    private List<Long> imageIds;
+    // 제거: imageIds 제거
+    // 설명: 판매글 수정 시 이미지는 건드리지 않음
+    // 이유: 이미지 수정은 SalePostImageController로 분리
 }

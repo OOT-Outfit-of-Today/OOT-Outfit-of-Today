@@ -47,12 +47,12 @@ public class SalePostControllerImpl implements SalePostController {
     @Override
     @GetMapping("/{salePostId}")
     public ResponseEntity<Response<SalePostDetailResponse>> getSalePostDetail(@PathVariable Long salePostId) {
-
         SalePostDetailResponse response = salePostQueryService.getSalePostDetail(salePostId);
 
         return Response.success(response, SalePostSuccessCode.SALE_POST_RETRIEVED);
     }
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Override
     @GetMapping
     public ResponseEntity<Response<Slice<SalePostListResponse>>> getSalePosts(
@@ -67,8 +67,6 @@ public class SalePostControllerImpl implements SalePostController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
-        log.info("[GET] /v1/sale-posts: categoryId={}, status={}, keyword={}, pageable={}", categoryId, status, keyword, pageable);
-
         Slice<SalePostListResponse> salePosts = salePostQueryService.getSalePostList(
                 authUser.getUserId(),
                 categoryId,
@@ -81,13 +79,13 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @PutMapping("/{salePostId}")
-    public ResponseEntity<Response<SalePostDetailResponse>> updateSalePost(
+    @PutMapping("/{salePostId}")    // TODO: Patch 고려
+    public ResponseEntity<Response<SalePostUpdateResponse>> updateSalePost(
             @PathVariable Long salePostId,
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody SalePostUpdateRequest request
     ) {
-        SalePostDetailResponse response = salePostCommandService.updateSalePost(
+        SalePostUpdateResponse response = salePostCommandService.updateSalePost(
                 salePostId,
                 authUser.getUserId(),
                 request
@@ -109,12 +107,12 @@ public class SalePostControllerImpl implements SalePostController {
 
     @Override
     @PatchMapping("/{salePostId}/status")
-    public ResponseEntity<Response<SalePostDetailResponse>> updateSaleStatus(
+    public ResponseEntity<Response<SalePostUpdateResponse>> updateSaleStatus(
             @PathVariable Long salePostId,
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody SaleStatusUpdateRequest request
     ) {
-        SalePostDetailResponse response = salePostCommandService.updateSaleStatus(
+        SalePostUpdateResponse response = salePostCommandService.updateSaleStatus(
                 salePostId,
                 authUser.getUserId(),
                 request.getStatus()
@@ -124,8 +122,8 @@ public class SalePostControllerImpl implements SalePostController {
     }
 
     @Override
-    @GetMapping("/my")
-    public ResponseEntity<Response<Slice<SalePostSummaryResponse>>> getMySalePosts(
+    @GetMapping("/me")
+    public ResponseEntity<Response<Slice<SalePostListResponse>>> getMySalePosts(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) SaleStatus status,
             @RequestParam(defaultValue = "0") int page,
@@ -135,7 +133,7 @@ public class SalePostControllerImpl implements SalePostController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
-        Slice<SalePostSummaryResponse> response = salePostQueryService.findMySalePosts(
+        Slice<SalePostListResponse> response = salePostQueryService.findMySalePosts(
                 authUser.getUserId(),
                 status,
                 pageable
@@ -144,9 +142,10 @@ public class SalePostControllerImpl implements SalePostController {
         return Response.success(response, SalePostSuccessCode.SALE_POSTS_RETRIEVED);
     }
 
+    // TODO: 빈 배열 반환 문제 해결 필요
     @Override
     @GetMapping("/public")
-    public ResponseEntity<Response<Slice<SalePostPublicListResponse>>> getNotAuthSalePosts(
+    public ResponseEntity<Response<Slice<SalePostListResponse>>> getNotAuthSalePosts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) SaleStatus status,
             @RequestParam(required = false) String keyword,
@@ -157,7 +156,7 @@ public class SalePostControllerImpl implements SalePostController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
 
-        Slice<SalePostPublicListResponse> salePosts = salePostQueryService.getNotAuthSalePostList(
+        Slice<SalePostListResponse> salePosts = salePostQueryService.getNotAuthSalePostList(
                 categoryId,
                 status,
                 keyword,

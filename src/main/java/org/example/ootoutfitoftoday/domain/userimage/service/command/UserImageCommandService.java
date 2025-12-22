@@ -1,7 +1,7 @@
-package org.example.ootoutfitoftoday.domain.salepost.userimage.service.command;
+package org.example.ootoutfitoftoday.domain.userimage.service.command;
 
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
-import org.example.ootoutfitoftoday.domain.salepost.userimage.entity.UserImage;
+import org.example.ootoutfitoftoday.domain.userimage.entity.UserImage;
 
 public interface UserImageCommandService {
 

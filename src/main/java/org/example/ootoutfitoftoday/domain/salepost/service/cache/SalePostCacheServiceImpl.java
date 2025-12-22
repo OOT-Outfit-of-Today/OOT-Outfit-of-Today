@@ -40,8 +40,7 @@ public class SalePostCacheServiceImpl implements SalePostCacheService {
             String keyword,
             Pageable pageable
     ) {
-        log.info("SalePostCacheService.getCachedSalePostList : latitude={}, longitude={}", latitude, longitude);
-
+        // Native Query 수정(이미지 서브쿼리)
         String baseSql = """
                 SELECT
                     s.id,
@@ -50,8 +49,9 @@ public class SalePostCacheServiceImpl implements SalePostCacheService {
                     s.status,
                     s.trade_address,
                     ST_AsText(s.trade_location) AS trade_location,
-                    (SELECT spi.image_url
+                    (SELECT i.url
                      FROM sale_post_images spi
+                     JOIN images i ON spi.image_id = i.id
                      WHERE spi.sale_post_id = s.id
                      AND spi.is_main = TRUE
                      AND spi.is_deleted = FALSE
@@ -111,7 +111,7 @@ public class SalePostCacheServiceImpl implements SalePostCacheService {
                             (String) row[4],
                             location.latitude(),
                             location.longitude(),
-                            (String) row[6],
+                            (String) row[6],    // 썸네일 URL
                             (String) row[7],
                             (String) row[8],
                             ((java.sql.Timestamp) row[9]).toLocalDateTime()

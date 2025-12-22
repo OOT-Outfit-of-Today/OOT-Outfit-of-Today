@@ -1,4 +1,4 @@
-package org.example.ootoutfitoftoday.domain.salepost.userimage.entity;
+package org.example.ootoutfitoftoday.domain.userimage.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

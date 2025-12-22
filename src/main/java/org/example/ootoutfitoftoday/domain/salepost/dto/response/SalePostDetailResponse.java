@@ -34,7 +34,7 @@ public class SalePostDetailResponse {
     private final LocalDateTime updatedAt;
 
     // 추가: SalePost + SalePostImage 리스트로 생성
-    public static SalePostDetailResponse from(
+    public static SalePostDetailResponse of(
             SalePost salePost,
             List<SalePostImage> salePostImages
     ) {

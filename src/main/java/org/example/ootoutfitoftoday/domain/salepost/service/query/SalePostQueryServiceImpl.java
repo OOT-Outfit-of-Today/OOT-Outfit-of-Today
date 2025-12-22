@@ -79,7 +79,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
         List<SalePostImage> salePostImages = salePostImageQueryService.findBySalePostIdWithImage(salePostId);
 
         // 이미지 포함하여 Response 생성
-        return SalePostDetailResponse.from(salePost, salePostImages);
+        return SalePostDetailResponse.of(salePost, salePostImages);
     }
 
     @Override

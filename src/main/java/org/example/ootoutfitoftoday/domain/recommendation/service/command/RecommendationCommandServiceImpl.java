@@ -175,7 +175,7 @@ public class RecommendationCommandServiceImpl implements RecommendationCommandSe
                     recommendationId, existingSalePost.get().getId());
 
             // 반환값 변경(이미지 포함)
-            return SalePostCreateResponse.from(salePost, images);
+            return SalePostCreateResponse.of(salePost, images);
         }
 
         log.debug("신규 판매글 생성 - 추천ID: {}, 옷ID: {}",

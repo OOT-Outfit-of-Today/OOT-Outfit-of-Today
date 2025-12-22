@@ -32,7 +32,7 @@ public class SalePostCreateResponse {
 
     // 추가: SalePost + SalePostImage 리스트로 생성
     // 설명: 이미지 포함하여 Response 생성
-    public static SalePostCreateResponse from(
+    public static SalePostCreateResponse of(
             SalePost salePost,
             List<SalePostImage> salePostImages
     ) {

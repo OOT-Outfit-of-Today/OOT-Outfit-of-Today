@@ -94,7 +94,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        return SalePostCreateResponse.from(savedSalePost, salePostImages);
+        return SalePostCreateResponse.of(savedSalePost, salePostImages);
     }
 
     // Recommendation에서 판매글 생성
@@ -157,7 +157,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
         SalePost savedSalePost = salePostRepository.findByIdAsNativeQuery(salePostId).orElseThrow(
                 () -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
 
-        return SalePostCreateResponse.from(savedSalePost, salePostImages);
+        return SalePostCreateResponse.of(savedSalePost, salePostImages);
     }
 
     // 수정: SalePost만 수정(이미지 제외)

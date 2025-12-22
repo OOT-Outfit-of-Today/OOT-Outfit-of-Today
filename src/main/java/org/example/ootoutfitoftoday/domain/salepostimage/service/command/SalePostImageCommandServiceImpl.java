@@ -18,10 +18,7 @@ import org.example.ootoutfitoftoday.domain.salepostimage.repository.SalePostImag
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -269,18 +266,29 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
             List<Long> orderedImageIds
     ) {
         // 권한 검증
-        SalePost salePost = validateOwnership(salePostId, userId);
+        validateOwnership(salePostId, userId);
 
         // 모든 이미지 조회
         List<SalePostImage> allSalePostImages = salePostImageRepository.findBySalePostIdAndIsDeletedFalseWithoutImage(salePostId);
+
+        // 요청된 이미지 ID와 실제 이미지 ID가 일치하는지 확인
+        Set<Long> existingImageIds = allSalePostImages.stream()
+                .map(SalePostImage::getId)
+                .collect(Collectors.toSet());
+        Set<Long> requestedImageIds = new HashSet<>(orderedImageIds);
+
+        if (allSalePostImages.size() != orderedImageIds.size() || !existingImageIds.equals(requestedImageIds)) {
+            log.warn("이미지 순서 변경 요청 오류: 이미지 목록 불일치 - salePostId: {}, 기존: {}, 요청: {}", salePostId, existingImageIds, requestedImageIds);
+            throw new SalePostImageException(SalePostImageErrorCode.SALE_POST_IMAGE_NOT_BELONG);
+        }
 
         // ID로 매핑
         Map<Long, SalePostImage> salePostImageMap = allSalePostImages.stream()
                 .collect(Collectors.toMap(SalePostImage::getId, salePostImage -> salePostImage));
 
-        // 순서 변경(기존 이미지 soft delete)
-        List<SalePostImage> reorderedSalePostImages = new ArrayList<>();
-        for (Long salePostImageId : orderedImageIds) {
+        // 순서 업데이트
+        for (int i = 0; i < orderedImageIds.size(); i++) {
+            Long salePostImageId = orderedImageIds.get(i);
             SalePostImage salePostImage = salePostImageMap.get(salePostImageId);
 
             if (salePostImage == null) {
@@ -288,29 +296,15 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
                 throw new SalePostImageException(SalePostImageErrorCode.SALE_POST_IMAGE_NOT_FOUND);
             }
 
-            salePostImage.softDelete();
-            reorderedSalePostImages.add(salePostImage);
+            // displayOrder만 업데이트(첫 번째가 자동으로 메인이 되도록 할지는 비즈니스 요구사항에 따라)
+            salePostImage.updateDisplayOrder(i);
+
+            // 옵션: 첫 번째 이미지를 자동으로 메인으로 설정하려면
+            salePostImage.updateMain(i == 0);
         }
 
-        // 기존 이미지 soft delete
-        salePostImageRepository.saveAll(reorderedSalePostImages);
-
-        // 새로운 순서로 재생성
-        List<SalePostImage> newSalePostImages = new ArrayList<>();
-        for (int i = 0; i < orderedImageIds.size(); i++) {
-            Long salePostImageId = orderedImageIds.get(i);
-            SalePostImage originalSalePostImage = salePostImageMap.get(salePostImageId);
-
-            SalePostImage newSalePostImage = SalePostImage.create(
-                    salePost,
-                    originalSalePostImage.getImage(),
-                    i,    // displayOrder
-                    originalSalePostImage.getIsMain()
-            );
-            newSalePostImages.add(newSalePostImage);
-        }
-
-        salePostImageRepository.saveAll(newSalePostImages);
+        // 일괄 저장 (변경 감지로 UPDATE 쿼리만 발생)
+        salePostImageRepository.saveAll(allSalePostImages);
     }
 
     // 일괄 soft delete

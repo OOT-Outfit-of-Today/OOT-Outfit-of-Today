@@ -277,7 +277,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             return new UserException(UserErrorCode.USER_NOT_FOUND);
         });
 
-        String tradeLocation = PointFormatAndParse.format(request.tradeLongitude(), request.tradeLatitude());
+        String tradeLocation = PointFormatAndParse.format(request.tradeLatitude(), request.tradeLongitude());
 
         user.updateTradeLocation(request.tradeAddress(), tradeLocation);
 

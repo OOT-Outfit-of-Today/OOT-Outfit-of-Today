@@ -13,6 +13,7 @@ import org.example.ootoutfitoftoday.domain.salepost.dto.request.SalePostUpdateRe
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostUpdateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
+import org.example.ootoutfitoftoday.domain.salepost.service.query.SalePostQueryService;
 import org.example.ootoutfitoftoday.domain.salepostimage.entity.SalePostImage;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostErrorCode;
 import org.example.ootoutfitoftoday.domain.salepost.exception.SalePostException;
@@ -36,6 +37,7 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
 
     private final UserQueryService userQueryService;
     private final CategoryQueryService categoryQueryService;
+    private final SalePostQueryService salePostQueryService;
     private final SalePostRepository salePostRepository;
     private final EntityManager entityManager;
     private final SalePostImageCommandService salePostImageCommandService;
@@ -247,12 +249,11 @@ public class SalePostCommandServiceImpl implements SalePostCommandService {
     }
 
     // 권한 검증 헬퍼 메서드 추가
-    // 설명: SalePost 조회 + 소유권 확인을 한 번에 처리
+    // 설명: Native Query로 User, Category를 함께 조회하여 Lazy Loading 문제 방지
     // 목적: 중복 코드 제거 및 일관된 권한 검증 로직 제공
     // 반환: 검증된 SalePost 엔티티
     private SalePost validateOwnership(Long salePostId, Long userId) {
-        SalePost salePost = salePostRepository.findByIdAndIsDeletedFalse(salePostId)
-                .orElseThrow(() -> new SalePostException(SalePostErrorCode.SALE_POST_NOT_FOUND));
+        SalePost salePost = salePostQueryService.findSalePostById(salePostId);
 
         if (!salePost.isOwnedBy(userId)) {
             log.warn("권한 없는 접근 - salePostId: {}, userId: {}", salePostId, userId);

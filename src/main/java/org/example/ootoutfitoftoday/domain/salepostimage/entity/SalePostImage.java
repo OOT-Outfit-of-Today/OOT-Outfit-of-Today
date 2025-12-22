@@ -100,6 +100,10 @@ public class SalePostImage extends BaseEntity {
     // 설명: 생성 시 SalePost를 받으므로 setter 불필요
     // 이유: 불변성 유지, 양방향 동기화 코드 제거
 
+    public void updateDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
     public void updateMain(boolean isMain) {
         this.isMain = isMain;
     }

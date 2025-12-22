@@ -188,7 +188,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
         // Object[] 매핑(thumbnailUrl 포함)
         List<SalePostListResponse> responseContent = content.stream()
-                .map(this::mapToSalePostSummaryResponse)
+                .map(this::mapToMySalePostListResponse)
                 .toList();
 
         return new SliceImpl<>(responseContent, pageable, hasNext);
@@ -196,7 +196,7 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
     // 추가: Object[] -> SalePostSummaryResponse 매핑
     // 설명: Native Query 결과를 Response DTO로 변환
-    private SalePostListResponse mapToSalePostSummaryResponse(Object[] row) {
+    private SalePostListResponse mapToMySalePostListResponse(Object[] row) {
         String tradeLocationStr = (String) row[6];
         Location location = PointFormatAndParse.parse(tradeLocationStr);
 
@@ -290,13 +290,13 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
                 results;
 
         List<SalePostListResponse> responseContent = content.stream()
-                .map(this::mapToSalePostPublicListResponse)
+                .map(this::mapToPublicSalePostListResponse)
                 .toList();
 
         return new SliceImpl<>(responseContent, pageable, hasNext);
     }
 
-    private SalePostListResponse mapToSalePostPublicListResponse(Object[] row) {
+    private SalePostListResponse mapToPublicSalePostListResponse(Object[] row) {
         String tradeLocationStr = (String) row[5];
         Location location = PointFormatAndParse.parse(tradeLocationStr);
 

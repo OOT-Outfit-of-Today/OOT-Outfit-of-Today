@@ -2,6 +2,7 @@ package org.example.ootoutfitoftoday.domain.salepostimage.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/sale-posts/{salePostId}/images")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class SalePostImageController {
 
     private final SalePostImageCommandService salePostImageCommandService;

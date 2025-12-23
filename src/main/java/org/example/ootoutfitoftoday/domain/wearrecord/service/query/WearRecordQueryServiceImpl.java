@@ -27,7 +27,7 @@ public class WearRecordQueryServiceImpl implements WearRecordQueryService {
         log.debug("내 착용 기록 조회 시작 - 사용자 ID: {}, 페이지 정보: {}", userId, pageable);
 
         Page<WearRecord> wearRecords =
-                wearRecordRepository.findMyWearRecordsWithClothes(
+                wearRecordRepository.findMyWearRecordsWithClothesAndIsDeletedFalse(
                         userId,
                         pageable
                 );
@@ -58,5 +58,11 @@ public class WearRecordQueryServiceImpl implements WearRecordQueryService {
         log.debug("자주 입은 옷 조회 완료 - 조회된 옷 수: {}", result.size());
 
         return result;
+    }
+
+    @Override
+    public int softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId) {
+
+        return wearRecordRepository.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
     }
 }

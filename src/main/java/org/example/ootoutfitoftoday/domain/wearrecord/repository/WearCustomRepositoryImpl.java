@@ -52,6 +52,8 @@ public class WearCustomRepositoryImpl implements WearCustomRepository {
                 .leftJoin(wearRecord.clothes, clothes)
                 .where(
                         wearRecord.user.id.eq(userId),
+                        wearRecord.isDeleted.eq(false),
+                        clothes.isDeleted.eq(false),
                         wearRecord.wornAt.between(startOfWeek, endOfWeek)
                 )
                 .groupBy(wearRecord.clothes.id, wearRecord.clothes.description)
@@ -76,7 +78,11 @@ public class WearCustomRepositoryImpl implements WearCustomRepository {
                 ))
                 .from(wearRecord)
                 .leftJoin(wearRecord.clothes, clothes)
-                .where(wearRecord.user.id.eq(userId))
+                .where(
+                        wearRecord.user.id.eq(userId),
+                        wearRecord.isDeleted.eq(false),
+                        clothes.isDeleted.eq(false)
+                )
                 .groupBy(wearRecord.clothes.id, wearRecord.clothes.description)
                 .orderBy(wearRecord.id.count().desc(), wearRecord.clothes.id.count().asc())
                 .limit(5)

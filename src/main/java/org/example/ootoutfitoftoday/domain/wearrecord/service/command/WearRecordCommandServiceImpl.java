@@ -91,7 +91,7 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
             LocalDateTime endOfDay
     ) {
 
-        boolean exists = wearRecordRepository.existsByUserIdAndClothesIdAndWornAtBetween(
+        boolean exists = wearRecordRepository.existsByUserIdAndClothesIdAndWornAtBetweenAndIsDeletedFalse(
                 userId,
                 clothesId,
                 startOfDay,

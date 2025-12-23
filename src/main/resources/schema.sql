@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `images` (
     `content_type` VARCHAR(100) NOT NULL,
     `size` BIGINT NOT NULL,
     `type` ENUM('CLOSET', 'CLOTHES', 'SALEPOST', 'USER') NOT NULL,
+    `file_hash` VARCHAR(64) UNIQUE,
     `created_at` DATETIME(6) NOT NULL,
     `updated_at` DATETIME(6) NOT NULL,
     `deleted_at` DATETIME(6),

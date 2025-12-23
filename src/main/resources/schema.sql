@@ -118,18 +118,6 @@ CREATE TABLE IF NOT EXISTS `closet_clothes_links` (
     FOREIGN KEY (`clothes_id`) REFERENCES clothes(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- closet_images
-CREATE TABLE IF NOT EXISTS `closet_images` (
-    `closet_id` BIGINT PRIMARY KEY,
-    `image_id` BIGINT NOT NULL UNIQUE,
-    `created_at` DATETIME(6) NOT NULL,
-    `updated_at` DATETIME(6) NOT NULL,
-    `deleted_at` DATETIME(6),
-    `is_deleted` BIT(1) DEFAULT 0,
-    FOREIGN KEY (`closet_id`) REFERENCES closets(`id`),
-    FOREIGN KEY (`image_id`) REFERENCES images(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- recommendations(sale_posts보다 먼저 생성 - sale_posts가 참조)
 CREATE TABLE IF NOT EXISTS `recommendations` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,

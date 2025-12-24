@@ -7,11 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
 import org.example.ootoutfitoftoday.domain.clothes.service.query.ClothesQueryService;
 import org.example.ootoutfitoftoday.domain.recommendation.dto.request.RecommendationSalePostCreateRequest;
-import org.example.ootoutfitoftoday.domain.recommendation.dto.response.RecommendationCreateResponse;
 import org.example.ootoutfitoftoday.domain.recommendation.entity.Recommendation;
 import org.example.ootoutfitoftoday.domain.recommendation.exception.RecommendationErrorCode;
 import org.example.ootoutfitoftoday.domain.recommendation.exception.RecommendationException;
-import org.example.ootoutfitoftoday.domain.recommendation.repository.RecommendationRepository;
 import org.example.ootoutfitoftoday.domain.recommendation.service.query.RecommendationQueryService;
 import org.example.ootoutfitoftoday.domain.salepost.dto.response.SalePostCreateResponse;
 import org.example.ootoutfitoftoday.domain.salepost.entity.SalePost;
@@ -39,7 +37,6 @@ public class RecommendationCommandServiceImpl implements RecommendationCommandSe
 
     private static final String UNWORN_REASON = "마지막 착용일이 1년 이상 경과";
 
-    private final RecommendationRepository recommendationRepository;
     private final RecommendationQueryService recommendationQueryService;
     private final SalePostCommandService salePostCommandService;
     private final SalePostQueryService salePostQueryService;
@@ -47,37 +44,6 @@ public class RecommendationCommandServiceImpl implements RecommendationCommandSe
     private final ClothesQueryService clothesQueryService;
     private final UserQueryService userQueryService;
     private final Clock clock;
-
-    @Override
-    public List<RecommendationCreateResponse> generateRecommendations(Long userId) {
-        log.info("추천 생성 시작 - 사용자: {}", userId);
-
-        User user = userQueryService.findByIdAndIsDeletedFalse(userId);
-        log.debug("사용자 조회 완료 - 사용자: {}", user.getId());
-
-        List<Clothes> clothesList = clothesQueryService.findAllClothesByUserId(userId);
-        log.debug("전체 옷 조회 완료 - 사용자: {}, 옷 개수: {}", userId, clothesList.size());
-
-        List<Recommendation> recommendations = clothesList.stream()
-                .filter(this::isUnwornForOneYear)
-                .flatMap(clothes -> Arrays.stream(RecommendationType.values())
-                        .map(type -> Recommendation.createForUnwornClothes(
-                                user,
-                                clothes,
-                                type,
-                                UNWORN_REASON
-                        )))
-                .toList();
-
-        log.debug("저장 예정 추천 건수: {}", recommendations.size());
-
-        List<Recommendation> savedRecommendations = recommendationRepository.saveAll(recommendations);
-        log.info("추천 저장 완료 - 저장 건수: {}, 사용자: {}", savedRecommendations.size(), userId);
-
-        return savedRecommendations.stream()
-                .map(RecommendationCreateResponse::from)
-                .toList();
-    }
 
     @Override
     public List<Recommendation> createRecommendationsForBatch(Long userId) {

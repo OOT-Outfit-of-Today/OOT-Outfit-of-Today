@@ -31,7 +31,11 @@ public class ChatCommandServiceImpl implements ChatCommandService {
     private final ChatParticipatingUserQueryService chatParticipatingUserQueryService;
 
     @Override
-    public ChatResponse createChat(ChatRequest chatRequest, Long chatroomId, Long userId) {
+    public ChatResponse createChat(
+            ChatRequest chatRequest,
+            Long chatroomId,
+            Long userId
+    ) {
         log.info("ChatService.createChat : chatroomId={}, userId={} 채팅 생성", chatroomId, userId);
 
         Chatroom chatroom = chatroomQueryService.getChatroomById(chatroomId);

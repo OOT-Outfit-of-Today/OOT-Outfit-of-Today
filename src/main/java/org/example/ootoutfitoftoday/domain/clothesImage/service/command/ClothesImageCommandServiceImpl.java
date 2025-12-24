@@ -56,8 +56,11 @@ public class ClothesImageCommandServiceImpl implements ClothesImageCommandServic
      * - 둘 중 하나가 null이어도 안전하게 비교할 수 있음.
      */
     @Override
-    public ClothesImageLinkResponse saveClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest) {
-
+    public ClothesImageLinkResponse saveClothesImages(
+            Long userId,
+            Long clothesId,
+            ClothesImageRequest clothesImageRequest
+    ) {
         // 입력 정리(null 제거 + 중복 제거 + 순서 유지)
         List<Long> normalizedIds = normalizeAndValidateImageIds(clothesImageRequest.getImageIds());
 
@@ -135,8 +138,11 @@ public class ClothesImageCommandServiceImpl implements ClothesImageCommandServic
      * - 나머지는 main=false로 설정한다.
      */
     @Override
-    public ClothesImageChangeMainResponse changeMainImage(Long userId, Long clothesId, Long clothesImageId) {
-
+    public ClothesImageChangeMainResponse changeMainImage(
+            Long userId,
+            Long clothesId,
+            Long clothesImageId
+    ) {
         // 사용자의 옷인지 검증
         clothesQueryService.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId);
 
@@ -174,8 +180,11 @@ public class ClothesImageCommandServiceImpl implements ClothesImageCommandServic
      * - 만약 삭제되는 것 중 메인이 있었다면, 남은 이미지 중 하나를 차선 메인으로 변경한다.
      */
     @Override
-    public void removeClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest) {
-
+    public void removeClothesImages(
+            Long userId,
+            Long clothesId,
+            ClothesImageRequest clothesImageRequest
+    ) {
         clothesQueryService.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId); // 유저 검증로직
 
         List<Long> normalizedIds = normalizeAndValidateImageIds(clothesImageRequest.getImageIds());

@@ -32,7 +32,6 @@ public class ClosetControllerImpl implements ClosetController {
             @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody ClosetRequest closetRequest
     ) {
-
         ClosetCreateResponse closetCreateResponse = closetCommandService.createCloset(
                 authUser.getUserId(),
                 closetRequest
@@ -102,9 +101,7 @@ public class ClosetControllerImpl implements ClosetController {
     // 공개 옷장 단건 조회
     @Override
     @GetMapping("/public/{closetId}")
-    public ResponseEntity<Response<ClosetGetResponse>> getPublicCloset(
-            @PathVariable Long closetId
-    ) {
+    public ResponseEntity<Response<ClosetGetResponse>> getPublicCloset(@PathVariable Long closetId) {
         ClosetGetResponse closetGetResponse = closetQueryService.getPublicCloset(closetId);
 
         return Response.success(closetGetResponse, ClosetSuccessCode.CLOSET_GET_PUBLIC_OK);
@@ -118,7 +115,6 @@ public class ClosetControllerImpl implements ClosetController {
             @PathVariable Long closetId,
             @Valid @RequestBody ClosetRequest closetRequest
     ) {
-
         ClosetUpdateResponse closetUpdateResponse = closetCommandService.updateCloset(
                 authUser.getUserId(),
                 closetId,
@@ -134,7 +130,6 @@ public class ClosetControllerImpl implements ClosetController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long closetId
     ) {
-
         ClosetDeleteResponse response = closetCommandService.deleteCloset(
                 authUser.getUserId(),
                 closetId

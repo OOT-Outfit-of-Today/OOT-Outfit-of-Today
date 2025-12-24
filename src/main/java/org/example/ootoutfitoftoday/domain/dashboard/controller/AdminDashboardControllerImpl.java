@@ -25,33 +25,33 @@ public class AdminDashboardControllerImpl implements AdminDashboardController {
 
     @Override
     @GetMapping("/users/statistics")
-    public ResponseEntity<Response<AdminUserStatisticsResponse>> adminUserStatistics(
-            @RequestParam(required = false) LocalDate baseDate
-    ) {
+    public ResponseEntity<Response<AdminUserStatisticsResponse>> adminUserStatistics(@RequestParam(required = false) LocalDate baseDate) {
+        AdminUserStatisticsResponse response = dashboardAdminQueryService.adminUserStatistics(baseDate);
 
-        return Response.success(dashboardAdminQueryService.adminUserStatistics(baseDate), DashboardSuccessCode.DASHBOARD_ADMIN_USER_STATISTICS_OK);
+        return Response.success(response, DashboardSuccessCode.DASHBOARD_ADMIN_USER_STATISTICS_OK);
     }
 
     @Override
     @GetMapping("/clothes/statistics")
     public ResponseEntity<Response<AdminClothesStatisticsResponse>> adminClothesStatistics() {
+        AdminClothesStatisticsResponse response = dashboardAdminQueryService.adminClothesStatistics();
 
-        return Response.success(dashboardAdminQueryService.adminClothesStatistics(), DashboardSuccessCode.DASHBOARD_ADMIN_CLOTHES_STATISTICS_OK);
+        return Response.success(response, DashboardSuccessCode.DASHBOARD_ADMIN_CLOTHES_STATISTICS_OK);
     }
 
     @Override
     @GetMapping("/sale-posts/statistics")
-    public ResponseEntity<Response<AdminSalePostStatisticsResponse>> adminSalePostStatistics(
-            @RequestParam(required = false) LocalDate baseDate
-    ) {
+    public ResponseEntity<Response<AdminSalePostStatisticsResponse>> adminSalePostStatistics(@RequestParam(required = false) LocalDate baseDate) {
+        AdminSalePostStatisticsResponse response = dashboardAdminQueryService.adminSalePostStatistics(baseDate);
 
-        return Response.success(dashboardAdminQueryService.adminSalePostStatistics(baseDate), DashboardSuccessCode.DASHBOARD_ADMIN_SALE_POST_STATISTICS_OK);
+        return Response.success(response, DashboardSuccessCode.DASHBOARD_ADMIN_SALE_POST_STATISTICS_OK);
     }
 
     @Override
     @GetMapping("/popular")
     public ResponseEntity<Response<AdminTopCategoryStatisticsResponse>> adminTopCategoryStatistics() {
+        AdminTopCategoryStatisticsResponse response = dashboardAdminQueryService.adminTopCategoryStatistics();
 
-        return Response.success(dashboardAdminQueryService.adminTopCategoryStatistics(), DashboardSuccessCode.DASHBOARD_ADMIN_TOP10_CATEGORY_STATISTICS_OK);
+        return Response.success(response, DashboardSuccessCode.DASHBOARD_ADMIN_TOP10_CATEGORY_STATISTICS_OK);
     }
 }

@@ -32,7 +32,7 @@ public class DonationCenterQueryServiceImpl implements DonationCenterQueryServic
             "헌옷수거함",
             "아름다운가게",
             "의류수거함"
-    );
+    ); // todo: enum으로 뺴면 되지 않을까?
     private final KakaoMapClient kakaoMapClient;
     private final DonationCenterCommandService donationCenterCommandService;
 

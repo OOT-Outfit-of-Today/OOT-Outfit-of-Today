@@ -71,7 +71,6 @@ public class SalePostQueryServiceImpl implements SalePostQueryService {
 
     @Override
     public SalePostDetailResponse getSalePostDetail(Long salePostId) {
-
         SalePost salePost = findSalePostById(salePostId);
 
         // QueryService로 변경(Image URL 필요)

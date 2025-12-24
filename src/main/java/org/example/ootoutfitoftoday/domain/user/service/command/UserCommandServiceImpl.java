@@ -117,8 +117,8 @@ public class UserCommandServiceImpl implements UserCommandService {
             User user,
             SocialProvider socialProvider,
             String socialId,
-            String imageUrl) {
-
+            String imageUrl
+    ) {
         user.linkSocialAccount(socialProvider, socialId, imageUrl);
 
         return userRepository.save(user);

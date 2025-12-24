@@ -36,7 +36,6 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
     //      이미지 검증, SalePostImage 생성, 저장을 한 번에 처리
     @Override
     public List<SalePostImage> createSalePostImages(Long salePostId, List<Long> imageIds) {
-
         // 중복 검증
         if (imageIds.size() != new HashSet<>(imageIds).size()) {
             log.warn("판매글 이미지 중복 감지 - imageIds: {}", imageIds);
@@ -312,7 +311,6 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
     // 변경 이유: 삭제 로직을 CommandService에 집중
     @Override
     public void bulkSoftDelete(List<SalePostImage> salePostImages) {
-
         for (SalePostImage salePostImage : salePostImages) {
             salePostImage.softDelete();
         }
@@ -322,7 +320,6 @@ public class SalePostImageCommandServiceImpl implements SalePostImageCommandServ
 
     // 권한 검증 헬퍼 메서드 (기존과 동일)
     private SalePost validateOwnership(Long salePostId, Long userId) {
-
         SalePost salePost = salePostQueryService.findSalePostById(salePostId);
 
         if (!salePost.isOwnedBy(userId)) {

@@ -29,8 +29,10 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
     private final ImageQueryService imageQueryService;
 
     @Override
-    public ClosetCreateResponse createCloset(Long userId, ClosetRequest request) {
-
+    public ClosetCreateResponse createCloset(
+            Long userId,
+            ClosetRequest request
+    ) {
         User user = userQueryService.findByIdAndIsDeletedFalse(userId);
 
         Closet closet = Closet.create(
@@ -58,7 +60,6 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
             Long closetId,
             ClosetRequest request
     ) {
-
         Closet updatedCloset = closetRepository.findClosetByIdAndIsDeletedFalse(userId, closetId).orElseThrow(
                 () -> {
                     log.warn("옷장을 찾을 수 없음 - 옷장ID: {}", closetId);
@@ -79,12 +80,12 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
         updatedCloset.changeImage(newImage);
 
         ClosetImageResponse closetImage = ClosetImageResponse.from(updatedCloset.getImage());
+
         return ClosetUpdateResponse.from(updatedCloset, closetImage);
     }
 
     @Override
     public ClosetDeleteResponse deleteCloset(Long userId, Long closetId) {
-
         Closet closet = closetRepository.findClosetByIdAndIsDeletedFalse(userId, closetId).orElseThrow(
                 () -> {
                     log.warn("삭제할 옷장을 찾을 수 없음 - 옷장ID: {}", closetId);

@@ -40,9 +40,7 @@ public class ImageControllerImpl implements ImageController {
 
     @Override
     @PostMapping
-    public ResponseEntity<Response<ImageSaveResponse>> saveImage(
-            @Valid @RequestBody ImageSaveRequest request
-    ) {
+    public ResponseEntity<Response<ImageSaveResponse>> saveImage(@Valid @RequestBody ImageSaveRequest request) {
         ImageSaveResponse response = imageCommandService.saveImage(request);
 
         return Response.success(response, ImageSuccessCode.IMAGE_SAVED);

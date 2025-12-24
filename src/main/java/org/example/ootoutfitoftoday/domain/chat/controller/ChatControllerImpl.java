@@ -27,7 +27,6 @@ public class ChatControllerImpl implements ChatController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-
         log.info("[GET] /v1/chatrooms/{}/chats : Controller 작동", chatroomId);
 
         Pageable pageable = PageRequest.of(page, size);

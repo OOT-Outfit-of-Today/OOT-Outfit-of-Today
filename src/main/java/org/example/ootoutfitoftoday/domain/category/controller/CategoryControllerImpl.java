@@ -22,9 +22,7 @@ public class CategoryControllerImpl implements CategoryController {
 
     @Override
     @PostMapping("/admin/v1/categories")
-    public ResponseEntity<Response<CategoryResponse>> create(
-            @Valid @RequestBody CategoryRequest categoryRequest
-    ) {
+    public ResponseEntity<Response<CategoryResponse>> create(@Valid @RequestBody CategoryRequest categoryRequest) {
         CategoryResponse response = categoryCommandService.createCategory(categoryRequest);
 
         return Response.success(response, CategorySuccessCode.CATEGORY_CREATED);
@@ -61,9 +59,7 @@ public class CategoryControllerImpl implements CategoryController {
 
     @Override
     @DeleteMapping("/admin/v1/categories/{categoryId}")
-    public ResponseEntity<Response<Void>> deleteCategory(
-            @PathVariable Long categoryId
-    ) {
+    public ResponseEntity<Response<Void>> deleteCategory(@PathVariable Long categoryId) {
         categoryCommandService.deleteCategory(categoryId);
 
         return Response.success(null, CategorySuccessCode.CATEGORY_DELETE);

@@ -25,9 +25,7 @@ public class RecommendationInternalControllerImpl implements RecommendationInter
 
     @Override
     @PostMapping("/users/{userId}")
-    public ResponseEntity<Response<List<RecommendationBatchCreateResponse>>> createRecommendationsForBatch(
-            @PathVariable Long userId
-    ) {
+    public ResponseEntity<Response<List<RecommendationBatchCreateResponse>>> createRecommendationsForBatch(@PathVariable Long userId) {
         log.info("[Internal API] 배치 추천 생성 요청 - 사용자: {}", userId);
         long startTime = System.currentTimeMillis();
 

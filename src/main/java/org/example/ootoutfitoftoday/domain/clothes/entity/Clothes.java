@@ -9,12 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.ootoutfitoftoday.common.entity.BaseEntity;
 import org.example.ootoutfitoftoday.domain.category.entity.Category;
-import org.example.ootoutfitoftoday.domain.closetclotheslink.entity.ClosetClothesLink;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -46,10 +43,7 @@ public class Clothes extends BaseEntity {
     private String description;
 
     @Column(nullable = true)
-    private LocalDateTime lastWornAt; // todo: 필드명 다시 고려해보기!
-
-    @OneToMany(mappedBy = "clothes")
-    private List<ClosetClothesLink> closetClothesLinks = new ArrayList<>();
+    private LocalDateTime lastWornAt;
 
     @Builder(access = AccessLevel.PRIVATE)
     private Clothes(

@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
 public class ClothesRequest {
 
@@ -15,9 +13,7 @@ public class ClothesRequest {
     private ClothesSize clothesSize;
     private ClothesColor clothesColor;
 
-    @NotBlank
-    @Size(max = 255, message = "255자 이하로 입력해 주세요!")
+    @NotBlank(message = "description은 필수입니다.")
+    @Size(max = 255, message = "255자 이하로 입력해 주세요.")
     private String description;
-
-    private List<Long> images;
 }

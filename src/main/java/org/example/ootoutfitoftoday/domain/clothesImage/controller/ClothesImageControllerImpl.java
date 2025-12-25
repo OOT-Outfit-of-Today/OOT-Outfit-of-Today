@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.clothesImage.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
@@ -23,7 +24,7 @@ public class ClothesImageControllerImpl implements ClothesImageController {
     public ResponseEntity<Response<ClothesImageLinkResponse>> linkImages(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clothesId,
-            @RequestBody ClothesImageRequest clothesImageRequest
+            @Valid @RequestBody ClothesImageRequest clothesImageRequest
     ) {
         ClothesImageLinkResponse clothesImageLinkResponse = clothesImageCommandService.saveClothesImages(
                 authUser.getUserId(),
@@ -55,7 +56,7 @@ public class ClothesImageControllerImpl implements ClothesImageController {
     public ResponseEntity<Response<Void>> removeImages(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clothesId,
-            @RequestBody ClothesImageRequest clothesImageRequest
+            @Valid @RequestBody ClothesImageRequest clothesImageRequest
     ) {
         clothesImageCommandService.removeClothesImages(
                 authUser.getUserId(),

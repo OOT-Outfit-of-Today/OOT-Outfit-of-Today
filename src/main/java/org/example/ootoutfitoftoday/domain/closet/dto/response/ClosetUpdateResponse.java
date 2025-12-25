@@ -11,18 +11,20 @@ public record ClosetUpdateResponse(
         Long closetId,
         String name,
         String description,
-        ClosetImageResponse image,
+        ClosetImageResponse closetImage,
         Boolean isPublic,
         LocalDateTime updatedAt
 ) {
-    public static ClosetUpdateResponse from(Closet closet) {
-        ClosetImageResponse image = ClosetImageResponse.from(closet.getImage());
+    public static ClosetUpdateResponse from(
+            Closet closet,
+            ClosetImageResponse closetImage
+    ) {
 
         return ClosetUpdateResponse.builder()
                 .closetId(closet.getId())
                 .name(closet.getName())
                 .description(closet.getDescription())
-                .image(image)
+                .closetImage(closetImage)
                 .isPublic(closet.getIsPublic())
                 .updatedAt(closet.getUpdatedAt())
                 .build();

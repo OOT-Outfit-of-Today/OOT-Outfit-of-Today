@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.domain.closet.dto.request.ClosetRequest;
 import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetCreateResponse;
 import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetDeleteResponse;
+import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetImageResponse;
 import org.example.ootoutfitoftoday.domain.closet.dto.response.ClosetUpdateResponse;
 import org.example.ootoutfitoftoday.domain.closet.entity.Closet;
 import org.example.ootoutfitoftoday.domain.closet.exception.ClosetErrorCode;
@@ -46,7 +47,9 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
 
         Closet savedCloset = closetRepository.save(closet);
 
-        return ClosetCreateResponse.from(savedCloset);
+        ClosetImageResponse closetImage = ClosetImageResponse.from(savedCloset.getImage());
+
+        return ClosetCreateResponse.from(savedCloset, closetImage);
     }
 
     @Override
@@ -75,7 +78,8 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
 
         updatedCloset.changeImage(newImage);
 
-        return ClosetUpdateResponse.from(updatedCloset);
+        ClosetImageResponse closetImage = ClosetImageResponse.from(updatedCloset.getImage());
+        return ClosetUpdateResponse.from(updatedCloset, closetImage);
     }
 
     @Override

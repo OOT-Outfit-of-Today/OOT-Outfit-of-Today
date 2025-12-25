@@ -12,20 +12,22 @@ public record ClosetCreateResponse(
         Long userId,
         String name,
         String description,
-        ClosetImageResponse image,
+        ClosetImageResponse closetImage,
         Boolean isPublic,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static ClosetCreateResponse from(Closet closet) {
-        ClosetImageResponse image = ClosetImageResponse.from(closet.getImage());
+    public static ClosetCreateResponse from(
+            Closet closet,
+            ClosetImageResponse closetImage
+    ) {
 
         return ClosetCreateResponse.builder()
                 .closetId(closet.getId())
                 .userId(closet.getUserId())
                 .name(closet.getName())
                 .description(closet.getDescription())
-                .image(image)
+                .closetImage(closetImage)
                 .isPublic(closet.getIsPublic())
                 .createdAt(closet.getCreatedAt())
                 .updatedAt(closet.getUpdatedAt())

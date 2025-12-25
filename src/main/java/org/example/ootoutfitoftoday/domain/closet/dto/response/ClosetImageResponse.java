@@ -15,6 +15,5 @@ public record ClosetImageResponse(
                 image.getId(),
                 image.getUrl()
         );
-
     }
 }

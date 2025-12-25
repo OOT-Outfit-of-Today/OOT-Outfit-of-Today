@@ -6,12 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.ootoutfitoftoday.common.entity.BaseEntity;
-import org.example.ootoutfitoftoday.domain.closetclotheslink.entity.ClosetClothesLink;
 import org.example.ootoutfitoftoday.domain.image.entity.Image;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -40,9 +37,6 @@ public class Closet extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", unique = true)
     private Image image;
-
-    @OneToMany(mappedBy = "closet")
-    private List<ClosetClothesLink> closetClothesLinks = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
     private Closet(

@@ -47,10 +47,7 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
 
         Closet savedCloset = closetRepository.save(closet);
 
-        ClosetImageResponse closetImage = null;
-        if (savedCloset.getImage() != null) {
-            closetImage = ClosetImageResponse.from(savedCloset.getImage());
-        }
+        ClosetImageResponse closetImage = ClosetImageResponse.from(savedCloset.getImage());
 
         return ClosetCreateResponse.from(savedCloset, closetImage);
     }
@@ -81,10 +78,7 @@ public class ClosetCommandServiceImpl implements ClosetCommandService {
 
         updatedCloset.changeImage(newImage);
 
-        ClosetImageResponse closetImage = null;
-        if (updatedCloset.getImage() != null) {
-            closetImage = ClosetImageResponse.from(updatedCloset.getImage());
-        }
+        ClosetImageResponse closetImage = ClosetImageResponse.from(updatedCloset.getImage());
         return ClosetUpdateResponse.from(updatedCloset, closetImage);
     }
 

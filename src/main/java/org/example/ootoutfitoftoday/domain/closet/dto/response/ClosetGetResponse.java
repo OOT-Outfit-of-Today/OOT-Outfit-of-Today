@@ -3,7 +3,6 @@ package org.example.ootoutfitoftoday.domain.closet.dto.response;
 import lombok.AccessLevel;
 import lombok.Builder;
 import org.example.ootoutfitoftoday.domain.closet.entity.Closet;
-import org.example.ootoutfitoftoday.domain.image.entity.Image;
 
 import java.time.LocalDateTime;
 
@@ -19,12 +18,7 @@ public record ClosetGetResponse(
 ) {
 
     public static ClosetGetResponse from(Closet closet) {
-        ClosetImageResponse closetImage = null;
-
-        Image image = closet.getImage();
-        if (image != null) {
-            closetImage = ClosetImageResponse.from(image);
-        }
+        ClosetImageResponse closetImage = ClosetImageResponse.from(closet.getImage());
 
         return from(closet, closetImage);
     }

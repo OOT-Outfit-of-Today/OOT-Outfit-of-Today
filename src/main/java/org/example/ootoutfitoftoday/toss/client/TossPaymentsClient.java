@@ -6,5 +6,9 @@ import java.math.BigDecimal;
 
 public interface TossPaymentsClient {
 
-    TossConfirmResult confirmPayment(String paymentKey, String orderId, BigDecimal amount);
+    TossConfirmResult confirmPayment(
+            String paymentKey,
+            String orderId,
+            BigDecimal amount
+    );
 }

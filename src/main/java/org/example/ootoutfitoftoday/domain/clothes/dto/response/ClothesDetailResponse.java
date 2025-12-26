@@ -24,7 +24,10 @@ public class ClothesDetailResponse {
     private final String description;
     private final List<ClothesImageResponse> clothesImages;
 
-    public static ClothesDetailResponse from(Clothes clothes, List<ClothesImageResponse> clothesImages) {
+    public static ClothesDetailResponse from(
+            Clothes clothes,
+            List<ClothesImageResponse> clothesImages
+    ) {
 
         return ClothesDetailResponse.builder()
                 .id(clothes.getId())

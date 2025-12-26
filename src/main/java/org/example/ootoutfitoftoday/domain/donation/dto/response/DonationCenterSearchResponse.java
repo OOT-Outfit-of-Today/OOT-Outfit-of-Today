@@ -33,7 +33,10 @@ public record DonationCenterSearchResponse(
                 .build();
     }
 
-    public static DonationCenterSearchResponse fromWithDistance(DonationCenter center, Integer distance) {
+    public static DonationCenterSearchResponse fromWithDistance(
+            DonationCenter center,
+            Integer distance
+    ) {
 
         return DonationCenterSearchResponse.builder()
                 .donationCenterId(center.getId())

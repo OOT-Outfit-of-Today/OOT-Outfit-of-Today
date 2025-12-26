@@ -11,13 +11,21 @@ public class ClothesImageChangeMainResponse {
     private final ClothesImageResponse clothesImages;
 
     @Builder
-    public ClothesImageChangeMainResponse(Long userId, Long clothesId, ClothesImageResponse clothesImages) {
+    public ClothesImageChangeMainResponse(
+            Long userId,
+            Long clothesId,
+            ClothesImageResponse clothesImages
+    ) {
         this.userId = userId;
         this.clothesId = clothesId;
         this.clothesImages = clothesImages;
     }
 
-    public static ClothesImageChangeMainResponse from(Long userId, Long clothesId, ClothesImageResponse clothesImages) {
+    public static ClothesImageChangeMainResponse from(
+            Long userId,
+            Long clothesId,
+            ClothesImageResponse clothesImages
+    ) {
 
         return ClothesImageChangeMainResponse.builder()
                 .userId(userId)

@@ -22,7 +22,10 @@ public class ClothesSummaryResponse {
     private final String description;
     private final ClothesImageResponse clothesImages;
 
-    public static ClothesSummaryResponse from(Clothes clothes, ClothesImageResponse clothesImages) {
+    public static ClothesSummaryResponse from(
+            Clothes clothes,
+            ClothesImageResponse clothesImages
+    ) {
 
         return ClothesSummaryResponse.builder()
                 .id(clothes.getId())

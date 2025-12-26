@@ -12,13 +12,21 @@ public class ClothesImageLinkResponse {
     private final List<ClothesImageResponse> clothesImages;
 
     @Builder
-    public ClothesImageLinkResponse(Long userId, Long clothesId, List<ClothesImageResponse> clothesImages) {
+    public ClothesImageLinkResponse(
+            Long userId,
+            Long clothesId,
+            List<ClothesImageResponse> clothesImages
+    ) {
         this.userId = userId;
         this.clothesId = clothesId;
         this.clothesImages = clothesImages;
     }
 
-    public static ClothesImageLinkResponse from(Long userId, Long clothesId, List<ClothesImageResponse> clothesImages) {
+    public static ClothesImageLinkResponse from(
+            Long userId,
+            Long clothesId,
+            List<ClothesImageResponse> clothesImages
+    ) {
 
         return ClothesImageLinkResponse.builder()
                 .userId(userId)

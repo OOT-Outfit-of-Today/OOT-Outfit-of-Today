@@ -12,7 +12,10 @@ public class UserUpdateProfileImageResponse {
     private final Long userId;
     private final String imageUrl;
 
-    public static UserUpdateProfileImageResponse of(Long userId, String profileImageUrl) {
+    public static UserUpdateProfileImageResponse of(
+            Long userId,
+            String profileImageUrl
+    ) {
 
         return UserUpdateProfileImageResponse.builder()
                 .userId(userId)

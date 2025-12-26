@@ -12,7 +12,10 @@ import java.util.Optional;
 public interface ClosetClothesLinkRepository extends JpaRepository<ClosetClothesLink, Long> {
 
     // 옷장에 등록된 옷인지 아닌지 검증하는 쿼리 메서드
-    Optional<ClosetClothesLink> findByClosetIdAndClothesId(Long closetId, Long clothesId);
+    Optional<ClosetClothesLink> findByClosetIdAndClothesId(
+            Long closetId,
+            Long clothesId
+    );
 
     @Query(
             value = """
@@ -28,7 +31,13 @@ public interface ClosetClothesLinkRepository extends JpaRepository<ClosetClothes
                     WHERE l.closet.id = :closetId
                     """
     )
-    Page<ClosetClothesLink> findAllByClosetId(@Param("closetId") Long closetId, Pageable pageable);
+    Page<ClosetClothesLink> findAllByClosetId(
+            @Param("closetId") Long closetId,
+            Pageable pageable
+    );
 
-    Optional<ClosetClothesLink> findByClosetIdAndClothesIdAndIsDeletedFalse(Long closetId, Long clothesId);
+    Optional<ClosetClothesLink> findByClosetIdAndClothesIdAndIsDeletedFalse(
+            Long closetId,
+            Long clothesId
+    );
 }

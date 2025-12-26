@@ -12,7 +12,10 @@ public interface ChatRepository extends JpaRepository<Chat, Long>, CustomChatRep
 
     Optional<Chat> findFirstByChatroomAndIsDeletedFalseOrderByCreatedAtDesc(Chatroom chatroom);
 
-    Slice<Chat> findByChatroomAndIsDeletedFalseOrderByCreatedAtDesc(Chatroom chatroom, Pageable pageable);
+    Slice<Chat> findByChatroomAndIsDeletedFalseOrderByCreatedAtDesc(
+            Chatroom chatroom,
+            Pageable pageable
+    );
 
     boolean existsByChatroomIdAndIsDeletedFalse(Long chatroomId);
 }

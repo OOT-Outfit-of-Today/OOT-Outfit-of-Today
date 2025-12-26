@@ -29,7 +29,10 @@ public interface ClothesImageRepository extends JpaRepository<ClothesImage, Long
                       AND ci.clothes.id <> :clothesId
                   )
             """)
-    boolean existsLinkedImages(@Param("clothesId") Long clothesId, @Param("imageIds") List<Long> imageIds);
+    boolean existsLinkedImages(
+            @Param("clothesId") Long clothesId,
+            @Param("imageIds") List<Long> imageIds
+    );
 
     @Query("""
             SELECT ci
@@ -38,7 +41,10 @@ public interface ClothesImageRepository extends JpaRepository<ClothesImage, Long
               AND ci.image.id IN :imageIds
               AND ci.isDeleted = false
             """)
-    List<ClothesImage> findByClothesIdAndImageIdsAndIsDeletedFalse(@Param("clothesId") Long clothesId, @Param("imageIds") List<Long> imageIds);
+    List<ClothesImage> findByClothesIdAndImageIdsAndIsDeletedFalse(
+            @Param("clothesId") Long clothesId,
+            @Param("imageIds") List<Long> imageIds
+    );
 
     @Query("""
             SELECT ci

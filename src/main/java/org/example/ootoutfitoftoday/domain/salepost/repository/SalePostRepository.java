@@ -69,7 +69,10 @@ public interface SalePostRepository extends JpaRepository<SalePost, Long> {
               AND sp.createdAt >= :start
               AND sp.createdAt < :end
             """)
-    int countSalePostsRegisteredSince(LocalDateTime start, LocalDateTime end);
+    int countSalePostsRegisteredSince(
+            LocalDateTime start,
+            LocalDateTime end
+    );
 
     @Query("""
             SELECT sp FROM SalePost sp

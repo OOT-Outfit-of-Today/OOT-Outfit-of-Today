@@ -24,7 +24,10 @@ public class WearCustomRepositoryImpl implements WearCustomRepository {
     private final QClothes clothes = QClothes.clothes;
 
     @Override
-    public List<ClothesWearCount> wornThisWeek(Long userId, LocalDate baseDate) {
+    public List<ClothesWearCount> wornThisWeek(
+            Long userId,
+            LocalDate baseDate
+    ) {
         log.debug("이번 주 착용 빈도 쿼리 실행 시작 - 사용자 ID: {}, 기준 날짜: {}", userId, baseDate);
 
         if (baseDate == null) {

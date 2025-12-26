@@ -16,13 +16,15 @@ public interface AuthCommandService {
     AuthLoginResponse refresh(
             String refreshToken,
             String deviceId,
-            HttpServletRequest httpRequest);
+            HttpServletRequest httpRequest
+    );
 
     AuthLoginResponse exchangeOAuthToken(
             String code,
             String deviceId,
             String deviceName,
-            HttpServletRequest httpRequest);
+            HttpServletRequest httpRequest
+    );
 
     void logout(AuthUser authUser, String deviceId);
 
@@ -31,7 +33,8 @@ public interface AuthCommandService {
     void removeDevice(
             AuthUser authUser,
             String deviceId,
-            String currentDeviceId);
+            String currentDeviceId
+    );
 
     void withdraw(AuthWithdrawRequest request, AuthUser authUser);
 }

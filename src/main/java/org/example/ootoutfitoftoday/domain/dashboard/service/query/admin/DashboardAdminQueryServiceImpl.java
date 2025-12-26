@@ -68,7 +68,6 @@ public class DashboardAdminQueryServiceImpl implements DashboardAdminQueryServic
     @Override
     @Cacheable(value = DashboardAdminCacheNames.CLOTHES, key = "'default'", unless = "#result == null")
     public AdminClothesStatisticsResponse adminClothesStatistics() {
-
         long totalClothes = clothesQueryService.countClothesByIsDeletedFalse();
 
         List<CategoryStat> categoryStats = clothesQueryService.countTopCategoryStats();

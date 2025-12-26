@@ -15,7 +15,8 @@ public interface SalePostCommandService {
 
     SalePostCreateResponse createSalePost(
             Long userId,
-            SalePostCreateRequest request);
+            SalePostCreateRequest request
+    );
 
     SalePostCreateResponse createSalePostFromRecommendation(
             Recommendation recommendation,

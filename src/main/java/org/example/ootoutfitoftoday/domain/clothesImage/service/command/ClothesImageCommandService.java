@@ -6,11 +6,23 @@ import org.example.ootoutfitoftoday.domain.clothesImage.dto.response.ClothesImag
 
 public interface ClothesImageCommandService {
 
-    ClothesImageLinkResponse saveClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest);
+    ClothesImageLinkResponse saveClothesImages(
+            Long userId,
+            Long clothesId,
+            ClothesImageRequest clothesImageRequest
+    );
 
-    ClothesImageChangeMainResponse changeMainImage(Long userId, Long clothesId, Long clothesImageId);
+    ClothesImageChangeMainResponse changeMainImage(
+            Long userId,
+            Long clothesId,
+            Long clothesImageId
+    );
 
-    void removeClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest);
+    void removeClothesImages(
+            Long userId,
+            Long clothesId,
+            ClothesImageRequest clothesImageRequest
+    );
 
     int softDeleteAllByClothesIdIsDeletedFalse(Long clothesId);
 }

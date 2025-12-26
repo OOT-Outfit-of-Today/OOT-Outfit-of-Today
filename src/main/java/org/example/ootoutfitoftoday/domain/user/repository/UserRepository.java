@@ -27,7 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long>, UserCustomRep
 
     Optional<User> findByEmailAndIsDeletedFalse(String email);
 
-    Optional<User> findBySocialProviderAndSocialId(SocialProvider provider, String socialId);
+    Optional<User> findBySocialProviderAndSocialId(
+            SocialProvider provider,
+            String socialId
+    );
 
     @Query("""
             SELECT count(u)
@@ -51,7 +54,10 @@ public interface UserRepository extends JpaRepository<User, Long>, UserCustomRep
               AND u.createdAt >= :start
               AND u.createdAt < :end
             """)
-    int countUsersRegisteredSince(LocalDateTime start, LocalDateTime end);
+    int countUsersRegisteredSince(
+            LocalDateTime start,
+            LocalDateTime end
+    );
 
     @Query("""
             SELECT u.id
@@ -92,7 +98,11 @@ public interface UserRepository extends JpaRepository<User, Long>, UserCustomRep
             SET trade_address = ?2, trade_location = ST_GeomFromText(?3, 4326), updated_at = NOW() 
             WHERE id = ?1
             """, nativeQuery = true)
-    void updateTradeLocationAsNativeQuery(Long userId, String tradeAddress, String tradeLocation);
+    void updateTradeLocationAsNativeQuery(
+            Long userId,
+            String tradeAddress,
+            String tradeLocation
+    );
 
     @Query(value = """
             SELECT u.id,

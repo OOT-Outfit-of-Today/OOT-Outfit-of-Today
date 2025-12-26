@@ -18,7 +18,10 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
     private final EntityManager em;
 
     @Override
-    public void bulkSoftDeleteUserRelatedData(Long id, LocalDateTime deletedAt) {
+    public void bulkSoftDeleteUserRelatedData(
+            Long id,
+            LocalDateTime deletedAt
+    ) {
         QClothes clothes = QClothes.clothes;
         QCloset closet = QCloset.closet;
         QClosetClothesLink closetClothesLink = QClosetClothesLink.closetClothesLink;

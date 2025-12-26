@@ -4,5 +4,8 @@ import java.time.LocalDateTime;
 
 public interface UserCustomRepository {
 
-    void bulkSoftDeleteUserRelatedData(Long id, LocalDateTime deletedAt);
+    void bulkSoftDeleteUserRelatedData(
+            Long id,
+            LocalDateTime deletedAt
+    );
 }

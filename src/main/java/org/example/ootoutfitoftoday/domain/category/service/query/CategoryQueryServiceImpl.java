@@ -23,7 +23,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public Category findById(long categoryId) {
+    public Category findById(Long categoryId) {
 
         return categoryRepository.findByIdAndIsDeletedFalse(categoryId).orElseThrow(
                 () -> {

@@ -12,9 +12,7 @@ public class NativeQuerySortUtil {
 
     private static final List<String> ALLOWED_SORT_COLUMNS = List.of("id", "title", "price", DEFAULT_SORT_COLUMN);
 
-    public static String buildOrderClause(
-            String baseSql,
-            Pageable pageable) {
+    public static String buildOrderClause(String baseSql, Pageable pageable) {
         Sort sort = pageable.getSort();
 
         if (sort.isUnsorted() || sort.isEmpty()) {

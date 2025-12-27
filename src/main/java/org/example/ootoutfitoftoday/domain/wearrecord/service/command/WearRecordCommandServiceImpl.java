@@ -102,4 +102,10 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
             throw new WearRecordException(WearRecordErrorCode.DUPLICATE_WEAR_RECORD_SAME_DAY);
         }
     }
+
+    @Override
+    public int softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId) {
+
+        return wearRecordRepository.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
+    }
 }

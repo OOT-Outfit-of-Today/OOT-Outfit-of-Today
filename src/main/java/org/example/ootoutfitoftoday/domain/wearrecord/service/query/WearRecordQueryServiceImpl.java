@@ -59,10 +59,4 @@ public class WearRecordQueryServiceImpl implements WearRecordQueryService {
 
         return result;
     }
-
-    @Override
-    public int softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId) {
-
-        return wearRecordRepository.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
-    }
 }

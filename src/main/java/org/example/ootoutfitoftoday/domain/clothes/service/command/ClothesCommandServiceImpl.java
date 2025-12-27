@@ -13,7 +13,7 @@ import org.example.ootoutfitoftoday.domain.clothes.repository.ClothesRepository;
 import org.example.ootoutfitoftoday.domain.clothesImage.service.command.ClothesImageCommandService;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
-import org.example.ootoutfitoftoday.domain.wearrecord.service.query.WearRecordQueryService;
+import org.example.ootoutfitoftoday.domain.wearrecord.service.command.WearRecordCommandService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +30,7 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     private final CategoryQueryServiceImpl categoryQueryService;
     private final UserQueryService userQueryService;
     private final ClothesImageCommandService clothesImageCommandService;
-    private final WearRecordQueryService wearRecordQueryService;
+    private final WearRecordCommandService wearRecordCommandService;
 
     @Override
     public ClothesResponse createClothes(Long userId, ClothesRequest clothesRequest) {
@@ -89,7 +89,7 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
 
         clothes.softDelete();
 
-        wearRecordQueryService.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
+        wearRecordCommandService.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
 
         clothesImageCommandService.softDeleteAllByClothesId(clothesId);
     }

@@ -15,6 +15,4 @@ public interface WearRecordQueryService {
     List<ClothesWearCount> wornThisWeek(Long userId, LocalDate baseDate);
 
     List<ClothesWearCount> topWornClothes(Long userId);
-
-    int softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId);
 }

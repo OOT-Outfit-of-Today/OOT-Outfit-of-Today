@@ -43,6 +43,17 @@ public interface WearRecordRepository extends JpaRepository<WearRecord, Long>, W
             @Param("endOfDay") LocalDateTime endOfDay
     );
 
+    /**
+     * clearAutomatically = true <- 벌크 쿼리 실행 후 영속성 컨텍스트를 자동으로 비운다(clear)
+     * flushAutomatically = true <- 벌크 쿼리 실행 전에 영속성 컨텍스트 변경 사항을 DB에 먼저 반영(flush)
+     *
+     * 1. flushAutomatically
+     *  - 영속성 컨텍스트 변경 사항 → DB 반영
+     * 2. 벌크 UPDATE 실행(DB 직접 수정)
+     * 3. clearAutomatically
+     *  - 영속성 컨텍스트 비움
+     * 4. 이후 조회는 항상 DB 기준의 최신 상태
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE WearRecord wr

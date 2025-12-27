@@ -91,7 +91,7 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
             LocalDateTime endOfDay
     ) {
 
-        boolean exists = wearRecordRepository.existsByUserIdAndClothesIdAndWornAtBetween(
+        boolean exists = wearRecordRepository.existsByUserIdAndClothesIdAndWornAtBetweenAndIsDeletedFalse(
                 userId,
                 clothesId,
                 startOfDay,
@@ -101,5 +101,11 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
         if (exists) {
             throw new WearRecordException(WearRecordErrorCode.DUPLICATE_WEAR_RECORD_SAME_DAY);
         }
+    }
+
+    @Override
+    public int softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId) {
+
+        return wearRecordRepository.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
     }
 }

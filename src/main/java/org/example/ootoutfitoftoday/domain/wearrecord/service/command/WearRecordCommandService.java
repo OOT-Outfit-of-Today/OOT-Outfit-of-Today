@@ -6,4 +6,6 @@ import org.example.ootoutfitoftoday.domain.wearrecord.dto.response.WearRecordCre
 public interface WearRecordCommandService {
 
     WearRecordCreateResponse createWearRecord(Long userId, WearRecordCreateRequest request);
+
+    int softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId);
 }

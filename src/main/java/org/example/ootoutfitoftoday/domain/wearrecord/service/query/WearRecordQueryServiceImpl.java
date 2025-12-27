@@ -27,7 +27,7 @@ public class WearRecordQueryServiceImpl implements WearRecordQueryService {
         log.debug("내 착용 기록 조회 시작 - 사용자 ID: {}, 페이지 정보: {}", userId, pageable);
 
         Page<WearRecord> wearRecords =
-                wearRecordRepository.findMyWearRecordsWithClothes(
+                wearRecordRepository.findMyWearRecordsWithClothesAndIsDeletedFalse(
                         userId,
                         pageable
                 );

@@ -14,6 +14,7 @@ import org.example.ootoutfitoftoday.domain.clothes.dto.response.ClothesSummaryRe
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesSuccessCode;
 import org.example.ootoutfitoftoday.domain.clothes.service.command.ClothesCommandService;
 import org.example.ootoutfitoftoday.domain.clothes.service.query.ClothesQueryService;
+import org.example.ootoutfitoftoday.domain.clothes.service.usecase.ClothesUseCaseService;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +27,7 @@ public class ClothesControllerImpl implements ClothesController {
 
     private final ClothesCommandService clothesCommandService;
     private final ClothesQueryService clothesQueryService;
+    private final ClothesUseCaseService clothesUseCaseService;
 
     @Override
     @PostMapping
@@ -89,7 +91,7 @@ public class ClothesControllerImpl implements ClothesController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clothesId
     ) {
-        clothesCommandService.deleteClothes(authUser.getUserId(), clothesId);
+        clothesUseCaseService.deleteClothes(authUser.getUserId(), clothesId);
 
         return Response.success(null, ClothesSuccessCode.CLOTHES_DELETE);
     }

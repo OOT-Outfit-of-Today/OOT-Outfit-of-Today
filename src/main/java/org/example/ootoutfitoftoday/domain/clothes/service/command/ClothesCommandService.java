@@ -16,7 +16,7 @@ public interface ClothesCommandService {
             ClothesRequest clothesRequest
     );
 
-    void deleteClothes(Long userId, Long clothesId);
+    void softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId);
 
     void clearCategoryFromClothes(List<Long> categoryIds);
 

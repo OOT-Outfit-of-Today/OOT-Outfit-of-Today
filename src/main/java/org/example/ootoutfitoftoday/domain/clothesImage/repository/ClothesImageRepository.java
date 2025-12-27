@@ -18,7 +18,7 @@ public interface ClothesImageRepository extends JpaRepository<ClothesImage, Long
             WHERE ci.clothes.id = :clothesId
               AND ci.isDeleted = false
             """)
-    int softDeleteAllByClothesId(@Param("clothesId") Long clothesId);
+    int softDeleteAllByClothesIdIsDeletedFalse(@Param("clothesId") Long clothesId);
 
     @Query("""
             SELECT EXISTS (

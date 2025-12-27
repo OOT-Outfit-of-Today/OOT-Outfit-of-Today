@@ -12,5 +12,5 @@ public interface ClothesImageCommandService {
 
     void removeClothesImages(Long userId, Long clothesId, ClothesImageRequest clothesImageRequest);
 
-    int softDeleteAllByClothesId(Long id);
+    int softDeleteAllByClothesIdIsDeletedFalse(Long clothesId);
 }

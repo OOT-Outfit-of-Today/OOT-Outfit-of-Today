@@ -202,8 +202,9 @@ public class ClothesImageCommandServiceImpl implements ClothesImageCommandServic
     }
 
     @Override
-    public int softDeleteAllByClothesId(Long id) {
-        return clothesImageRepository.softDeleteAllByClothesId(id);
+    public int softDeleteAllByClothesIdIsDeletedFalse(Long id) {
+
+        return clothesImageRepository.softDeleteAllByClothesIdIsDeletedFalse(id);
     }
 
     /**

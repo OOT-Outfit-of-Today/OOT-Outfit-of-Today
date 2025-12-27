@@ -10,10 +10,8 @@ import org.example.ootoutfitoftoday.domain.clothes.entity.Clothes;
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesErrorCode;
 import org.example.ootoutfitoftoday.domain.clothes.exception.ClothesException;
 import org.example.ootoutfitoftoday.domain.clothes.repository.ClothesRepository;
-import org.example.ootoutfitoftoday.domain.clothesImage.service.command.ClothesImageCommandService;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
-import org.example.ootoutfitoftoday.domain.wearrecord.service.command.WearRecordCommandService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +27,6 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     private final ClothesRepository clothesRepository;
     private final CategoryQueryServiceImpl categoryQueryService;
     private final UserQueryService userQueryService;
-    private final ClothesImageCommandService clothesImageCommandService;
-    private final WearRecordCommandService wearRecordCommandService;
 
     @Override
     public ClothesResponse createClothes(Long userId, ClothesRequest clothesRequest) {
@@ -80,7 +76,7 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
     }
 
     @Override
-    public void deleteClothes(Long userId, Long clothesId) {
+    public void softDeleteByUserIdAndClothesIdAndIsDeletedFalse(Long userId, Long clothesId) {
         Clothes clothes = clothesRepository.findClothesByIdAndUserIdAndIsDeletedFalse(userId, clothesId).orElseThrow(
                 () -> {
                     log.warn("deleteClothes - 옷 없음. clothesId={}", clothesId);
@@ -88,10 +84,6 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
                 });
 
         clothes.softDelete();
-
-        wearRecordCommandService.softDeleteByUserIdAndClothesIdAndIsDeletedFalse(userId, clothesId);
-
-        clothesImageCommandService.softDeleteAllByClothesId(clothesId);
     }
 
     @Override

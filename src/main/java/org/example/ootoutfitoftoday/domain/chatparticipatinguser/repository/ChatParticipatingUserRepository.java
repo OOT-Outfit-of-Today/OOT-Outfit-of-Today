@@ -15,5 +15,8 @@ public interface ChatParticipatingUserRepository extends JpaRepository<ChatParti
 
     List<ChatParticipatingUser> findAllByChatroom(Chatroom chatroom);
 
-    Optional<ChatParticipatingUser> findByChatroomAndUser(Chatroom chatroom, User user);
+    Optional<ChatParticipatingUser> findByChatroomAndUser(
+            Chatroom chatroom,
+            User user
+    );
 }

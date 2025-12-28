@@ -14,7 +14,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     Optional<RefreshToken> findByToken(String token);
 
-    Optional<RefreshToken> findByUserIdAndDeviceId(Long userId, String deviceId);
+    Optional<RefreshToken> findByUserIdAndDeviceId(
+            Long userId,
+            String deviceId
+    );
 
     List<RefreshToken> findAllByUserIdOrderByLastUsedAtDesc(Long userId);
 
@@ -24,7 +27,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Query("DELETE FROM RefreshToken rt WHERE rt.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
 
-    void deleteByUserIdAndDeviceId(Long userId, String deviceId);
+    void deleteByUserIdAndDeviceId(
+            Long userId,
+            String deviceId
+    );
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM RefreshToken rt WHERE rt.expiresAt < :now")

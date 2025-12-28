@@ -25,11 +25,10 @@ public class UserDashboardControllerImpl implements UserDashboardController {
 
     @Override
     @GetMapping("/overview")
-    public ResponseEntity<Response<DashboardUserSummaryResponse>> getUserDashboardSummary(
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+    public ResponseEntity<Response<DashboardUserSummaryResponse>> getUserDashboardSummary(@AuthenticationPrincipal AuthUser authUser) {
+        DashboardUserSummaryResponse response = dashboardUserQueryService.getUserDashboardSummary(authUser.getUserId());
 
-        return Response.success(dashboardUserQueryService.getUserDashboardSummary(authUser.getUserId()), DashboardSuccessCode.DASHBOARD_USER_SUMMARY_OK);
+        return Response.success(response, DashboardSuccessCode.DASHBOARD_USER_SUMMARY_OK);
     }
 
     @Override
@@ -38,7 +37,8 @@ public class UserDashboardControllerImpl implements UserDashboardController {
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) LocalDate baseDate
     ) {
+        DashboardUserWearStatisticsResponse response = dashboardUserQueryService.getUserWearStatistics(authUser.getUserId(), baseDate);
 
-        return Response.success(dashboardUserQueryService.getUserWearStatistics(authUser.getUserId(), baseDate), DashboardSuccessCode.DASHBOARD_USER_STATISTICS_OK);
+        return Response.success(response, DashboardSuccessCode.DASHBOARD_USER_STATISTICS_OK);
     }
 }

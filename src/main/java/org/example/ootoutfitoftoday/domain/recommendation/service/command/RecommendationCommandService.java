@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface RecommendationCommandService {
 
-    List<RecommendationCreateResponse> generateRecommendations(Long userId);
-
     List<Recommendation> createRecommendationsForBatch(Long userId);
 
     SalePostCreateResponse createSalePostFromRecommendation(

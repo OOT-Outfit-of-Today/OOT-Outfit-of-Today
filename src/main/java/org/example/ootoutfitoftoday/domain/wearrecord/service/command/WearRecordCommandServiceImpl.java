@@ -32,7 +32,6 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
 
     @Override
     public WearRecordCreateResponse createWearRecord(Long userId, WearRecordCreateRequest request) {
-
         User user = userQueryService.findByIdAndIsDeletedFalse(userId);
 
         Clothes clothes = clothesQueryService.findClothesByIdAndUserIdAndIsDeletedFalse(userId, request.clothesId());
@@ -90,7 +89,6 @@ public class WearRecordCommandServiceImpl implements WearRecordCommandService {
             LocalDateTime startOfDay,
             LocalDateTime endOfDay
     ) {
-
         boolean exists = wearRecordRepository.existsByUserIdAndClothesIdAndWornAtBetweenAndIsDeletedFalse(
                 userId,
                 clothesId,

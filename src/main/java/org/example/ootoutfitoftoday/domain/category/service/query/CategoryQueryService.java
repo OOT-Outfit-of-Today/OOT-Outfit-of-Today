@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 
 public interface CategoryQueryService {
 
-    Category findById(long categoryId);
+    Category findById(Long categoryId);
 
     Page<CategoryResponse> getCategories(
             int page,

@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface WearCustomRepository {
 
-    List<ClothesWearCount> wornThisWeek(Long userId, LocalDate baseDate);
+    List<ClothesWearCount> wornThisWeek(
+            Long userId,
+            LocalDate baseDate
+    );
 
     List<ClothesWearCount> topWornClothes(Long userId);
 }

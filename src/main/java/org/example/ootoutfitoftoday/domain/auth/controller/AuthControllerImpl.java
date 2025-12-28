@@ -27,9 +27,7 @@ public class AuthControllerImpl implements AuthController {
 
     @Override
     @PostMapping("/signup")
-    public ResponseEntity<Response<Void>> signup(
-            @Valid @RequestBody AuthSignupRequest request
-    ) {
+    public ResponseEntity<Response<Void>> signup(@Valid @RequestBody AuthSignupRequest request) {
         authCommandService.signup(request);
 
         return Response.success(null, AuthSuccessCode.USER_SIGNUP);
@@ -74,7 +72,6 @@ public class AuthControllerImpl implements AuthController {
             @Valid @RequestBody TokenExchangeRequest request,
             HttpServletRequest httpRequest
     ) {
-
         AuthLoginResponse response = authCommandService.exchangeOAuthToken(request.getCode(), request.getDeviceId(), request.getDeviceName(), httpRequest);
 
         return Response.success(response, AuthSuccessCode.TOKEN_EXCHANGE);
@@ -93,9 +90,7 @@ public class AuthControllerImpl implements AuthController {
 
     @Override
     @PostMapping("/logout/all")
-    public ResponseEntity<Response<Void>> logoutAll(
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+    public ResponseEntity<Response<Void>> logoutAll(@AuthenticationPrincipal AuthUser authUser) {
         authCommandService.logoutAll(authUser);
 
         return Response.success(null, AuthSuccessCode.USER_LOGOUT);

@@ -29,7 +29,6 @@ public class UserControllerImpl implements UserController {
     @Override
     @GetMapping
     public ResponseEntity<Response<UserGetMyInfoResponse>> getMyInfo(@AuthenticationPrincipal AuthUser authUser) {
-
         UserGetMyInfoResponse response = userQueryService.getMyInfo(authUser.getUserId());
 
         return Response.success(response, UserSuccessCode.GET_MY_INFO);
@@ -41,7 +40,6 @@ public class UserControllerImpl implements UserController {
             @Valid @RequestBody UserPasswordVerificationRequest request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-
         userQueryService.verifyPassword(request, authUser);
 
         return Response.success(null, UserSuccessCode.PASSWORD_VERIFIED);
@@ -53,7 +51,6 @@ public class UserControllerImpl implements UserController {
             @Valid @RequestBody UserUpdateInfoRequest request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-
         UserUpdateInfoResponse response = userCommandService.updateInfo(request, authUser);
 
         return Response.success(response, UserSuccessCode.UPDATE_INFO);
@@ -65,7 +62,9 @@ public class UserControllerImpl implements UserController {
             @Valid @RequestBody UserUpdateProfileImageRequest request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        UserUpdateProfileImageResponse response = userCommandService.updateProfileImage(authUser.getUserId(), request.getImageId()
+        UserUpdateProfileImageResponse response = userCommandService.updateProfileImage(
+                authUser.getUserId(),
+                request.getImageId()
         );
 
         return Response.success(response, UserSuccessCode.UPDATE_PROFILE_IMAGE);
@@ -73,9 +72,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @DeleteMapping("/profile-image")
-    public ResponseEntity<Response<Void>> deleteProfileImage(
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+    public ResponseEntity<Response<Void>> deleteProfileImage(@AuthenticationPrincipal AuthUser authUser) {
         userCommandService.deleteProfileImage(authUser.getUserId());
 
         return Response.success(null, UserSuccessCode.DELETE_PROFILE_IMAGE);
@@ -87,7 +84,6 @@ public class UserControllerImpl implements UserController {
             @RequestBody UserUpdateTradeLocationRequest request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-
         userCommandService.updateMyTradeLocation(request, authUser.getUserId());
 
         return Response.success(null, UserSuccessCode.UPDATED_TRADE_LOCATION);

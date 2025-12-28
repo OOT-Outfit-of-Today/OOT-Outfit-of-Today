@@ -11,10 +11,7 @@ public interface SalePostImageCommandService {
     // 설명: 판매글 생성 시 이미지를 함께 등록
     //      중복 검증, 이미지 존재 검증 포함
     // 사용: SalePostCommandService에서 호출
-    List<SalePostImage> createSalePostImages(
-            Long salePostId,
-            List<Long> imageIds
-    );
+    List<SalePostImage> createSalePostImages(Long salePostId, List<Long> imageIds);
 
     // 이미지 추가
     // 설명: 기존 이미지는 유지하고 새 이미지 추가

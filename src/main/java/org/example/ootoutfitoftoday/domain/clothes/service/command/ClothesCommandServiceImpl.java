@@ -88,7 +88,6 @@ public class ClothesCommandServiceImpl implements ClothesCommandService {
 
     @Override
     public void clearCategoryFromClothes(List<Long> categoryIds) {
-
         clothesRepository.clearCategoryFromClothes(categoryIds);
     }
 

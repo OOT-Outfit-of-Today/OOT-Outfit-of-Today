@@ -19,7 +19,10 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long>, Clothes
               AND c.id = :clothesId
               AND c.isDeleted = false
             """)
-    Optional<Clothes> findClothesByIdAndUserIdAndIsDeletedFalse(@Param("userId") Long userId, @Param("clothesId") Long clothesId);
+    Optional<Clothes> findClothesByIdAndUserIdAndIsDeletedFalse(
+            @Param("userId") Long userId,
+            @Param("clothesId") Long clothesId
+    );
 
     @Modifying
     @Query("""

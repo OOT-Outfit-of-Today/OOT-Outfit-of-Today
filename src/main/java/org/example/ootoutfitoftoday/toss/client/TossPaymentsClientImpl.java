@@ -95,7 +95,9 @@ public class TossPaymentsClientImpl implements TossPaymentsClient {
     }
 
     private LocalDateTime parseIso(String iso) {
-        if (iso == null) return null;
+        if (iso == null) {
+            return null;
+        }
         try {
 
             return LocalDateTime.parse(iso);

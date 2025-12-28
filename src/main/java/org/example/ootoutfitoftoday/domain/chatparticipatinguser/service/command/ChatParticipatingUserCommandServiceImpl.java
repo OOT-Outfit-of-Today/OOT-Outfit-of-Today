@@ -25,7 +25,11 @@ public class ChatParticipatingUserCommandServiceImpl implements ChatParticipatin
     private final ChatReferenceToChatroomCommandService chatReferenceToChatroomCommandService;
 
     @Override
-    public void saveKeys(Chatroom chatroom, SalePost salePost, User user) {
+    public void saveKeys(
+            Chatroom chatroom,
+            SalePost salePost,
+            User user
+    ) {
         ChatParticipatingUserId buyerId = ChatParticipatingUserId.create(chatroom.getId(), user.getId());
 
         ChatParticipatingUser buyerParticipation = ChatParticipatingUser.create(buyerId, chatroom, user);

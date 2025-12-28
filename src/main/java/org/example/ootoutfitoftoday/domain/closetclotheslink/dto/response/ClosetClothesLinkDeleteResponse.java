@@ -9,7 +9,7 @@ public record ClosetClothesLinkDeleteResponse(
             Long closetId,
             Long clothesId
     ) {
-    
+
         return new ClosetClothesLinkDeleteResponse(
                 closetId,
                 clothesId

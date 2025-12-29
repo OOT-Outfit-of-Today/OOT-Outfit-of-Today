@@ -22,10 +22,10 @@ services:
     # Redis 설정 옵션
     command:
       - redis-server
-      - --appendonly yes                                         # AOF 영속성: 모든 쓰기 명령을 로그로 저장 (재시작 시 복구)
+      - --appendonly yes                                         # AOF 영속성: 모든 쓰기 명령을 로그로 저장(재시작 시 복구)
       - --requirepass ${REDIS_PASSWORD}                          # 비밀번호 인증: .env 파일의 REDIS_PASSWORD 사용
       - --maxmemory 256mb                                        # 최대 메모리: 256MB로 제한(로컬 환경 최적화)
-      - --maxmemory-policy allkeys-lru                           # 메모리 정책: 메모리 부족 시 가장 오래 사용 안 한 키 삭제
+      - --maxmemory-policy allkeys-lru                           # 메모리 정책: 메모리 부족 시 가장 오래 사용 안 한 키(LRU) 삭제
 
     # 헬스체크
     healthcheck:
@@ -39,7 +39,7 @@ services:
 
     # 네트워크
     networks:
-      - oot-network                                              # 네트워크 분리(추후 MySQL 등 추가 시 같은 네트워크 사용)
+      - oot-network
 
   # ============================================
   # RedisInsight: Redis 공식 브라우저 기반 GUI 도구
@@ -50,7 +50,7 @@ services:
 
     # 포트
     ports:
-      - "5540:5540"                                              # 브라우저에서 localhost:5540 접속하면 Redis GUI 사용 가능
+      - "5540:5540"                                              # 접속: http://localhost:5540
 
     # 환경변수
     environment:
@@ -102,9 +102,9 @@ services:
     # MySQL 서버 설정 옵션
     command:
       # 문자셋 설정
-      - --character-set-server=utf8mb4                           # 기본 문자셋: UTF-8(한글, 이모지 완벽 지원)
-      - --collation-server=utf8mb4_unicode_ci                    # 정렬 규칙: 유니코드 기반(대소문자 구분 없이 정렬)
-      - --default-authentication-plugin=mysql_native_password    # 인증 플러그인: 기존 방식 사용(호환성 향상)
+      - --character-set-server=utf8mb4                           # 기본 문자셋: UTF-8(한글, 이모지 지원)
+      - --collation-server=utf8mb4_unicode_ci                    # 정렬 규칙: 유니코드 기반 정렬(대소문자 구분 없이 정렬)
+      - --default-authentication-plugin=mysql_native_password    # 인증 플러그인: 기존 방식(레거시 인증 방식) 사용(호환성 향상)
       # 성능 최적화
       - --max-connections=200                                    # 최대 연결 수(기본 151에서 증가)
       - --innodb-buffer-pool-size=256M                           # InnoDB 버퍼 풀(로컬 개발 환경 최적화, 자주 쓰는 데이터 메모리에 저장, 쿼리 성능 향상)

@@ -6,12 +6,13 @@ services:
       - "6379:6379"                                              # Redis 기본 포트
     volumes:
       - redis-data:/data                                         # 데이터 영속성: Redis 재시작해도 데이터 유지
-    # Redis 설정 옵션들
-    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}" --maxmemory 256mb --maxmemory-policy allkeys-lru
-    # appendonly yes: AOF 방식 영속성(데이터 손실 최소화)
-    # requirepass: 비밀번호 설정(보안 강화, 실제로는 환경변수 권장)
-    # maxmemory: 최대 메모리 제한(로컬 환경 고려)
-    # maxmemory-policy allkeys-lru: 메모리 부족 시 가장 오래된 키 삭제
+    # Redis 설정 옵션
+    command:
+      - redis-server
+      - --appendonly yes                                         # AOF 영속성: 모든 쓰기 명령을 로그로 저장 (재시작 시 복구)
+      - --requirepass ${REDIS_PASSWORD}                          # 비밀번호 인증: .env 파일의 REDIS_PASSWORD 사용
+      - --maxmemory 256mb                                        # 최대 메모리: 256MB로 제한(로컬 환경 최적화)
+      - --maxmemory-policy allkeys-lru                           # 메모리 정책: 메모리 부족 시 가장 오래 사용 안 한 키 삭제
     restart: unless-stopped                                      # Docker 재시작 시 자동 실행(수동 중지 제외)
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]      # 헬스체크 개선

@@ -20,12 +20,21 @@ services:
       - redis-data:/data                                         # 데이터 영속성: Redis 재시작해도 데이터 유지
 
     # Redis 설정 옵션
+    # $$REDIS_PASSWORD: Docker Compose가 해석하지 않고
+    #                   sh -c를 사용하여 컨테이너 내부 셸에서 환경변수 참조
     command:
-      - redis-server
-      - --appendonly yes                                         # AOF 영속성: 모든 쓰기 명령을 로그로 저장(재시작 시 복구)
-      - --requirepass ${REDIS_PASSWORD}                          # 비밀번호 인증: .env 파일의 REDIS_PASSWORD 사용
-      - --maxmemory 256mb                                        # 최대 메모리: 256MB로 제한(로컬 환경 최적화)
-      - --maxmemory-policy allkeys-lru                           # 메모리 정책: 메모리 부족 시 가장 오래 사용 안 한 키(LRU) 삭제
+      - sh
+      - -c
+      - |
+        exec redis-server \
+          --appendonly yes \
+          --requirepass "$$REDIS_PASSWORD" \
+          --maxmemory 256mb \
+          --maxmemory-policy allkeys-lru
+      # AOF 영속성: 모든 쓰기 명령을 로그로 저장(재시작 시 복구)
+      # 비밀번호 인증: .env 파일의 REDIS_PASSWORD 사용
+      # 최대 메모리: 256MB로 제한(로컬 환경 최적화)
+      # 메모리 정책: 메모리 부족 시 가장 오래 사용 안 한 키(LRU) 삭제
 
     # 헬스체크
     healthcheck:

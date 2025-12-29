@@ -1,53 +1,171 @@
-version: '3.8'
-
+# ============================================
+# Redis: 캐싱 및 세션 관리
+# ============================================
 services:
   redis:
-    image: redis:7-alpine                                       # 7-alpine: 최신 안정 버전 + 가벼운 이미지(용량 절약)
+    image: redis:7-alpine                                                    # 7-alpine: 최신 안정 버전 + 가벼운 이미지(용량 절약)
     container_name: oot-redis
-    ports:
-      - "6379:6379"                                             # Redis 기본 포트
-    volumes:
-      - redis-data:/data                                        # 데이터 영속성: Redis 재시작해도 데이터 유지
-    # Redis 설정 옵션들
-    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}" --maxmemory 256mb --maxmemory-policy allkeys-lru
-    # appendonly yes: AOF 방식 영속성(데이터 손실 최소화)
-    # requirepass: 비밀번호 설정(보안 강화, 실제로는 환경변수 권장)
-    # maxmemory: 최대 메모리 제한(로컬 환경 고려)
-    # maxmemory-policy allkeys-lru: 메모리 부족 시 가장 오래된 키 삭제
-    restart: unless-stopped                                    # Docker 재시작 시 자동 실행(수동 중지 제외)
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]    # 헬스체크 개선
-      interval: 10s                                            # 10초마다 체크
-      timeout: 3s                                              # 3초 이내 응답 없으면 실패
-      retries: 3                                               # 3번 실패하면 unhealthy 상태
-    environment:
-      - TZ=Asia/Seoul                                          # 타임존 설정(로그 시간 한국 시간으로)
-    networks:
-      - oot-network                                            # 네트워크 분리(추후 MySQL 등 추가 시 같은 네트워크 사용)
 
-  # Redis 모니터링 도구(선택사항 - 개발 시 편리)
-  # Redis Insight: Redis 공식 GUI 도구(Commander보다 기능 풍부)
-  redis-insight:
-    image: redis/redisinsight:latest                          # Redis 공식 모니터링 도구 최신 버전
-    container_name: oot-redis-insight
+    # 포트
     ports:
-      - "5540:5540"                                           # 브라우저에서 localhost:5540 접속하면 Redis GUI 사용 가능
+      - "6379:6379"                                                          # Redis 기본 포트
+
+    # 환경변수(명시적 전달)
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}                                     # Redis 비밀번호(command에서 사용)
+      - TZ=Asia/Seoul                                                        # 타임존 설정(로그 시간 한국 시간으로)
+
+    # 볼륨
     volumes:
-      - redisinsight-data:/data                               # Redis Insight 설정 및 연결 정보 저장용(재시작 시에도 유지)
-    depends_on:
-      - redis                                                 # Redis 실행 후 Insight 실행
+      - redis-data:/data                                                     # 데이터 영속성: Redis 재시작해도 데이터 유지
+
+    # Redis 설정 옵션
+    # $$REDIS_PASSWORD: Docker Compose가 해석하지 않고
+    #                   sh -c를 사용하여 컨테이너 내부 셸에서 환경변수 참조
+    command:
+      - sh
+      - -c
+      - |
+        exec redis-server \
+          --appendonly yes \
+          --requirepass "$$REDIS_PASSWORD" \
+          --maxmemory 256mb \
+          --maxmemory-policy allkeys-lru
+      # AOF 영속성: 모든 쓰기 명령을 로그로 저장(재시작 시 복구)
+      # 비밀번호 인증: .env 파일의 REDIS_PASSWORD 사용
+      # 최대 메모리: 256MB로 제한(로컬 환경 최적화)
+      # 메모리 정책: 메모리 부족 시 가장 오래 사용 안 한 키(LRU) 삭제
+
+    # 헬스체크
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping || exit 1"]    # 헬스체크 개선
+      interval: 10s                                                          # 10초마다 체크
+      timeout: 3s                                                            # 3초 이내 응답 없으면 실패
+      retries: 3                                                             # 3번 실패하면 unhealthy 상태
+
+    # 재시작 정책
+    restart: unless-stopped                                                  # Docker 재시작 시 자동 실행(수동 중지 제외)
+
+    # 네트워크
     networks:
       - oot-network
-    restart: unless-stopped
-    environment:
-      - TZ=Asia/Seoul                                         # 타임존 설정(로그 시간 한국 시간으로)
 
+  # ============================================
+  # RedisInsight: Redis 공식 브라우저 기반 GUI 도구
+  # ============================================
+  redisinsight:
+    image: redis/redisinsight:latest                                         # Redis 공식 모니터링 도구 최신 버전
+    container_name: oot-redisinsight                                         # 컨테이너명: 공식 제품명 따라 붙여쓰기
+
+    # 포트
+    ports:
+      - "5540:5540"                                                          # 접속: http://localhost:5540
+
+    # 환경변수
+    environment:
+      - TZ=Asia/Seoul                                                        # 타임존 설정(로그 시간 한국 시간으로)
+
+    # 볼륨
+    volumes:
+      - redisinsight-data:/data                                              # 볼륨명: 공식 제품명 따라 붙여쓰기
+
+    # 의존성
+    depends_on:
+      redis:
+        condition: service_healthy                                           # Redis가 healthy 상태일 때 RedisInsight 시작
+
+    # 재시작 정책
+    restart: unless-stopped
+
+    # 네트워크
+    networks:
+      - oot-network
+
+    # 프로파일(선택적 실행)
+    # 기본 실행(docker-compose up -d → Redis, MySQL만 실행) 시 제외, --profile tools 옵션으로 실행
+    profiles:                                                                # RedisInsight 포함해서 실행: docker-compose --profile tools up -d
+      - tools                                                                # RedisInsight만 실행: docker-compose --profile tools up redisinsight
+
+  # ============================================
+  # MySQL: 메인 데이터베이스
+  # ============================================
+  mysql:
+    image: mysql:8.0                                                         # MySQL 8.0 공식 이미지(안정 버전)
+    container_name: oot-mysql
+
+    # 포트
+    ports:
+      - "3306:3306"                                                          # MySQL 기본 포트(localhost:3306으로 접근 가능)
+
+    # 환경변수로 민감정보 관리(.env 파일에서 자동으로 읽음)
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}                                   # root 계정 비밀번호(.env의 DB_PASSWORD 사용)
+      - MYSQL_DATABASE=oot                                                   # 초기 데이터베이스 자동 생성(애플리케이션 DB)
+      - TZ=Asia/Seoul                                                        # 타임존 설정(한국 시간, 로그 및 timestamp 일관성)
+
+    # 볼륨
+    # 데이터 영속성: MySQL 데이터를 Docker 볼륨에 저장(컨테이너 삭제해도 데이터 유지)
+    volumes:
+      - mysql-data:/var/lib/mysql                                            # MySQL 데이터 디렉토리 마운트
+
+    # MySQL 서버 설정 옵션
+    command:
+      # 문자셋 설정
+      - --character-set-server=utf8mb4                                       # 기본 문자셋: UTF-8(한글, 이모지 지원)
+      - --collation-server=utf8mb4_unicode_ci                                # 정렬 규칙: 유니코드 기반 정렬(대소문자 구분 없이 정렬)
+      - --default-authentication-plugin=mysql_native_password                # 인증 플러그인: 기존 방식(레거시 인증 방식) 사용(호환성 향상)
+      # 성능 최적화
+      - --max-connections=200                                                # 최대 연결 수(기본 151에서 증가)
+      - --innodb-buffer-pool-size=256M                                       # InnoDB 버퍼 풀(로컬 개발 환경 최적화, 자주 쓰는 데이터 메모리에 저장, 쿼리 성능 향상)
+      - --innodb-log-file-size=64M                                           # Redo 로그 파일 크기(쓰기 성능 향상)
+      - --innodb-flush-log-at-trx-commit=2                                   # 트랜잭션 커밋 시 로그 플러시 정책(옵션 2 = 1초마다 플러시(로컬 개발 환경 권장, 운영은 1 사용)
+      # innodb-flush-log-at-trx-commit 설명:
+      # 1 = 매번 커밋마다 디스크 쓰기(안전, 느림) → 운영 환경 권장
+      # 2 = 1초마다 디스크 쓰기(빠름, 안전성 약간↓) → 로컬 개발 권장
+      # 0 = 1초마다 쓰기(가장 빠름, 위험) → 비권장
+
+    # 헬스체크
+    # MySQL 헬스체크: mysqladmin으로 서버 상태 확인
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 10s                                                          # 10초마다 헬스체크 실행
+      timeout: 5s                                                            # 5초 이내 응답 없으면 실패
+      retries: 5                                                             # 5번 연속 실패 시 unhealthy 상태
+      start_period: 30s                                                      # 컨테이너 시작 후 30초 유예(초기화 시간 고려, 해당 시간동안 헬스체크 실패해도 unhealthy로 판단 안 함)
+
+    # 재시작 정책
+    restart: unless-stopped                                                  # Docker 재시작 시 자동 실행(수동 중지 제외)
+
+    # 네트워크
+    networks:
+      - oot-network                                                          # Redis와 동일한 네트워크에 연결(서비스 간 통신 가능)
+
+# ============================================
+# 볼륨: 데이터 영속성
+# ============================================
 volumes:
   redis-data:
-    driver: local                                             # 로컬 볼륨 사용(Redis 데이터는 Docker 볼륨에 저장)
-  redisinsight-data:
-    driver: local                                             # Redis Insight 설정 저장용 볼륨(데이터베이스 연결 정보 등)
+    driver: local                                                            # 로컬 볼륨 사용(Redis 데이터는 Docker 볼륨에 저장)
+    # 볼륨 레이블 추가(관리 편의성)
+    labels:
+      - "com.oot.description=Redis data volume"                              # 볼륨 설명(docker volume inspect 시 표시)
+      - "com.oot.environment=local"                                          # 환경 구분
 
+  redisinsight-data:                                                         # 볼륨명: 공식 제품명 따라 붙여쓰기
+    driver: local                                                            # RedisInsight 설정 저장용 볼륨
+    labels:
+      - "com.oot.description=RedisInsight configuration"
+      - "com.oot.environment=local"
+
+  mysql-data:                                                                # MySQL 데이터 영속성 볼륨
+    driver: local                                                            # 로컬 볼륨 사용(MySQL 데이터는 Docker 볼륨에 저장)
+    labels:
+      - "com.oot.description=MySQL data volume"
+      - "com.oot.environment=local"
+
+# ============================================
+# 네트워크: 컨테이너 간 통신
+# ============================================
 networks:
   oot-network:
-    driver: bridge                                             # 브릿지 네트워크로 컨테이너 간 통신 가능
+    driver: bridge                                                           # 브릿지 네트워크로 컨테이너 간 통신 가능

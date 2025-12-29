@@ -19,7 +19,9 @@ services:
       interval: 10s                                              # 10초마다 체크
       timeout: 3s                                                # 3초 이내 응답 없으면 실패
       retries: 3                                                 # 3번 실패하면 unhealthy 상태
+    # 환경변수(명시적 전달)
     environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}                         # Redis 비밀번호(command에서 사용)
       - TZ=Asia/Seoul                                            # 타임존 설정(로그 시간 한국 시간으로)
     networks:
       - oot-network                                              # 네트워크 분리(추후 MySQL 등 추가 시 같은 네트워크 사용)

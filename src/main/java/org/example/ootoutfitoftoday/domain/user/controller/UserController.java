@@ -81,10 +81,10 @@ public interface UserController {
     );
 
     @Operation(
-            summary = "이건 추후에 테스트 후 내용 작성하길 바랍니다!",
-            description = "test",
+            summary = "회원 위치 수정",
+            description = "회원의 위치(주소지, 위도, 경도)를 수정합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "성공")
+                    @ApiResponse(responseCode = "200", description = "성공")    // TODO: 추가할 것
             })
     ResponseEntity<Response<Void>> updateUserTradeLocation(
             UserUpdateTradeLocationRequest request,

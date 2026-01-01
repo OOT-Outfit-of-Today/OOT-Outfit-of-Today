@@ -35,17 +35,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final ObjectMapper objectMapper;
 
+    /**
+     * JWT 필터 실행 제외 경로(인프라/도구만 포함)
+     * 설계 원칙: 필터는 JWT 검증만 담당, 보안 정책은 SecurityConfig에 위임
+     * - 이 메서드는 "필터 실행이 아예 불필요한 경로"만 정의
+     * - 비즈니스 API는 제외(SecurityConfig에서 인가 처리)
+     * - 성능 최적화 목적: Swagger, Actuator 등은 JWT 검증 자체가 무의미
+     */
+
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getServletPath();
         String method = request.getMethod();
 
-        if (path.startsWith("/v1/internal/")) {
-            log.debug("[JWT FILTER] Skipped for Internal API → {}", path);
-
-            return true;
-        }
-
+        // 인프라: 문서화 도구 (Swagger)
+        // JWT 검증이 아예 불필요한 정적 리소스
         if (path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-resources") ||
@@ -54,6 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
+        // 인프라: 모니터링 엔드포인트 (Actuator)
+        // 헬스체크, 메트릭 수집은 JWT 없이 동작해야 함
         if (path.startsWith("/actuator/health") ||
                 path.startsWith("/actuator/info") ||
                 path.startsWith("/actuator/prometheus")) {
@@ -61,44 +67,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (path.startsWith("/oauth2/") || path.startsWith("/login/oauth2/")) {
+        // 인프라: OAuth2 프로토콜 엔드포인트
+        // Spring Security OAuth2가 자체적으로 처리
+        if (path.startsWith("/oauth2/") ||
+                path.startsWith("/login/oauth2/")) {
 
             return true;
         }
 
-        if (path.startsWith("/ws") || path.startsWith("/stomp")) {
+        // 인프라: WebSocket 엔드포인트
+        // WebSocket은 별도 인증 메커니즘 사용
+        if (path.startsWith("/ws")
+                || path.startsWith("/stomp")) {
 
             return true;
         }
 
-        if ("POST".equalsIgnoreCase(method) &&
-                (path.startsWith("/v1/auth/signup") ||
-                        path.startsWith("/v1/auth/login") ||
-                        path.startsWith("/v1/auth/refresh") ||
-                        path.startsWith("/v1/auth/oauth2/token/exchange"))) {
+        // 내부 API: 서버 간 통신
+        // 별도의 내부 인증 메커니즘 사용(API Gateway 등)
+        if (path.startsWith("/v1/internal/")) {
+            log.debug("[JWT FILTER] Skipped for Internal API → {}", path);
 
             return true;
         }
 
-        if ("GET".equalsIgnoreCase(method)) {
-            if (path.startsWith("/v1/closets/public") ||
-                    path.startsWith("/v1/sale-posts/public") ||
-                    path.startsWith("/v1/categories") ||
-                    path.startsWith("/v1/donation-centers/search")) {
-
-                return true;
-            }
-
-            if (path.matches("/v1/closets/\\d+") ||
-                    path.matches("/v1/sale-posts/\\d+")) {
-
-                return true;
-            }
-        }
+        // 나머지 모든 비즈니스 API는 필터 실행
+        // 헤더 없으면 통과, 있으면 검증(doFilterInternal에서 처리)
 
         return false;
     }
 
+    /**
+     * JWT 인증 처리(관대한 필터 전략)
+     * 설계 원칙:
+     * 1. Authorization 헤더 없음 → 통과(SecurityConfig에 위임)
+     * 2. Authorization 헤더 있음 → 반드시 검증(잘못된 토큰은 차단)
+     * 3. 최종 인가 결정은 SecurityConfig의 authorizeHttpRequests()가 담당
+     * 이점:
+     * - 보안 정책의 단일 진실 공급원(Single Source of Truth) = SecurityConfig
+     * - 새로운 공개 API 추가 시 SecurityConfig만 수정하면 됨
+     * - 다중 인증 방식 지원 가능(JWT, OAuth2, API Key 등)
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest httpRequest,
@@ -111,19 +120,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
+            // Authorization 헤더 없음 → 통과(SecurityConfig에서 최종 판단)
+            // 공개 API인지 인증 필요한지는 SecurityConfig의 authorizeHttpRequests()가 결정
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                sendErrorResponse(httpResponse, HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다.");
+                log.debug("Authorization 헤더 없음 → SecurityConfig에 위임: {}", httpRequest.getRequestURI());
+                chain.doFilter(httpRequest, httpResponse);
 
                 return;
             }
 
+            // Authorization 헤더 있음 → JWT 검증 필수
+            // 잘못된 토큰으로 접근 시도는 여기서 차단
             String jwt = jwtUtil.substringToken(authorizationHeader);
 
             if (!processAuthentication(jwt, httpRequest, httpResponse)) {
-
+                // 검증 실패 시 에러 응답 후 종료
                 return;
             }
 
+            // JWT 검증 성공 → 다음 필터로
             chain.doFilter(httpRequest, httpResponse);
 
         } finally {

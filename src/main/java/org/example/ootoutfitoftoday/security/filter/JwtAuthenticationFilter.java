@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.user.enums.UserRole;
+import org.example.ootoutfitoftoday.security.config.SecurityWhitelist;
 import org.example.ootoutfitoftoday.security.jwt.JwtAuthenticationToken;
 import org.example.ootoutfitoftoday.security.jwt.JwtUtil;
 import org.springframework.http.HttpStatus;
@@ -41,60 +42,60 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * - 이 메서드는 "필터 실행이 아예 불필요한 경로"만 정의
      * - 비즈니스 API는 제외(SecurityConfig에서 인가 처리)
      * - 성능 최적화 목적: Swagger, Actuator 등은 JWT 검증 자체가 무의미
+     * - SecurityWhitelist 클래스에서 경로 상수를 중앙 관리
+     *   - 경로 변경 시 SecurityWhitelist만 수정하면 됨
+     *   - DRY 원칙 준수로 유지보수성 향상
      */
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getServletPath();
-        String method = request.getMethod();
 
-        // 인프라: 문서화 도구 (Swagger)
-        // JWT 검증이 아예 불필요한 정적 리소스
-        if (path.startsWith("/swagger-ui") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/swagger-resources") ||
-                path.startsWith("/webjars")) {
-
-            return true;
-        }
-
-        // 인프라: 모니터링 엔드포인트 (Actuator)
-        // 헬스체크, 메트릭 수집은 JWT 없이 동작해야 함
-        if (path.startsWith("/actuator/health") ||
-                path.startsWith("/actuator/info") ||
-                path.startsWith("/actuator/prometheus")) {
-
-            return true;
-        }
-
-        // 인프라: OAuth2 프로토콜 엔드포인트
-        // Spring Security OAuth2가 자체적으로 처리
-        if (path.startsWith("/oauth2/") ||
-                path.startsWith("/login/oauth2/")) {
-
-            return true;
-        }
-
-        // 인프라: WebSocket 엔드포인트
-        // WebSocket은 별도 인증 메커니즘 사용
-        if (path.startsWith("/ws")
-                || path.startsWith("/stomp")) {
-
-            return true;
-        }
-
-        // 내부 API: 서버 간 통신
-        // 별도의 내부 인증 메커니즘 사용(API Gateway 등)
-        if (path.startsWith("/v1/internal/")) {
-            log.debug("[JWT FILTER] Skipped for Internal API → {}", path);
-
-            return true;
+        // SecurityWhitelist에서 인프라 경로 가져오기
+        // - Swagger, Actuator, OAuth2, WebSocket, 내부 API 경로
+        // - 각 경로 그룹별로 명확히 구분되어 관리됨
+        for (String pattern : SecurityWhitelist.getAllInfrastructurePaths()) {
+            // Ant 패턴 매칭(/** 지원)
+            if (pathMatches(path, pattern)) {
+                // 내부 API는 로그 출력(디버깅용)
+                if (path.startsWith("/v1/internal/")) {
+                    log.debug("[JWT FILTER] Skipped for Internal API → {}", path);
+                }
+                return true;
+            }
         }
 
         // 나머지 모든 비즈니스 API는 필터 실행
-        // 헤더 없으면 통과, 있으면 검증(doFilterInternal에서 처리)
-
+        // 헤더 없으면 통과, 있으면 검증 (doFilterInternal에서 처리)
         return false;
+    }
+
+    /**
+     * 간단한 Ant 패턴 매칭 메서드
+     * 지원하는 패턴:
+     * - /path/** : /path로 시작하는 모든 경로
+     * - /path/* : /path 바로 하위 경로만
+     * - /path : 정확히 일치
+     */
+    private boolean pathMatches(String path, String pattern) {
+        // /** 패턴 처리(모든 하위 경로)
+        if (pattern.endsWith("/**")) {
+        String prefix = pattern.substring(0, pattern.length() - 3);
+        return path.startsWith(prefix);
+    }
+
+        // /* 패턴 처리(바로 하위 경로만)
+        if (pattern.endsWith("/*")) {
+            String prefix = pattern.substring(0, pattern.length() - 2);
+            if (!path.startsWith(prefix)) {
+                return false;
+            }
+            String remaining = path.substring(prefix.length());
+            return !remaining.contains("/") || remaining.equals("/");
+        }
+
+        // 정확히 일치
+        return path.equals(pattern);
     }
 
     /**

@@ -38,6 +38,6 @@ public class AuthSignupRequest {
     private String password;
 
     @NotBlank(message = "전화번호는 필수 입력값입니다.")
-    @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "전화번호 형식은 01012345678 형태여야 합니다.")
+    @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "휴대폰 번호는 하이픈(-) 없이 숫자만 입력해야 합니다.")
     private String phoneNumber;
 }

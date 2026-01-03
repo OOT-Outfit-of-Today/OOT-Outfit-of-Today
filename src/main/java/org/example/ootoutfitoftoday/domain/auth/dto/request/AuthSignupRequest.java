@@ -37,7 +37,7 @@ public class AuthSignupRequest {
             message = "비밀번호는 대소문자 불문 영문, 숫자, 특수문자를 모두 포함해야 하고 공백은 불가합니다.")
     private String password;
 
-    @NotBlank(message = "전화번호는 필수 입력값입니다.")
+    @NotBlank(message = "휴대폰 번호는 필수 입력값입니다.")
     @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "휴대폰 번호는 하이픈(-) 없이 숫자만 입력해야 합니다.")
     private String phoneNumber;
 }

@@ -1,6 +1,10 @@
 package org.example.ootoutfitoftoday.common.constant;
 
-public class ValidationRegex {
+public final class ValidationRegex {
+
+    private ValidationRegex() {
+        throw new AssertionError("Utility class는 인스턴스화할 수 없습니다.");
+    }
 
     public static final String ID_REGEX = "^[a-zA-Z0-9_]+$";
 
@@ -16,7 +20,4 @@ public class ValidationRegex {
     public static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>])[^\\s]+$";
 
     public static final String PHONE_NUMBER_REGEX = "^01[016789]\\d{8}$";
-
-    private ValidationRegex() {
-    }
 }

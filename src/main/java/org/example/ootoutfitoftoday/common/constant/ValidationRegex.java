@@ -15,7 +15,7 @@ public class ValidationRegex {
 
     public static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>])[^\\s]+$";
 
-    public static final String PHONE_NUMBER_REGEX = "^01[016789]\\d{7,8}$";
+    public static final String PHONE_NUMBER_REGEX = "^01[016789]\\d{8}$";
 
     private ValidationRegex() {
     }

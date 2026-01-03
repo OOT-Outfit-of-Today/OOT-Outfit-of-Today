@@ -1,5 +1,6 @@
 package org.example.ootoutfitoftoday.domain.auth.service.command;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -246,7 +247,8 @@ public class AuthCommandServiceImpl implements AuthCommandService {
         }
 
         try {
-            Map<String, String> tokenData = objectMapper.readValue(tokenJson, Map.class);
+            Map<String, String> tokenData = objectMapper.readValue(tokenJson, new TypeReference<Map<String, String>>() {}
+            );
 
             String accessToken = tokenData.get("accessToken");
             String refreshToken = tokenData.get("refreshToken");

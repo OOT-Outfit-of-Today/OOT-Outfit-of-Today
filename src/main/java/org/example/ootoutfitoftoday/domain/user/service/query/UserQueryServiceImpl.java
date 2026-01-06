@@ -8,6 +8,7 @@ import org.example.ootoutfitoftoday.domain.auth.enums.SocialProvider;
 import org.example.ootoutfitoftoday.domain.auth.exception.AuthErrorCode;
 import org.example.ootoutfitoftoday.domain.auth.exception.AuthException;
 import org.example.ootoutfitoftoday.domain.user.dto.UserCacheDto;
+import org.example.ootoutfitoftoday.domain.user.dto.UserDuplicateCheckResult;
 import org.example.ootoutfitoftoday.domain.user.dto.request.UserPasswordVerificationRequest;
 import org.example.ootoutfitoftoday.domain.user.dto.response.UserGetMyInfoResponse;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
@@ -59,6 +60,16 @@ public class UserQueryServiceImpl implements UserQueryService {
     public boolean existsByPhoneNumber(String phoneNumber) {
 
         return userRepository.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Override
+    public UserDuplicateCheckResult checkDuplicatesForSignup(
+            String loginId,
+            String email,
+            String nickname,
+            String phoneNumber
+    ) {
+        return userRepository.checkDuplicates(loginId, email, nickname, phoneNumber);
     }
 
     @Override

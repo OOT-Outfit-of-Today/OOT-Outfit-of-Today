@@ -22,6 +22,7 @@ import org.example.ootoutfitoftoday.domain.chat.service.command.ChatReferenceToC
 import org.example.ootoutfitoftoday.domain.chatparticipatinguser.entity.ChatParticipatingUser;
 import org.example.ootoutfitoftoday.domain.chatparticipatinguser.service.query.ChatParticipatingUserQueryService;
 import org.example.ootoutfitoftoday.domain.user.dto.UserCacheDto;
+import org.example.ootoutfitoftoday.domain.user.dto.UserDuplicateCheckResult;
 import org.example.ootoutfitoftoday.domain.user.entity.User;
 import org.example.ootoutfitoftoday.domain.user.enums.UserRole;
 import org.example.ootoutfitoftoday.domain.user.exception.UserErrorCode;
@@ -69,23 +70,34 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     @Value("${jwt.max-devices-per-user:5}")
     private int maxDevicesPerUser;
 
+    /**
+     * 회원가입
+     * 개선 사항:
+     * - 중복 체크: 4번 쿼리 → 1번 쿼리(TODO: 성능 개선 수치화하여 "~성능 개선"으로 수정하기)
+     * - 사용자 경험: 모든 중복 필드를 한 번에 확인하여 동시 반환
+     * 검증 전략:
+     * 1. 실시간 체크 API: 사용자 입력 시 즉각 피드백
+     * 2. 최종 검증(이 메서드): Race Condition 방지
+     */
     @Override
     public void signup(AuthSignupRequest request) {
-        if (userQueryService.existsByLoginId(request.getLoginId())) {
-            log.warn("회원가입 실패 - 로그인 ID 중복 - loginId: {}", request.getLoginId());
-            throw new AuthException(AuthErrorCode.DUPLICATE_LOGIN_ID);
-        }
-        if (userQueryService.existsByEmail(request.getEmail())) {
-            log.warn("회원가입 실패 - 이메일 중복 - email: {}", request.getEmail());
-            throw new AuthException(AuthErrorCode.DUPLICATE_EMAIL);
-        }
-        if (userQueryService.existsByNickname(request.getNickname())) {
-            log.warn("회원가입 실패 - 닉네임 중복 - nickname: {}", request.getNickname());
-            throw new AuthException(AuthErrorCode.DUPLICATE_NICKNAME);
-        }
-        if (userQueryService.existsByPhoneNumber(request.getPhoneNumber())) {
-            log.warn("회원가입 실패 - 전화번호 중복 - phoneNumber: {}", request.getPhoneNumber());
-            throw new AuthException(AuthErrorCode.DUPLICATE_PHONE_NUMBER);
+        // 통합 중복 체크(단일 쿼리로 4개 필드 동시 확인)
+        UserDuplicateCheckResult duplicateCheckResult = userQueryService.checkDuplicatesForSignup(
+                request.getLoginId(),
+                request.getEmail(),
+                request.getNickname(),
+                request.getPhoneNumber()
+        );
+
+        // 중복이 있는 경우, 모든 중복 필드를 포함하여 예외 발생
+        // Repository가 찾은 모든 중복 정보를 활용
+        if (duplicateCheckResult.hasDuplicates()) {
+            List<String> duplicateFields = duplicateCheckResult.getDuplicateFields();
+
+            // 모든 중복 필드를 로그에 기록
+            log.warn("회원가입 실패 - 필드 중복 - duplicateFields: {}", duplicateFields);
+
+            throw new AuthException(AuthErrorCode.DUPLICATE_FIELDS, duplicateFields);
         }
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());

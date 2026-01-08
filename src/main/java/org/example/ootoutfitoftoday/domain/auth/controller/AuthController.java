@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.auth.dto.request.*;
+import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthFieldAvailabilityResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthLoginResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.DeviceInfoResponse;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,63 @@ public interface AuthController {
             })
     ResponseEntity<Response<Void>> signup(
             AuthSignupRequest request
+    );
+
+    // 실시간 중복 체크 API
+    @Operation(
+            summary = "로그인 ID 중복 체크",
+            description = "회원가입 시 로그인 ID의 중복 여부를 실시간으로 확인합니다.\n\n" +
+                    "- 사용자가 아이디 입력 완료 시 호출\n" +
+                    "- 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선\n" +
+                    "- 최종 회원가입 시에도 서버에서 재검증",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공 (available: true/false)"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청")
+            })
+    ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
+            String value
+    );
+
+    @Operation(
+            summary = "이메일 중복 체크",
+            description = "회원가입 시 이메일의 중복 여부를 실시간으로 확인합니다.\n\n" +
+                    "- 이메일 입력 완료 시 호출\n" +
+                    "- 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선\n" +
+                    "- 최종 회원가입 시에도 서버에서 재검증",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공 (available: true/false)"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청")
+            })
+    ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
+            String value
+    );
+
+    @Operation(
+            summary = "닉네임 중복 체크",
+            description = "회원가입 시 닉네임의 중복 여부를 실시간으로 확인합니다.\n\n" +
+                    "- 닉네임 입력 완료 시 호출\n" +
+                    "- 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선\n" +
+                    "- 최종 회원가입 시에도 서버에서 재검증",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공 (available: true/false)"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청")
+            })
+    ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
+            String value
+    );
+
+    @Operation(
+            summary = "전화번호 중복 체크",
+            description = "회원가입 시 전화번호의 중복 여부를 실시간으로 확인합니다.\n\n" +
+                    "- 전화번호 입력 완료 시 호출\n" +
+                    "- 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선\n" +
+                    "- 최종 회원가입 시에도 서버에서 재검증",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공 (available: true/false)"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청")
+            })
+    ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
+            String value
     );
 
     @Operation(

@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.auth.dto.request.*;
+import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthFieldAvailabilityResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthLoginResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.DeviceInfoResponse;
 import org.example.ootoutfitoftoday.domain.auth.exception.AuthSuccessCode;
 import org.example.ootoutfitoftoday.domain.auth.service.command.AuthCommandService;
 import org.example.ootoutfitoftoday.domain.auth.service.query.AuthQueryService;
+import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ public class AuthControllerImpl implements AuthController {
 
     private final AuthCommandService authCommandService;
     private final AuthQueryService authQueryService;
+    private final UserQueryService userQueryService;
 
     @Override
     @PostMapping("/signup")
@@ -31,6 +34,51 @@ public class AuthControllerImpl implements AuthController {
         authCommandService.signup(request);
 
         return Response.success(null, AuthSuccessCode.USER_SIGNUP);
+    }
+
+    // 실시간 중복 체크 API
+    @Override
+    @GetMapping("/check/login-id")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
+            @RequestParam String value
+    ) {
+        boolean available = !userQueryService.existsByLoginId(value);
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
+    }
+
+    @Override
+    @GetMapping("/check/email")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
+            @RequestParam String value
+    ) {
+        boolean available = !userQueryService.existsByEmail(value);
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
+    }
+
+    @Override
+    @GetMapping("/check/nickname")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
+            @RequestParam String value
+    ) {
+        boolean available = !userQueryService.existsByNickname(value);
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
+    }
+
+    @Override
+    @GetMapping("/check/phone-number")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
+            @RequestParam String value
+    ) {
+        boolean available = !userQueryService.existsByPhoneNumber(value);
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
     }
 
     @Override

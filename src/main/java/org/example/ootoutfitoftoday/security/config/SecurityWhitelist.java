@@ -97,14 +97,15 @@ public final class SecurityWhitelist {
     /**
      * 조회용 공개 API(GET)
      * - 로그인 없이도 볼 수 있는 공개 정보
-     * - 옷장, 판매 게시글, 카테고리, 기부센터 등
+     * - 옷장, 판매 게시글, 카테고리, 기부센터、 실시간 중복 체크(회원가입 전 필드 검증용 API) 등
      */
     public static final String[] PUBLIC_GET_PATHS = {
             "/v1/closets/public/**",
             "/v1/sale-posts/public",
             "/v1/sale-posts/{salePostId}",
             "/v1/categories",
-            "/v1/donation-centers/search"
+            "/v1/donation-centers/search",
+            "/v1/auth/check/**"
     };
 
     // =================================================================

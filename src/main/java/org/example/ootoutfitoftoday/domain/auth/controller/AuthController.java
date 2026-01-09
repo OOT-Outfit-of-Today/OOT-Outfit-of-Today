@@ -42,7 +42,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             })
     ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
-            String value
+            AuthLoginIdCheckRequest request
     );
 
     @Operation(
@@ -56,7 +56,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             })
     ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
-            String value
+            AuthEmailCheckRequest request
     );
 
     @Operation(
@@ -70,7 +70,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             })
     ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
-            String value
+            AuthNicknameCheckRequest request
     );
 
     @Operation(
@@ -84,7 +84,7 @@ public interface AuthController {
                     @ApiResponse(responseCode = "400", description = "잘못된 요청")
             })
     ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
-            String value
+            AuthPhoneNumberCheckRequest request
     );
 
     @Operation(

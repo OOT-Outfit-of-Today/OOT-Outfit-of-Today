@@ -40,9 +40,9 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @GetMapping("/check/login-id")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
-            @RequestParam String value
+            @Valid @ModelAttribute AuthLoginIdCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByLoginId(value);
+        boolean available = !userQueryService.existsByLoginId(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
@@ -51,9 +51,9 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @GetMapping("/check/email")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
-            @RequestParam String value
+            @Valid @ModelAttribute AuthEmailCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByEmail(value);
+        boolean available = !userQueryService.existsByEmail(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
@@ -62,9 +62,9 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @GetMapping("/check/nickname")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
-            @RequestParam String value
+            @Valid @ModelAttribute AuthNicknameCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByNickname(value);
+        boolean available = !userQueryService.existsByNickname(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
@@ -73,9 +73,9 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @GetMapping("/check/phone-number")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
-            @RequestParam String value
+            @Valid @ModelAttribute AuthPhoneNumberCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByPhoneNumber(value);
+        boolean available = !userQueryService.existsByPhoneNumber(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);

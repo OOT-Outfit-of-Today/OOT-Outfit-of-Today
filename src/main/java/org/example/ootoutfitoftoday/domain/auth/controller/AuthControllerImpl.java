@@ -45,7 +45,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
             @Valid @RequestBody AuthLoginIdCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByLoginId(request.getValue());
+        boolean available = !userQueryService.existsByLoginId(request.getLoginId());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
@@ -56,7 +56,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
             @Valid @RequestBody AuthEmailCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByEmail(request.getValue());
+        boolean available = !userQueryService.existsByEmail(request.getEmail());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
@@ -67,7 +67,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
             @Valid @RequestBody AuthNicknameCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByNickname(request.getValue());
+        boolean available = !userQueryService.existsByNickname(request.getNickname());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
@@ -78,7 +78,7 @@ public class AuthControllerImpl implements AuthController {
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
             @Valid @RequestBody AuthPhoneNumberCheckRequest request
     ) {
-        boolean available = !userQueryService.existsByPhoneNumber(request.getValue());
+        boolean available = !userQueryService.existsByPhoneNumber(request.getPhoneNumber());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
 
         return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);

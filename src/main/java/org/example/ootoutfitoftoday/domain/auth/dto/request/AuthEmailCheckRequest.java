@@ -16,5 +16,5 @@ public class AuthEmailCheckRequest {
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     @Size(max = 50, message = "이메일은 최대 50자까지 가능합니다.")
     @Pattern(regexp = ValidationRegex.EMAIL_REGEX, message = "이메일 형식이 올바르지 않습니다.")
-    private String value;
+    private String email;
 }

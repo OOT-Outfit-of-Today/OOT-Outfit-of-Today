@@ -38,9 +38,9 @@ public class AuthControllerImpl implements AuthController {
 
     // 실시간 중복 체크 API
     @Override
-    @GetMapping("/check/login-id")
+    @PostMapping("/check/login-id")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
-            @Valid @ModelAttribute AuthLoginIdCheckRequest request
+            @Valid @RequestBody AuthLoginIdCheckRequest request
     ) {
         boolean available = !userQueryService.existsByLoginId(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
@@ -49,9 +49,9 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    @GetMapping("/check/email")
+    @PostMapping("/check/email")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
-            @Valid @ModelAttribute AuthEmailCheckRequest request
+            @Valid @RequestBody AuthEmailCheckRequest request
     ) {
         boolean available = !userQueryService.existsByEmail(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
@@ -60,9 +60,9 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    @GetMapping("/check/nickname")
+    @PostMapping("/check/nickname")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
-            @Valid @ModelAttribute AuthNicknameCheckRequest request
+            @Valid @RequestBody AuthNicknameCheckRequest request
     ) {
         boolean available = !userQueryService.existsByNickname(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
@@ -71,9 +71,9 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    @GetMapping("/check/phone-number")
+    @PostMapping("/check/phone-number")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
-            @Valid @ModelAttribute AuthPhoneNumberCheckRequest request
+            @Valid @RequestBody AuthPhoneNumberCheckRequest request
     ) {
         boolean available = !userQueryService.existsByPhoneNumber(request.getValue());
         AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);

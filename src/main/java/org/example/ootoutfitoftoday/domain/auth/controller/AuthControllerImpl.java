@@ -37,6 +37,9 @@ public class AuthControllerImpl implements AuthController {
     }
 
     // 실시간 중복 체크 API
+    // GET -> POST 변경, @ModelAttribute -> @RequestBody 변경
+    // 이유: @ModelAttribute는 WebDataBinder의 자동 trim으로 인해 전후 공백 검증이 우회됨
+    //      민감정보(로그인ID, 이메일, 전화번호) 보호를 위해 POST + Body 방식 사용
     @Override
     @PostMapping("/check/login-id")
     public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(

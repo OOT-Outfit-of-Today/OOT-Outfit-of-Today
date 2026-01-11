@@ -39,8 +39,7 @@ public interface AuthController {
                     - 사용자가 아이디 입력 완료 시 호출
                     - 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선
                     - 최종 회원가입 시에도 서버에서 재검증
-                    
-                    요청 파라미터: `?value=xxx`(Query Parameter)
+                    - POST 방식으로 민감정보 보호 및 정확한 유효성 검증 수행
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공(available: true/false)"),
@@ -58,8 +57,7 @@ public interface AuthController {
                     - 이메일 입력 완료 시 호출
                     - 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선
                     - 최종 회원가입 시에도 서버에서 재검증
-                    
-                    요청 파라미터: `?value=xxx`(Query Parameter)
+                    - POST 방식으로 민감정보 보호 및 정확한 유효성 검증 수행
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공(available: true/false)"),
@@ -77,8 +75,7 @@ public interface AuthController {
                     - 닉네임 입력 완료 시 호출
                     - 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선
                     - 최종 회원가입 시에도 서버에서 재검증
-                    
-                    요청 파라미터: `?value=xxx`(Query Parameter)
+                    - POST 방식으로 일관성 유지 및 정확한 유효성 검증 수행
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공(available: true/false)"),
@@ -96,8 +93,7 @@ public interface AuthController {
                     - 전화번호 입력 완료 시 호출
                     - 즉각적인 중복 여부 피드백 제공으로 사용자 경험 개선
                     - 최종 회원가입 시에도 서버에서 재검증
-                    
-                    요청 파라미터: `?value=xxx`(Query Parameter)
+                    - POST 방식으로 민감한 개인정보 보호 및 정확한 유효성 검증 수행
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공(available: true/false)"),

@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.example.ootoutfitoftoday.common.constant.ValidationRegex;
 
 @Getter
-@Setter
 public class AuthEmailCheckRequest {
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")

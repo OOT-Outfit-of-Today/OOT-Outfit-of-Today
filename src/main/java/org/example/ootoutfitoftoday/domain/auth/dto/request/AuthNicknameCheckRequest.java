@@ -8,7 +8,6 @@ import lombok.Setter;
 import org.example.ootoutfitoftoday.common.constant.ValidationRegex;
 
 @Getter
-@Setter
 public class AuthNicknameCheckRequest {
 
     @NotBlank(message = "닉네임은 필수 입력값입니다.")

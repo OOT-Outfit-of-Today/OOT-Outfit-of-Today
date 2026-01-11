@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.example.ootoutfitoftoday.common.constant.ValidationRegex;
 
 @Getter
-@Setter
 public class AuthPhoneNumberCheckRequest {
 
     @NotBlank(message = "휴대폰 번호는 필수 입력값입니다.")

@@ -112,20 +112,21 @@ public class GlobalExceptionHandler {
 
     // [Bean Validation 실패] @Valid 검증 실패
     // 담당: @NotNull 등 어노테이션 검증 실패, 필드가 없거나, 범위를 벗어나거나, 형식이 맞지 않을 때
-    // 모든 필드 에러를 Map으로 반환하여 한 번에 모든 문제를 파악 가능
+    // 수정: 동일 필드의 모든 검증 에러를 List로 누적하여 일관된 응답 보장
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Response<Map<String, List<String>>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
         // 수정: Map<String, String> → Map<String, List<String>>으로 변경
-        // 이유: Bean Validation 순서가 비결정적이므로, put() 덮어쓰기로 인해
-        //       같은 입력에 대해 응답이 달라지는 문제 해결
+        // 이유: 동일 필드에 여러 검증 에러 발생 시 put() 덮어쓰기로 일부만 응답되는 문제 해결
+        //       Bean Validation 순서가 비결정적이므로 모든 에러를 누적하여 일관된 응답 보장
         Map<String, List<String>> errorMessages = new HashMap<>();
 
         // FieldError와 ObjectError(글로벌 에러) 모두 처리
         // FieldError: 개별 필드 검증 실패(예: @NotNull, @Size)
         // 수정: computeIfAbsent로 동일 필드의 모든 에러를 List에 누적
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errorMessages.computeIfAbsent(error.getField(), k -> new ArrayList<>()).add(error.getDefaultMessage());
+            errorMessages.computeIfAbsent(error.getField(), k -> new ArrayList<>())
+                    .add(error.getDefaultMessage());
             log.warn("Validation 실패(필드) - 필드: {}, 입력값: {}, 메시지: {}",
                     error.getField(),
                     error.getRejectedValue(),
@@ -136,7 +137,8 @@ public class GlobalExceptionHandler {
         // 특정 필드에 속하지 않는 글로벌 에러 처리
         // 수정: 글로벌 에러도 List에 누적
         ex.getBindingResult().getGlobalErrors().forEach(error -> {
-            errorMessages.computeIfAbsent(error.getObjectName(), k -> new ArrayList<>()).add(error.getDefaultMessage());
+            errorMessages.computeIfAbsent(error.getObjectName(), k -> new ArrayList<>())
+                    .add(error.getDefaultMessage());
             log.warn("Validation 실패(글로벌) - 객체: {}, 메시지: {}",
                     error.getObjectName(),
                     error.getDefaultMessage());

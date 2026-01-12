@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,9 +33,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
         log.error("알 수 없는 서버 오류 발생", ex);
 
+        Response<Void> errorResponse = Response.error(null, CommonErrorCode.UNEXPECTED_SERVER_ERROR);
         return ResponseEntity
                 .status(CommonErrorCode.UNEXPECTED_SERVER_ERROR.getHttpStatus())
-                .body(Response.error(null, CommonErrorCode.UNEXPECTED_SERVER_ERROR));
+                .body(errorResponse);
     }
 
     // [비즈니스 예외] 비즈니스 로직(Service)에서 의도적으로 던진 예외
@@ -45,9 +48,10 @@ public class GlobalExceptionHandler {
         // additionalData가 있으면 포함, 없으면 null
         Object data = ex.getAdditionalData();
 
+        Response<?> errorResponse = Response.error(data, ex.getErrorCode());
         return ResponseEntity
                 .status(ex.getErrorCode().getHttpStatus())
-                .body(Response.error(data, ex.getErrorCode()));
+                .body(errorResponse);
     }
 
     // [JSON 파싱 실패] Controller 진입 전 JSON → DTO 변환 실패
@@ -100,22 +104,29 @@ public class GlobalExceptionHandler {
             errorMessage.put("body", detailMessage);
         }
 
+        Response<Map<String, String>> errorResponse = Response.error(errorMessage, CommonErrorCode.INVALID_REQUEST_BODY);
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_REQUEST_BODY.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.INVALID_REQUEST_BODY));
+                .body(errorResponse);
     }
 
     // [Bean Validation 실패] @Valid 검증 실패
     // 담당: @NotNull 등 어노테이션 검증 실패, 필드가 없거나, 범위를 벗어나거나, 형식이 맞지 않을 때
-    // 모든 필드 에러를 Map으로 반환하여 한 번에 모든 문제를 파악 가능
+    // 수정: 동일 필드의 모든 검증 에러를 List로 누적하여 일관된 응답 보장
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Response<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Response<Map<String, List<String>>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
-        Map<String, String> errorMessage = new HashMap<>();
+        // 수정: Map<String, String> → Map<String, List<String>>으로 변경
+        // 이유: 동일 필드에 여러 검증 에러 발생 시 put() 덮어쓰기로 일부만 응답되는 문제 해결
+        //       Bean Validation 순서가 비결정적이므로 모든 에러를 누적하여 일관된 응답 보장
+        Map<String, List<String>> errorMessages = new HashMap<>();
+
         // FieldError와 ObjectError(글로벌 에러) 모두 처리
         // FieldError: 개별 필드 검증 실패(예: @NotNull, @Size)
+        // 수정: computeIfAbsent로 동일 필드의 모든 에러를 List에 누적
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errorMessage.put(error.getField(), error.getDefaultMessage());
+            errorMessages.computeIfAbsent(error.getField(), k -> new ArrayList<>())
+                    .add(error.getDefaultMessage());
             log.warn("Validation 실패(필드) - 필드: {}, 입력값: {}, 메시지: {}",
                     error.getField(),
                     error.getRejectedValue(),
@@ -124,16 +135,19 @@ public class GlobalExceptionHandler {
 
         // ObjectError: 클래스 레벨 검증 실패(예: 두 필드 비교, 커스텀 검증)
         // 특정 필드에 속하지 않는 글로벌 에러 처리
+        // 수정: 글로벌 에러도 List에 누적
         ex.getBindingResult().getGlobalErrors().forEach(error -> {
-            errorMessage.put(error.getObjectName(), error.getDefaultMessage());
+            errorMessages.computeIfAbsent(error.getObjectName(), k -> new ArrayList<>())
+                    .add(error.getDefaultMessage());
             log.warn("Validation 실패(글로벌) - 객체: {}, 메시지: {}",
                     error.getObjectName(),
                     error.getDefaultMessage());
         });
 
+        Response<Map<String, List<String>>> errorResponse = Response.error(errorMessages, CommonErrorCode.VALIDATION_ERROR);
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.VALIDATION_ERROR));
+                .body(errorResponse);
     }
 
     // [경로 변수 타입 오류] URL 경로의 파라미터 타입이 맞지 않을 때
@@ -149,9 +163,10 @@ public class GlobalExceptionHandler {
         String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다.", ex.getName());
         errorMessage.put(ex.getName(), detailMessage);
 
+        Response<Map<String, String>> errorResponse = Response.error(errorMessage, CommonErrorCode.INVALID_INPUT_VALUE);
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.INVALID_INPUT_VALUE));
+                .body(errorResponse);
     }
 
     // [필수 요청 파라미터 누락] @RequestParam(required=true) 파라미터가 없을 때
@@ -166,9 +181,10 @@ public class GlobalExceptionHandler {
         String detailMessage = String.format("%s 파라미터는 필수입니다.", ex.getParameterName());
         errorMessage.put(ex.getParameterName(), detailMessage);
 
+        Response<Map<String, String>> errorResponse = Response.error(errorMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER);
         return ResponseEntity
                 .status(CommonErrorCode.MISSING_REQUEST_PARAMETER.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER));
+                .body(errorResponse);
     }
 
     // [HTTP 메서드 불일치] 지원하지 않는 HTTP 메서드로 요청할 때
@@ -181,16 +197,18 @@ public class GlobalExceptionHandler {
 
         String detailMessage = String.format("%s 메서드는 지원하지 않습니다.", ex.getMethod());
 
+        Response<String> errorResponse = Response.error(detailMessage, CommonErrorCode.METHOD_NOT_ALLOWED);
         return ResponseEntity
                 .status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())
-                .body(Response.error(detailMessage, CommonErrorCode.METHOD_NOT_ALLOWED));
+                .body(errorResponse);
     }
 
     // 내부 헬퍼 메서드: ErrorCode를 Response로 변환
     private ResponseEntity<Response<Void>> handleExceptionInternal(ErrorCode errorCode) {
 
+        Response<Void> errorResponse = Response.error(null, errorCode);
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
-                .body(Response.error(null, errorCode));
+                .body(errorResponse);
     }
 }

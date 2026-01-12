@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -109,13 +111,18 @@ public class GlobalExceptionHandler {
     // 담당: @NotNull 등 어노테이션 검증 실패, 필드가 없거나, 범위를 벗어나거나, 형식이 맞지 않을 때
     // 모든 필드 에러를 Map으로 반환하여 한 번에 모든 문제를 파악 가능
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Response<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Response<Map<String, List<String>>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
-        Map<String, String> errorMessage = new HashMap<>();
+        // 수정: Map<String, String> → Map<String, List<String>>으로 변경
+        // 이유: Bean Validation 순서가 비결정적이므로, put() 덮어쓰기로 인해
+        //       같은 입력에 대해 응답이 달라지는 문제 해결
+        Map<String, List<String>> errorMessages = new HashMap<>();
+
         // FieldError와 ObjectError(글로벌 에러) 모두 처리
         // FieldError: 개별 필드 검증 실패(예: @NotNull, @Size)
+        // 수정: computeIfAbsent로 동일 필드의 모든 에러를 List에 누적
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errorMessage.put(error.getField(), error.getDefaultMessage());
+            errorMessages.computeIfAbsent(error.getField(), k -> new ArrayList<>()).add(error.getDefaultMessage());
             log.warn("Validation 실패(필드) - 필드: {}, 입력값: {}, 메시지: {}",
                     error.getField(),
                     error.getRejectedValue(),
@@ -124,8 +131,9 @@ public class GlobalExceptionHandler {
 
         // ObjectError: 클래스 레벨 검증 실패(예: 두 필드 비교, 커스텀 검증)
         // 특정 필드에 속하지 않는 글로벌 에러 처리
+        // 수정: 글로벌 에러도 List에 누적
         ex.getBindingResult().getGlobalErrors().forEach(error -> {
-            errorMessage.put(error.getObjectName(), error.getDefaultMessage());
+            errorMessages.computeIfAbsent(error.getObjectName(), k -> new ArrayList<>()).add(error.getDefaultMessage());
             log.warn("Validation 실패(글로벌) - 객체: {}, 메시지: {}",
                     error.getObjectName(),
                     error.getDefaultMessage());
@@ -133,7 +141,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.VALIDATION_ERROR));
+                .body(Response.error(errorMessages, CommonErrorCode.VALIDATION_ERROR));
     }
 
     // [경로 변수 타입 오류] URL 경로의 파라미터 타입이 맞지 않을 때

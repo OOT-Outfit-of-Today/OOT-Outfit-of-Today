@@ -61,5 +61,5 @@ public final class ValidationRegex {
      * - 010, 011, 016, 017, 018, 019로 시작
      * - 총 11자리(010XXXXXXXX 형태)
      */
-    public static final String PHONE_NUMBER_REGEX = "^01[016789]\\d{8}$";
+    public static final String PHONE_NUMBER_REGEX = "^01[016789]\\d+$";
 }

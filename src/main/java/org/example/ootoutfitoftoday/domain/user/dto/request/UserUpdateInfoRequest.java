@@ -14,7 +14,7 @@ public class UserUpdateInfoRequest {
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     @Size(max = 50, message = "이메일은 최대 50자까지 가능합니다.")
-    @Pattern(regexp = ValidationRegex.EMAIL_REGEX, message = "이메일 형식이 올바르지 않습니다.")
+    @Pattern(regexp = ValidationRegex.EMAIL_REGEX, message = "유효한 이메일 주소가 아닙니다.")
     private String email;
 
     @Size(min = 2, max = 10, message = "닉네임은 2~10자 사이여야 합니다.")

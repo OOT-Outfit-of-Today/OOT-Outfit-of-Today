@@ -13,7 +13,6 @@ import org.example.ootoutfitoftoday.domain.salepost.entity.QSalePost;
 import org.example.ootoutfitoftoday.domain.user.dto.UserDuplicateCheckResult;
 import org.example.ootoutfitoftoday.domain.user.dto.UserDuplicateFieldsProjection;
 import org.example.ootoutfitoftoday.domain.user.entity.QUser;
-import org.example.ootoutfitoftoday.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.*;

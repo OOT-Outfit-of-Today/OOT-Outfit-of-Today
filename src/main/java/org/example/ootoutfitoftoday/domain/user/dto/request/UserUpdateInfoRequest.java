@@ -1,6 +1,7 @@
 package org.example.ootoutfitoftoday.domain.user.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class UserUpdateInfoRequest {
             message = "비밀번호는 대소문자 불문 영문, 숫자, 특수문자를 모두 포함해야 하고 공백은 불가합니다.")
     private String password;
 
-    @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "전화번호 형식은 01012345678 형태여야 합니다.")
+    @Size(min = 11, max = 11, message = "휴대폰 번호는 11자리여야 합니다.")
+    @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "휴대폰 번호는 숫자만 입력해야 합니다.")
     private String phoneNumber;
 }

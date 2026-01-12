@@ -175,11 +175,11 @@ public class SecurityConfig {
                         // 헬스체크, 메트릭 수집은 인증 불필요(보안그룹/방화벽으로 제한)
                         .requestMatchers(SecurityWhitelist.ACTUATOR_PATHS).permitAll()
 
-                        // 공개 API: 인증(회원가입, 로그인, 토큰 갱신)
+                        // 공개 API: 인증(회원가입, 로그인, 토큰 갱신, 실시간 중복 체크)
                         // POST 메서드로만 접근 가능
                         .requestMatchers(HttpMethod.POST, SecurityWhitelist.AUTH_PUBLIC_POST_PATHS).permitAll()
 
-                        // 공개 API: 조회(옷장, 판매 게시글, 카테고리, 기부센터, 실시간 중복 체크)
+                        // 공개 API: 조회(옷장, 판매 게시글, 카테고리, 기부센터)
                         // 로그인 없이도 볼 수 있는 공개 정보
                         .requestMatchers(HttpMethod.GET, SecurityWhitelist.PUBLIC_GET_PATHS).permitAll()
 

@@ -33,9 +33,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
         log.error("알 수 없는 서버 오류 발생", ex);
 
+        Response<Void> errorResponse = Response.error(null, CommonErrorCode.UNEXPECTED_SERVER_ERROR);
         return ResponseEntity
                 .status(CommonErrorCode.UNEXPECTED_SERVER_ERROR.getHttpStatus())
-                .body(Response.error(null, CommonErrorCode.UNEXPECTED_SERVER_ERROR));
+                .body(errorResponse);
     }
 
     // [비즈니스 예외] 비즈니스 로직(Service)에서 의도적으로 던진 예외
@@ -47,9 +48,10 @@ public class GlobalExceptionHandler {
         // additionalData가 있으면 포함, 없으면 null
         Object data = ex.getAdditionalData();
 
+        Response<?> errorResponse = Response.error(data, ex.getErrorCode());
         return ResponseEntity
                 .status(ex.getErrorCode().getHttpStatus())
-                .body(Response.error(data, ex.getErrorCode()));
+                .body(errorResponse);
     }
 
     // [JSON 파싱 실패] Controller 진입 전 JSON → DTO 변환 실패
@@ -102,9 +104,10 @@ public class GlobalExceptionHandler {
             errorMessage.put("body", detailMessage);
         }
 
+        Response<Map<String, String>> errorResponse = Response.error(errorMessage, CommonErrorCode.INVALID_REQUEST_BODY);
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_REQUEST_BODY.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.INVALID_REQUEST_BODY));
+                .body(errorResponse);
     }
 
     // [Bean Validation 실패] @Valid 검증 실패
@@ -139,9 +142,10 @@ public class GlobalExceptionHandler {
                     error.getDefaultMessage());
         });
 
+        Response<Map<String, List<String>>> errorResponse = Response.error(errorMessages, CommonErrorCode.VALIDATION_ERROR);
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getHttpStatus())
-                .body(Response.error(errorMessages, CommonErrorCode.VALIDATION_ERROR));
+                .body(errorResponse);
     }
 
     // [경로 변수 타입 오류] URL 경로의 파라미터 타입이 맞지 않을 때
@@ -157,9 +161,10 @@ public class GlobalExceptionHandler {
         String detailMessage = String.format("%s 파라미터의 값 형식이 올바르지 않습니다.", ex.getName());
         errorMessage.put(ex.getName(), detailMessage);
 
+        Response<Map<String, String>> errorResponse = Response.error(errorMessage, CommonErrorCode.INVALID_INPUT_VALUE);
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.INVALID_INPUT_VALUE));
+                .body(errorResponse);
     }
 
     // [필수 요청 파라미터 누락] @RequestParam(required=true) 파라미터가 없을 때
@@ -174,9 +179,10 @@ public class GlobalExceptionHandler {
         String detailMessage = String.format("%s 파라미터는 필수입니다.", ex.getParameterName());
         errorMessage.put(ex.getParameterName(), detailMessage);
 
+        Response<Map<String, String>> errorResponse = Response.error(errorMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER);
         return ResponseEntity
                 .status(CommonErrorCode.MISSING_REQUEST_PARAMETER.getHttpStatus())
-                .body(Response.error(errorMessage, CommonErrorCode.MISSING_REQUEST_PARAMETER));
+                .body(errorResponse);
     }
 
     // [HTTP 메서드 불일치] 지원하지 않는 HTTP 메서드로 요청할 때
@@ -189,16 +195,18 @@ public class GlobalExceptionHandler {
 
         String detailMessage = String.format("%s 메서드는 지원하지 않습니다.", ex.getMethod());
 
+        Response<String> errorResponse = Response.error(detailMessage, CommonErrorCode.METHOD_NOT_ALLOWED);
         return ResponseEntity
                 .status(CommonErrorCode.METHOD_NOT_ALLOWED.getHttpStatus())
-                .body(Response.error(detailMessage, CommonErrorCode.METHOD_NOT_ALLOWED));
+                .body(errorResponse);
     }
 
     // 내부 헬퍼 메서드: ErrorCode를 Response로 변환
     private ResponseEntity<Response<Void>> handleExceptionInternal(ErrorCode errorCode) {
 
+        Response<Void> errorResponse = Response.error(null, errorCode);
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
-                .body(Response.error(null, errorCode));
+                .body(errorResponse);
     }
 }

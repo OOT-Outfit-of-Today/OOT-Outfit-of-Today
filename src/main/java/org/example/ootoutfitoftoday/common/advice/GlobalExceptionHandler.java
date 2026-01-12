@@ -39,10 +39,15 @@ public class GlobalExceptionHandler {
     // [비즈니스 예외] 비즈니스 로직(Service)에서 의도적으로 던진 예외
     // 담당: 존재하지 않는 리소스, 권한 없음, 중복 데이터, 비즈니스 규칙 위반
     @ExceptionHandler(GlobalException.class)
-    public ResponseEntity<Response<Void>> handleGlobalException(GlobalException ex) {
+    public ResponseEntity<Response<?>> handleGlobalException(GlobalException ex) {
         log.warn("비즈니스 오류 발생: {}", ex.getMessage());
 
-        return handleExceptionInternal(ex.getErrorCode());
+        // additionalData가 있으면 포함, 없으면 null
+        Object data = ex.getAdditionalData();
+
+        return ResponseEntity
+                .status(ex.getErrorCode().getHttpStatus())
+                .body(Response.error(data, ex.getErrorCode()));
     }
 
     // [JSON 파싱 실패] Controller 진입 전 JSON → DTO 변환 실패

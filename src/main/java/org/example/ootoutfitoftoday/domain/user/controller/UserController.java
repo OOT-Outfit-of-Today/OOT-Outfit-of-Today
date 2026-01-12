@@ -29,9 +29,12 @@ public interface UserController {
 
     @Operation(
             summary = "회원정보 수정 전 비밀번호 검증",
-            description = "회원정보 수정 전 비밀번호를 검증합니다.\n\n" +
-                    "- 일반 로그인 사용자: 비밀번호 검증 필수\n" +
-                    "- 소셜 로그인 사용자: 비밀번호 검증 통과",
+            description = """
+                    회원정보 수정 전 비밀번호를 검증합니다.
+                    
+                    - 일반 로그인 사용자: 비밀번호 검증 필수
+                    - 소셜 로그인 사용자: 비밀번호 검증 통과
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패"),
@@ -81,10 +84,10 @@ public interface UserController {
     );
 
     @Operation(
-            summary = "이건 추후에 테스트 후 내용 작성하길 바랍니다!",
-            description = "test",
+            summary = "회원 위치 수정",
+            description = "회원의 위치(주소지, 위도, 경도)를 수정합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "성공")
+                    @ApiResponse(responseCode = "200", description = "성공")    // TODO: 추가할 것
             })
     ResponseEntity<Response<Void>> updateUserTradeLocation(
             UserUpdateTradeLocationRequest request,

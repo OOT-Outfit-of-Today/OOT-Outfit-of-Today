@@ -12,13 +12,13 @@ public class AuthSignupRequest {
 
     @NotBlank(message = "아이디는 필수 입력값입니다.")
     @Size(min = 4, max = 15, message = "아이디는 4~15자 사이여야 합니다.")
-    @Pattern(regexp = ValidationRegex.ID_REGEX, message = "아이디는 영문, 숫자, 밑줄(_)만 사용할 수 있고 공백은 불가합니다.")
+    @Pattern(regexp = ValidationRegex.ID_REGEX, message = "아이디는 영문, 숫자, 언더바(_)만 사용할 수 있고 공백은 불가합니다.")
     private String loginId;
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     @Size(max = 50, message = "이메일은 최대 50자까지 가능합니다.")
-    @Pattern(regexp = ValidationRegex.EMAIL_REGEX, message = "이메일 형식이 올바르지 않습니다.")
+    @Pattern(regexp = ValidationRegex.EMAIL_REGEX, message = "유효한 이메일 주소가 아닙니다.")
     private String email;
 
     @NotBlank(message = "닉네임은 필수 입력값입니다.")
@@ -37,7 +37,8 @@ public class AuthSignupRequest {
             message = "비밀번호는 대소문자 불문 영문, 숫자, 특수문자를 모두 포함해야 하고 공백은 불가합니다.")
     private String password;
 
-    @NotBlank(message = "전화번호는 필수 입력값입니다.")
-    @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "전화번호 형식은 01012345678 형태여야 합니다.")
+    @NotBlank(message = "휴대폰 번호는 필수 입력값입니다.")
+    @Size(min = 11, max = 11, message = "휴대폰 번호는 11자리여야 합니다.")
+    @Pattern(regexp = ValidationRegex.PHONE_NUMBER_REGEX, message = "휴대폰 번호는 숫자만 입력해야 합니다.")
     private String phoneNumber;
 }

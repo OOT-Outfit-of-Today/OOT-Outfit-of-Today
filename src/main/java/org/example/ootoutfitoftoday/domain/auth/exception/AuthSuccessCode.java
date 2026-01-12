@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum AuthSuccessCode implements SuccessCode {
 
+    FIELD_AVAILABILITY_CHECK("FIELD_AVAILABILITY_CHECK", HttpStatus.OK, "사용 가능 여부 확인이 완료되었습니다."),
     USER_SIGNUP("USER_SIGNUP", HttpStatus.CREATED, "회원가입이 완료되었습니다."),
     USER_LOGIN("USER_LOGIN", HttpStatus.OK, "로그인이 완료되었습니다."),
     USER_WITHDRAW("USER_WITHDRAW", HttpStatus.OK, "회원탈퇴가 완료되었습니다."),

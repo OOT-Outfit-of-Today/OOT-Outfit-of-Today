@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.ootoutfitoftoday.common.response.Response;
 import org.example.ootoutfitoftoday.domain.auth.dto.AuthUser;
 import org.example.ootoutfitoftoday.domain.auth.dto.request.*;
+import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthFieldAvailabilityResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.AuthLoginResponse;
 import org.example.ootoutfitoftoday.domain.auth.dto.response.DeviceInfoResponse;
 import org.example.ootoutfitoftoday.domain.auth.exception.AuthSuccessCode;
 import org.example.ootoutfitoftoday.domain.auth.service.command.AuthCommandService;
 import org.example.ootoutfitoftoday.domain.auth.service.query.AuthQueryService;
+import org.example.ootoutfitoftoday.domain.user.service.query.UserQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ public class AuthControllerImpl implements AuthController {
 
     private final AuthCommandService authCommandService;
     private final AuthQueryService authQueryService;
+    private final UserQueryService userQueryService;
 
     @Override
     @PostMapping("/signup")
@@ -31,6 +34,54 @@ public class AuthControllerImpl implements AuthController {
         authCommandService.signup(request);
 
         return Response.success(null, AuthSuccessCode.USER_SIGNUP);
+    }
+
+    // 실시간 중복 체크 API
+    // GET -> POST 변경, @ModelAttribute -> @RequestBody 변경
+    // 이유: @ModelAttribute는 WebDataBinder의 자동 trim으로 인해 전후 공백 검증이 우회됨
+    //      민감정보(로그인ID, 이메일, 전화번호) 보호를 위해 POST + Body 방식 사용
+    @Override
+    @PostMapping("/check/login-id")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkLoginId(
+            @Valid @RequestBody AuthLoginIdCheckRequest request
+    ) {
+        boolean available = !userQueryService.existsByLoginId(request.getLoginId());
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
+    }
+
+    @Override
+    @PostMapping("/check/email")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkEmail(
+            @Valid @RequestBody AuthEmailCheckRequest request
+    ) {
+        boolean available = !userQueryService.existsByEmail(request.getEmail());
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
+    }
+
+    @Override
+    @PostMapping("/check/nickname")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkNickname(
+            @Valid @RequestBody AuthNicknameCheckRequest request
+    ) {
+        boolean available = !userQueryService.existsByNickname(request.getNickname());
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
+    }
+
+    @Override
+    @PostMapping("/check/phone-number")
+    public ResponseEntity<Response<AuthFieldAvailabilityResponse>> checkPhoneNumber(
+            @Valid @RequestBody AuthPhoneNumberCheckRequest request
+    ) {
+        boolean available = !userQueryService.existsByPhoneNumber(request.getPhoneNumber());
+        AuthFieldAvailabilityResponse response = new AuthFieldAvailabilityResponse(available);
+
+        return Response.success(response, AuthSuccessCode.FIELD_AVAILABILITY_CHECK);
     }
 
     @Override

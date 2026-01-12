@@ -95,6 +95,23 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * 보안 정책의 단일 진실 공급원(Single Source of Truth)
+     * 설계 원칙:
+     * - 모든 인가(Authorization) 정책은 이곳에서만 관리
+     * - JwtAuthenticationFilter는 JWT 검증만 담당(정책 결정 X)
+     * - SecurityWhitelist 클래스에서 경로 상수를 중앙 관리
+     *   - 경로 변경 시 SecurityWhitelist만 수정하면 됨
+     *   - DRY 원칙 준수로 유지보수성 향상
+     * 구조:
+     * 1. 인프라 엔드포인트(Swagger, Actuator 등)
+     * 2. 공개 API(회원가입, 로그인 등)
+     * 3. OAuth2 엔드포인트
+     * 4. WebSocket 엔드포인트
+     * 5. 관리자 전용 API
+     * 6. 내부 API(서버 간 통신)
+     * 7. 나머지 모든 API(인증 필수)
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -150,37 +167,40 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/v3/api-docs.yaml",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
+                        // 인프라: 문서화 도구(Swagger)
+                        // API 문서는 누구나 접근 가능
+                        .requestMatchers(SecurityWhitelist.SWAGGER_PATHS).permitAll()
 
-                        .requestMatchers(HttpMethod.POST,
-                                "/v1/auth/signup",
-                                "/v1/auth/login",
-                                "/v1/auth/refresh",
-                                "/v1/auth/oauth2/token/exchange").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/v1/closets/public/**",
-                                "/v1/sale-posts/public",
-                                "/v1/sale-posts/{salePostId}",
-                                "/v1/categories",
-                                "/v1/donation-centers/search").permitAll()
+                        // 인프라: 모니터링 엔드포인트(Actuator)
+                        // 헬스체크, 메트릭 수집은 인증 불필요(보안그룹/방화벽으로 제한)
+                        .requestMatchers(SecurityWhitelist.ACTUATOR_PATHS).permitAll()
 
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        // 공개 API: 인증(회원가입, 로그인, 토큰 갱신, 실시간 중복 체크)
+                        // POST 메서드로만 접근 가능
+                        .requestMatchers(HttpMethod.POST, SecurityWhitelist.AUTH_PUBLIC_POST_PATHS).permitAll()
 
-                        .requestMatchers("/ws/**").permitAll()
+                        // 공개 API: 조회(옷장, 판매 게시글, 카테고리, 기부센터)
+                        // 로그인 없이도 볼 수 있는 공개 정보
+                        .requestMatchers(HttpMethod.GET, SecurityWhitelist.PUBLIC_GET_PATHS).permitAll()
 
-                        .requestMatchers("/admin/**").hasAuthority(UserRole.Authority.ADMIN)
+                        // OAuth2: 소셜 로그인 프로토콜 엔드포인트
+                        // Spring Security OAuth2가 자체적으로 처리
+                        .requestMatchers(SecurityWhitelist.OAUTH2_PATHS).permitAll()
 
-                        .requestMatchers("/actuator/info", "/actuator/health", "/actuator/prometheus").permitAll()
+                        // WebSocket: 실시간 통신 엔드포인트
+                        // WebSocket은 연결 후 별도 인증 메커니즘 사용
+                        .requestMatchers(SecurityWhitelist.WEBSOCKET_PATHS).permitAll()
 
-                        .requestMatchers("/v1/internal/**").permitAll()
+                        // 관리자 전용 API
+                        // 관리자 권한 필수
+                        .requestMatchers(SecurityWhitelist.ADMIN_PATHS).hasAuthority(UserRole.Authority.ADMIN)
 
+                        // 내부 API: 서버 간 통신
+                        // API Gateway 등에서 별도 인증 메커니즘 사용
+                        .requestMatchers(SecurityWhitelist.INTERNAL_API_PATHS).permitAll()
+
+                        // 나머지 모든 API: 인증 필수
+                        // 명시적으로 허용되지 않은 모든 엔드포인트는 인증 필요
                         .anyRequest().authenticated()
                 )
                 .build();

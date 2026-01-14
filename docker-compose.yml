@@ -113,7 +113,7 @@ services:
       # 문자셋 설정
       - --character-set-server=utf8mb4                                       # 기본 문자셋: UTF-8(한글, 이모지 지원)
       - --collation-server=utf8mb4_unicode_ci                                # 정렬 규칙: 유니코드 기반 정렬(대소문자 구분 없이 정렬)
-      - --default-authentication-plugin=mysql_native_password                # 인증 플러그인: 기존 방식(레거시 인증 방식) 사용(호환성 향상)
+      - --default-authentication-plugin=caching_sha2_password                # 인증 플러그인: MySQL 8.0 기본값 사용 명시
       # 성능 최적화
       - --max-connections=200                                                # 최대 연결 수(기본 151에서 증가)
       - --innodb-buffer-pool-size=256M                                       # InnoDB 버퍼 풀(로컬 개발 환경 최적화, 자주 쓰는 데이터 메모리에 저장, 쿼리 성능 향상)

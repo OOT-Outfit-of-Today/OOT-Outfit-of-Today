@@ -10,10 +10,10 @@ spring:
       - "aws-parameterstore:/config/dev/"
 
   # ================================================================
-  # 데이터베이스 연결 설정
+  # 데이터베이스 연결 설정(AWS EC2/RDS)
   # ================================================================
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
